@@ -1,0 +1,13 @@
+{
+  "id": "01KR8GSWK7M4GQNZZ8B6MY8006",
+  "timestamp": "2026-05-10 08:42:01.703547+00:00",
+  "command": "/Users/artur/.polaris/bin/polaris init --help",
+  "error_message": "exit code 1",
+  "error_signature": "faaba62b85ec01a438e2ef684ec4f68155ebe479905164072a96340a19729f16",
+  "action_attempted": "/Users/artur/.polaris/bin/polaris init --help",
+  "resolution": "",
+  "resolution_verified": false,
+  "tags": [],
+  "agent": "unknown",
+  "platform": "darwin"
+}

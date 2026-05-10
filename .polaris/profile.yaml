@@ -1,0 +1,61 @@
+profile_version: '1.1'
+generated_at: '2026-05-10T07:24:35.024073+00:00'
+last_updated_at: '2026-05-10T00:00:00+00:00'
+project:
+  name: home-maintenance
+  primary_language: csharp
+  secondary_languages:
+    - typescript
+  project_types:
+    - dotnet-api
+    - nextjs-frontend
+  maturity: greenfield
+  stack:
+    backend:
+      runtime: .NET 9
+      framework: ASP.NET Core Minimal API
+      language: C# 12
+      pattern: Clean Architecture (Domain / Application / Infrastructure / API)
+      database: MongoDB 7 (via MongoDB.Driver)
+    frontend:
+      framework: Next.js 15.3 (App Router)
+      runtime: Node.js 22+
+      language: TypeScript 5.8 (strict)
+      ui: React 19, Tailwind CSS v4
+architecture:
+  patterns:
+    - Clean Architecture
+    - Vertical-slice feature growth
+    - Docker containerization
+    - Minimal API
+  top_level_dirs:
+    - backend
+    - frontend
+  modules:
+    - HomeMaintenance.Domain
+    - HomeMaintenance.Application
+    - HomeMaintenance.Infrastructure
+    - HomeMaintenance.API
+    - HomeMaintenance.Unit.Tests
+    - HomeMaintenance.Integration.Tests
+test:
+  frameworks:
+    - xUnit
+    - Shouldly
+    - NSubstitute
+    - Testcontainers (MongoDB)
+    - Jest
+    - Testing Library (React)
+  commands:
+    backend_unit: dotnet test backend/tests/HomeMaintenance.Unit.Tests
+    backend_integration: dotnet test backend/tests/HomeMaintenance.Integration.Tests
+    frontend: npm --prefix frontend test
+cicd:
+  platforms: []
+  notes: No CI/CD pipelines detected yet
+quality:
+  health_grade: B
+  health_score: 7.8
+branding:
+  aptean_branding: false
+  notes: User opted to skip Aptean branding during onboarding
