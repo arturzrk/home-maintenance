@@ -37,3 +37,5 @@ Thumbs.db
 .polaris/autopilot-state.json
 .polaris/autopilot-state.json.bak
 .polaris/code-graph.json
+.claude/settings.json
+.claude/helpers/polaris-status.cjs
