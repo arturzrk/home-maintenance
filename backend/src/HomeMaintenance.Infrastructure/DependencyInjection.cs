@@ -1,6 +1,8 @@
 using HomeMaintenance.Infrastructure.Persistence;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+using MongoDB.Driver;
 
 namespace HomeMaintenance.Infrastructure;
 
@@ -16,6 +18,16 @@ public static class DependencyInjection
     {
         services.Configure<MongoDbSettings>(
             configuration.GetSection(MongoDbSettings.SectionName));
+
+        services.AddSingleton<IMongoClient>(sp =>
+            new MongoClient(sp.GetRequiredService<IOptions<MongoDbSettings>>().Value.ConnectionString));
+
+        services.AddSingleton<IMongoDatabase>(sp =>
+        {
+            var client = sp.GetRequiredService<IMongoClient>();
+            var settings = sp.GetRequiredService<IOptions<MongoDbSettings>>().Value;
+            return client.GetDatabase(settings.DatabaseName);
+        });
 
         services.AddSingleton<MongoDbContext>();
 

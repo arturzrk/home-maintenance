@@ -1,4 +1,3 @@
-using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 
 namespace HomeMaintenance.Infrastructure.Persistence;
@@ -11,10 +10,9 @@ public sealed class MongoDbContext
 {
     private readonly IMongoDatabase _database;
 
-    public MongoDbContext(IOptions<MongoDbSettings> settings)
+    public MongoDbContext(IMongoDatabase database)
     {
-        var client = new MongoClient(settings.Value.ConnectionString);
-        _database = client.GetDatabase(settings.Value.DatabaseName);
+        _database = database;
     }
 
     /// <summary>
