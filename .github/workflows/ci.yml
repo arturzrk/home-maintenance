@@ -1,0 +1,151 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    name: backend
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up .NET 9
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('backend/**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --no-restore --configuration Release
+
+      - name: Unit tests
+        run: >
+          dotnet test tests/HomeMaintenance.Unit.Tests
+          --no-build --configuration Release
+          --logger "console;verbosity=normal"
+
+      - name: Integration tests (Testcontainers MongoDB)
+        if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
+        run: >
+          dotnet test tests/HomeMaintenance.Integration.Tests
+          --no-build --configuration Release
+          --logger "console;verbosity=normal"
+
+  frontend:
+    name: frontend
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm test -- --passWithNoTests
+
+      - name: Build
+        run: npm run build
+
+  validators:
+    name: validators
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Encoding validator (mirrors Polaris pre-commit-encoding-check)
+        run: |
+          python3 - <<'PYEOF'
+          import pathlib, sys
+
+          BLOCKED = {
+              "—": "em dash",
+              "―": "horizontal bar",
+              "‘": "left single quote",
+              "’": "right single quote",
+              "“": "left double quote",
+              "”": "right double quote",
+              "−": "minus sign",
+              "±": "plus-minus",
+              "×": "multiplication sign",
+              "°": "degree sign",
+              " ": "non-breaking space",
+          }
+          AGENT_PREFIXES = (
+              ".claude/commands/", ".codex/prompts/", ".gemini/commands/",
+              ".cursor/commands/", ".qwen/commands/", ".opencode/command/",
+              ".windsurf/workflows/", ".kilocode/workflows/",
+              ".augment/commands/", ".roo/commands/", ".amazonq/prompts/",
+              ".github/prompts/",
+          )
+          SKIP_DIRS = {".git", "node_modules", ".next", "obj", "bin"}
+
+          violations = []
+          for path in pathlib.Path(".").rglob("*.md"):
+              if any(part in SKIP_DIRS for part in path.parts):
+                  continue
+              rel = str(path.relative_to("."))
+              if any(rel.startswith(p) for p in AGENT_PREFIXES):
+                  continue
+              try:
+                  text = path.read_text(encoding="utf-8")
+              except UnicodeDecodeError:
+                  violations.append(f"{rel}: invalid UTF-8")
+                  continue
+              for char, name in BLOCKED.items():
+                  if char in text:
+                      idx = text.index(char)
+                      lineno = text[:idx].count("\n") + 1
+                      violations.append(f"{rel}:{lineno}: {name}")
+
+          if violations:
+              print("Encoding violations found in tracked markdown:")
+              for v in violations[:50]:
+                  print(f"  {v}")
+              if len(violations) > 50:
+                  print(f"  ... and {len(violations) - 50} more")
+              sys.exit(1)
+          print("All markdown files clean.")
+          PYEOF
+
+      - name: Validate docker-compose.yml
+        run: docker compose -f docker-compose.yml config --quiet
