@@ -1,3 +1,4 @@
+using System.Net;
 using HomeMaintenance.Integration.Tests.Infrastructure;
 using Shouldly;
 
@@ -22,7 +23,7 @@ public sealed class HealthCheckTests : IClassFixture<ApiFactory>
     {
         var response = await _client.GetAsync("/health");
 
-        response.StatusCode.ShouldBe(System.Net.HttpStatusCode.OK);
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
     }
 
     [Fact]
@@ -30,7 +31,7 @@ public sealed class HealthCheckTests : IClassFixture<ApiFactory>
     {
         var response = await _client.GetAsync("/");
 
-        response.StatusCode.ShouldBe(System.Net.HttpStatusCode.OK);
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
 
         var body = await response.Content.ReadAsStringAsync();
         body.ShouldContain("Running");

@@ -1,20 +1,19 @@
 using HomeMaintenance.Application;
 using HomeMaintenance.Infrastructure;
-using HomeMaintenance.Infrastructure.Persistence;
-using Microsoft.Extensions.Options;
+using MongoDB.Driver;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ── Layer registrations ────────────────────────────────────────────────────
+// Layer registrations
 builder.Services
     .AddApplication()
     .AddInfrastructure(builder.Configuration);
 
-// ── Health checks ──────────────────────────────────────────────────────────
+// Health checks
 builder.Services
     .AddHealthChecks()
     .AddMongoDb(
-        sp => sp.GetRequiredService<IOptions<MongoDbSettings>>().Value.ConnectionString,
+        sp => sp.GetRequiredService<IMongoDatabase>(),
         name: "mongodb",
         tags: ["db", "ready"]);
 
