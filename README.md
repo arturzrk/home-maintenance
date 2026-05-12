@@ -68,7 +68,7 @@ npm test
 
 ```
 home-maintenance/
-├── ARCHITECTURE.md         — project rules & decisions
+├── ARCHITECTURE.md         - project rules & decisions
 ├── docker-compose.yml
 ├── backend/
 │   ├── HomeMaintenance.sln
@@ -80,5 +80,5 @@ home-maintenance/
 │   └── tests/
 │       ├── HomeMaintenance.Unit.Tests/
 │       └── HomeMaintenance.Integration.Tests/
-└── frontend/               — Next.js 15 + TypeScript + Tailwind CSS
+└── frontend/               - Next.js 15 + TypeScript + Tailwind CSS
 ```
