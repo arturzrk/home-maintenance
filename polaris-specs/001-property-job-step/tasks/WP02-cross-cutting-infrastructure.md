@@ -1,7 +1,7 @@
 ---
 work_package_id: WP02
 lane: planned
-dependencies: []
+dependencies: ["WP01"]
 subtasks: [T008, T009, T010, T011, T012, T013, T014]
 test_status: required
 test_file: tests/e2e/WP02-wp02-cross-cutting-infrastructure.e2e.js

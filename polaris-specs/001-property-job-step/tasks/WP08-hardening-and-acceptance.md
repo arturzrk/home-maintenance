@@ -1,7 +1,7 @@
 ---
 work_package_id: WP08
 lane: planned
-dependencies: []
+dependencies: ["WP07"]
 subtasks: [T045, T046, T047, T048, T049, T050]
 test_status: required
 test_file: tests/e2e/WP08-wp08-hardening-and-acceptance.e2e.js

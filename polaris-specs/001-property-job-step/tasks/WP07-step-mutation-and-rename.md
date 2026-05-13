@@ -1,7 +1,7 @@
 ---
 work_package_id: WP07
 lane: planned
-dependencies: []
+dependencies: ["WP05", "WP06"]
 subtasks: [T038, T039, T040, T041, T042, T043, T044]
 test_status: required
 test_file: tests/e2e/WP07-wp07-step-mutation-and-rename.e2e.js

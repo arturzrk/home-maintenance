@@ -1,7 +1,7 @@
 ---
 work_package_id: WP05
 lane: planned
-dependencies: []
+dependencies: ["WP02"]
 subtasks: [T026, T027, T028, T029, T030, T031]
 test_status: required
 test_file: tests/e2e/WP05-wp05-job-aggregate-backend.e2e.js

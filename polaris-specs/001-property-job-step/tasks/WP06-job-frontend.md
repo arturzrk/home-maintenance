@@ -1,7 +1,7 @@
 ---
 work_package_id: WP06
 lane: planned
-dependencies: []
+dependencies: ["WP04", "WP05"]
 subtasks: [T032, T033, T034, T035, T036, T037]
 test_status: required
 test_file: tests/e2e/WP06-wp06-job-frontend.e2e.js

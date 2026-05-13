@@ -1,7 +1,7 @@
 ---
 work_package_id: WP04
 lane: planned
-dependencies: []
+dependencies: ["WP03"]
 subtasks: [T021, T022, T023, T024, T025]
 test_status: required
 test_file: tests/e2e/WP04-wp04-property-frontend.e2e.js
