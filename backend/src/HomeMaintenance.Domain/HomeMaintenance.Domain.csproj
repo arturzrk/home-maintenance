@@ -7,4 +7,9 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="HomeMaintenance.Infrastructure" />
+    <InternalsVisibleTo Include="HomeMaintenance.Unit.Tests" />
+  </ItemGroup>
+
 </Project>

@@ -1,3 +1,4 @@
+using HomeMaintenance.API.Endpoints;
 using HomeMaintenance.API.Middleware;
 using HomeMaintenance.Application;
 using HomeMaintenance.Application.Common.Interfaces;
@@ -87,6 +88,9 @@ if (app.Environment.IsDevelopment())
         .WithName("AuthPing")
         .WithTags("System");
 }
+
+// Property aggregate (WP03).
+app.MapPropertyEndpoints();
 
 app.Run();
 

@@ -1,3 +1,5 @@
+using HomeMaintenance.Application.Properties.Commands;
+using HomeMaintenance.Application.Properties.Queries;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace HomeMaintenance.Application;
@@ -10,8 +12,10 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
-        // Use cases and handlers will be registered here as features are added.
-        // e.g.: services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(DependencyInjection).Assembly));
+        services.AddScoped<CreatePropertyHandler>();
+        services.AddScoped<RenamePropertyHandler>();
+        services.AddScoped<ListPropertiesHandler>();
+        services.AddScoped<GetPropertyHandler>();
 
         return services;
     }

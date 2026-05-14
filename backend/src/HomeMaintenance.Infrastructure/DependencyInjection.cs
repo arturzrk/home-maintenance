@@ -36,13 +36,14 @@ public static class DependencyInjection
 
         services.AddHttpContextAccessor();
         services.AddScoped<IIdentityProvider, HttpContextIdentityProvider>();
+        services.AddScoped<ICorrelationContext, HttpContextCorrelationContext>();
 
         services.Configure<AuditLogOptions>(
             configuration.GetSection(AuditLogOptions.SectionName));
         services.AddSingleton<IAuditLog, FileAuditLog>();
 
-        // Repository implementations will be registered here as features are added.
-        // e.g.: services.AddScoped<IPropertyRepository, MongoPropertyRepository>();
+        services.AddScoped<IPropertyRepository, PropertyRepository>();
+        services.AddHostedService<MongoIndexInitializer>();
 
         return services;
     }

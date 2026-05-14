@@ -1,0 +1,78 @@
+### Base URL
+GET http://localhost:5000/
+
+### Health Check
+GET http://localhost:5000/health
+
+### Authentication Ping
+http://localhost:5000/api/_authping
+
+
+### Authentication ping with header owner: alice
+GET http://localhost:5000/api/_authping
+Authorization: Bearer dev-alice
+
+### Authentication ping with header owner: bob
+GET http://localhost:5000/api/_authping
+Authorization: Bearer dev-bob
+
+###
+http://localhost:5000
+X-Correlation-Id: my-trace-1
+
+
+###############################################################################
+# Properties (WP03)
+# All endpoints require authentication; cross-owner access returns 404.
+###############################################################################
+
+@alice = dev-alice
+@bob   = dev-bob
+
+### Create a property as Alice
+# @name createProperty
+POST http://localhost:5000/api/properties
+Authorization: Bearer {{alice}}
+Content-Type: application/json
+
+{
+  "name": "Main House"
+}
+
+### List Alice's properties (uses last create above for context)
+GET http://localhost:5000/api/properties
+Authorization: Bearer {{alice}}
+
+### Get one property by id (replace <id> with the id from the create response)
+GET http://localhost:5000/api/properties/{{createProperty.response.body.id}}
+Authorization: Bearer {{alice}}
+
+### Rename the property
+PATCH http://localhost:5000/api/properties/{{createProperty.response.body.id}}
+Authorization: Bearer {{alice}}
+Content-Type: application/json
+
+{
+  "name": "Main Residence"
+}
+
+### Bob tries to read Alice's property -> 404 (not 403, no leak)
+GET http://localhost:5000/api/properties/{{createProperty.response.body.id}}
+Authorization: Bearer {{bob}}
+
+### Anonymous create -> 401 problem+json
+POST http://localhost:5000/api/properties
+Content-Type: application/json
+
+{
+  "name": "Should be rejected"
+}
+
+### Validation: empty name -> 400
+POST http://localhost:5000/api/properties
+Authorization: Bearer {{alice}}
+Content-Type: application/json
+
+{
+  "name": ""
+}
