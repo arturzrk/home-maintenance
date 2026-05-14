@@ -1,11 +1,15 @@
 ---
 work_package_id: WP04
-lane: planned
-dependencies: ["WP03"]
+lane: "doing"
+dependencies: [WP03]
+base_branch: 001-property-job-step-WP03
+base_commit: 9eb7de1f4bc95e7be2dddfce491061785b74596f
+created_at: '2026-05-14T17:36:10.658867+00:00'
 subtasks: [T021, T022, T023, T024, T025]
 test_status: required
 test_file: tests/e2e/WP04-wp04-property-frontend.e2e.js
 domain: frontend-craft
+shell_pid: "29162"
 ---
 
 # WP04 - Property frontend
