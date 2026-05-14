@@ -1,11 +1,16 @@
 ---
 work_package_id: WP01
-lane: planned
+lane: doing
 dependencies: []
+base_branch: main
+base_commit: 50b56c07e3510a40f5d3327f0f815d736566f6ac
+created_at: '2026-05-14T14:18:31.414951+00:00'
 subtasks: [T001, T002, T003, T004, T005, T006, T007]
+shell_pid: "62492"
 test_status: required
 test_file: tests/e2e/WP01-wp01-authentication-foundation.e2e.js
 domain: backend-logic
+agent: "claude"
 ---
 
 # WP01 - Authentication foundation
@@ -299,3 +304,7 @@ Extend `ApiFactory` to support overriding configuration per test
 ```
 polaris implement WP01
 ```
+
+## Activity Log
+
+- 2026-05-14T14:18:31Z – claude – shell_pid=62492 – lane=doing – Assigned agent via workflow command
