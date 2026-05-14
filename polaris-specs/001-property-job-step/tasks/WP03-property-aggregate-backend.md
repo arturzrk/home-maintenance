@@ -1,11 +1,15 @@
 ---
 work_package_id: WP03
-lane: planned
-dependencies: ["WP02"]
+lane: "doing"
+dependencies: [WP02]
+base_branch: 001-property-job-step-WP02
+base_commit: c6ebfd5d2a99f98313309ca18aa30bcec4f43767
+created_at: '2026-05-14T17:06:29.588438+00:00'
 subtasks: [T015, T016, T017, T018, T019, T020]
 test_status: required
 test_file: tests/e2e/WP03-wp03-property-aggregate-backend.e2e.js
 domain: backend-logic
+shell_pid: "13951"
 ---
 
 # WP03 - Property aggregate backend
