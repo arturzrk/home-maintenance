@@ -41,3 +41,6 @@ Thumbs.db
 .claude/helpers/polaris-status.cjs
 .polaris/audit-trail/
 .polaris/memory/failures/
+
+# Audit log local sink (FileAuditLog default path; managed sink in production)
+audit-trail/

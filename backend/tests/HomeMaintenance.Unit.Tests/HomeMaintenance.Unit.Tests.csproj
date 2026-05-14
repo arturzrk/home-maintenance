@@ -31,6 +31,7 @@
     <ProjectReference Include="..\..\src\HomeMaintenance.Application\HomeMaintenance.Application.csproj" />
     <ProjectReference Include="..\..\src\HomeMaintenance.Domain\HomeMaintenance.Domain.csproj" />
     <ProjectReference Include="..\..\src\HomeMaintenance.Infrastructure\HomeMaintenance.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\HomeMaintenance.API\HomeMaintenance.API.csproj" />
   </ItemGroup>
 
 </Project>

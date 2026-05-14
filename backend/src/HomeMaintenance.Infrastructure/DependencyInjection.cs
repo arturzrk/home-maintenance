@@ -1,4 +1,5 @@
 using HomeMaintenance.Application.Common.Interfaces;
+using HomeMaintenance.Infrastructure.AuditLog;
 using HomeMaintenance.Infrastructure.Auth;
 using HomeMaintenance.Infrastructure.Persistence;
 using Microsoft.Extensions.Configuration;
@@ -35,6 +36,10 @@ public static class DependencyInjection
 
         services.AddHttpContextAccessor();
         services.AddScoped<IIdentityProvider, HttpContextIdentityProvider>();
+
+        services.Configure<AuditLogOptions>(
+            configuration.GetSection(AuditLogOptions.SectionName));
+        services.AddSingleton<IAuditLog, FileAuditLog>();
 
         // Repository implementations will be registered here as features are added.
         // e.g.: services.AddScoped<IPropertyRepository, MongoPropertyRepository>();

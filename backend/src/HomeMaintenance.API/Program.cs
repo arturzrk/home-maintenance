@@ -1,3 +1,4 @@
+using HomeMaintenance.API.Middleware;
 using HomeMaintenance.Application;
 using HomeMaintenance.Application.Common.Interfaces;
 using HomeMaintenance.Infrastructure;
@@ -48,6 +49,13 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors("Frontend");
 app.UseHttpsRedirection();
+
+// Correlation id stamps every request first so it's available to every
+// downstream middleware and handler. The unauthorized translator wraps
+// auth/authz so its tail logic runs after Authorization short-circuits
+// a 401, allowing us to upgrade the empty response to RFC 7807 JSON.
+app.UseMiddleware<CorrelationIdMiddleware>();
+app.UseMiddleware<UnauthorizedProblemDetailsMiddleware>();
 
 app.UseAuthentication();
 app.UseAuthorization();
