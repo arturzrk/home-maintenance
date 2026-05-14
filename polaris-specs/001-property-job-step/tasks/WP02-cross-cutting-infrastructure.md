@@ -1,11 +1,15 @@
 ---
 work_package_id: WP02
-lane: planned
-dependencies: ["WP01"]
+lane: "doing"
+dependencies: [WP01]
+base_branch: 001-property-job-step-WP01
+base_commit: e70515a6fa348c82bbdbcd87c47e740325df033a
+created_at: '2026-05-14T15:25:02.308366+00:00'
 subtasks: [T008, T009, T010, T011, T012, T013, T014]
 test_status: required
 test_file: tests/e2e/WP02-wp02-cross-cutting-infrastructure.e2e.js
 domain: backend-logic
+shell_pid: "82073"
 ---
 
 # WP02 - Cross-cutting infrastructure
