@@ -1,38 +1,128 @@
 import type { ApiInfo } from "@/types/api";
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000";
+// Server-side base URL (Server Components, Server Actions, Route Handlers).
+// The browser bundle never sees this value.
+const SERVER_BASE_URL = process.env.API_BASE_URL ?? "http://localhost:5000";
 
-// ─── Generic fetch wrapper ─────────────────────────────────────────────────
+// Public base URL for the few endpoints the browser hits directly
+// (currently: /health and / for the dashboard status widget).
+const PUBLIC_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000";
 
-async function apiFetch<T>(
-  path: string,
-  options?: RequestInit
-): Promise<T> {
-  const response = await fetch(`${BASE_URL}${path}`, {
-    headers: { "Content-Type": "application/json" },
-    ...options,
+// ---------------------------------------------------------------------------
+// Errors
+// ---------------------------------------------------------------------------
+
+export class ApiError extends Error {
+  constructor(
+    public readonly code: string,
+    public readonly status: number,
+    message: string,
+  ) {
+    super(message);
+    this.name = "ApiError";
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Internal fetch wrapper
+// ---------------------------------------------------------------------------
+
+interface FetchOptions {
+  /** Bearer token forwarded to the API (server-only callers supply this). */
+  idToken?: string;
+  method?: "GET" | "POST" | "PATCH" | "PUT" | "DELETE";
+  body?: unknown;
+  /** Override the base URL (defaults to the server-side one). */
+  baseUrl?: string;
+  signal?: AbortSignal;
+}
+
+async function apiFetch<T>(path: string, opts: FetchOptions = {}): Promise<T> {
+  const base = opts.baseUrl ?? SERVER_BASE_URL;
+  const headers: Record<string, string> = {};
+  if (opts.body !== undefined) headers["Content-Type"] = "application/json";
+  if (opts.idToken) headers.Authorization = `Bearer ${opts.idToken}`;
+
+  const res = await fetch(`${base}${path}`, {
+    method: opts.method ?? "GET",
+    headers,
+    body: opts.body !== undefined ? JSON.stringify(opts.body) : undefined,
+    cache: "no-store",
+    signal: opts.signal,
   });
 
-  if (!response.ok) {
-    throw new Error(
-      `API error: ${response.status} ${response.statusText} — ${path}`
+  if (res.status === 204) return undefined as T;
+
+  if (!res.ok) {
+    const problem = (await res.json().catch(() => ({}))) as {
+      code?: string;
+      detail?: string;
+      title?: string;
+    };
+    throw new ApiError(
+      problem.code ?? "error",
+      res.status,
+      problem.detail ?? problem.title ?? res.statusText,
     );
   }
 
-  return response.json() as Promise<T>;
+  return (await res.json()) as T;
 }
 
-// ─── System endpoints ──────────────────────────────────────────────────────
+// ---------------------------------------------------------------------------
+// System endpoints (public, called from the dashboard)
+// ---------------------------------------------------------------------------
 
 export async function getApiInfo(): Promise<ApiInfo> {
-  return apiFetch<ApiInfo>("/");
+  return apiFetch<ApiInfo>("/", { baseUrl: PUBLIC_BASE_URL });
 }
 
 export async function checkHealth(): Promise<boolean> {
   try {
-    const response = await fetch(`${BASE_URL}/health`);
+    const response = await fetch(`${PUBLIC_BASE_URL}/health`, {
+      cache: "no-store",
+    });
     return response.ok;
   } catch {
     return false;
   }
 }
+
+// ---------------------------------------------------------------------------
+// Properties (WP03 backend)
+// Callable from Server Components / Server Actions / Route Handlers.
+// Never call from a Client Component directly: the idToken would leak
+// to the browser bundle.
+// ---------------------------------------------------------------------------
+
+export interface Property {
+  id: string;
+  name: string;
+}
+
+export interface PropertyList {
+  properties: Property[];
+}
+
+export const properties = {
+  list: (idToken: string) =>
+    apiFetch<PropertyList>("/api/properties", { idToken }),
+
+  get: (id: string, idToken: string) =>
+    apiFetch<Property>(`/api/properties/${id}`, { idToken }),
+
+  create: (name: string, idToken: string) =>
+    apiFetch<Property>("/api/properties", {
+      method: "POST",
+      body: { name },
+      idToken,
+    }),
+
+  rename: (id: string, name: string, idToken: string) =>
+    apiFetch<Property>(`/api/properties/${id}`, {
+      method: "PATCH",
+      body: { name },
+      idToken,
+    }),
+};
