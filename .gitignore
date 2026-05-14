@@ -39,3 +39,5 @@ Thumbs.db
 .polaris/code-graph.json
 .claude/settings.json
 .claude/helpers/polaris-status.cjs
+.polaris/audit-trail/
+.polaris/memory/failures/
