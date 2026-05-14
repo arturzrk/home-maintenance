@@ -1,3 +1,5 @@
+using HomeMaintenance.Application.Common.Interfaces;
+using HomeMaintenance.Infrastructure.Auth;
 using HomeMaintenance.Infrastructure.Persistence;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -30,6 +32,9 @@ public static class DependencyInjection
         });
 
         services.AddSingleton<MongoDbContext>();
+
+        services.AddHttpContextAccessor();
+        services.AddScoped<IIdentityProvider, HttpContextIdentityProvider>();
 
         // Repository implementations will be registered here as features are added.
         // e.g.: services.AddScoped<IPropertyRepository, MongoPropertyRepository>();

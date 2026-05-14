@@ -1,5 +1,7 @@
 using HomeMaintenance.Application;
+using HomeMaintenance.Application.Common.Interfaces;
 using HomeMaintenance.Infrastructure;
+using HomeMaintenance.Infrastructure.Auth;
 using MongoDB.Driver;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -7,7 +9,8 @@ var builder = WebApplication.CreateBuilder(args);
 // Layer registrations
 builder.Services
     .AddApplication()
-    .AddInfrastructure(builder.Configuration);
+    .AddInfrastructure(builder.Configuration)
+    .AddAppAuthentication(builder.Configuration, builder.Environment);
 
 // Health checks
 builder.Services
@@ -46,12 +49,15 @@ if (app.Environment.IsDevelopment())
 app.UseCors("Frontend");
 app.UseHttpsRedirection();
 
-// ── Endpoints ─────────────────────────────────────────────────────────────
+app.UseAuthentication();
+app.UseAuthorization();
 
-// Health check — used by the frontend to confirm the backend is reachable.
-app.MapHealthChecks("/health");
+// Endpoints
 
-// Root — quick smoke-test that the API is running.
+// Health check - public, used by the frontend to confirm the backend is reachable.
+app.MapHealthChecks("/health").AllowAnonymous();
+
+// Root - public smoke-test that the API is running.
 app.MapGet("/", () => Results.Ok(new
 {
     Service = "HomeMaintenance API",
@@ -59,7 +65,20 @@ app.MapGet("/", () => Results.Ok(new
     Status = "Running"
 }))
 .WithName("Root")
-.WithTags("System");
+.WithTags("System")
+.AllowAnonymous();
+
+// Dev-only authenticated echo endpoint - exposes the resolved OwnerId.
+// Used by integration tests to verify the auth pipeline. Not present in
+// non-Development environments.
+if (app.Environment.IsDevelopment())
+{
+    app.MapGet("/api/_authping",
+        (IIdentityProvider identity) => Results.Ok(new { ownerId = identity.CurrentOwner.Value }))
+        .RequireAuthorization()
+        .WithName("AuthPing")
+        .WithTags("System");
+}
 
 app.Run();
 

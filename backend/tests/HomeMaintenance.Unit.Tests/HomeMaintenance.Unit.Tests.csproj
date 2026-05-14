@@ -30,6 +30,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\HomeMaintenance.Application\HomeMaintenance.Application.csproj" />
     <ProjectReference Include="..\..\src\HomeMaintenance.Domain\HomeMaintenance.Domain.csproj" />
+    <ProjectReference Include="..\..\src\HomeMaintenance.Infrastructure\HomeMaintenance.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>
