@@ -38,14 +38,20 @@ public static class ResultToHttpExtensions
             _ => (StatusCodes.Status500InternalServerError, "Internal Server Error"),
         };
 
+        // For BusinessRuleError we surface the specific Rule as the body's
+        // `code` (matches contracts/jobs.md and contracts/steps.md, where
+        // codes like "steps_incomplete" or "job_already_completed" are
+        // documented). All other Error variants use their generic Code.
+        var bodyCode = error is BusinessRuleError br ? br.Rule : error.Code;
+
         return Results.Problem(
-            type: $"https://home-maintenance/errors/{error.Code}",
+            type: $"https://home-maintenance/errors/{bodyCode}",
             title: title,
             statusCode: status,
             detail: error.Message,
             extensions: new Dictionary<string, object?>
             {
-                ["code"] = error.Code,
+                ["code"] = bodyCode,
                 ["correlationId"] = ctx.GetCorrelationId(),
             });
     }

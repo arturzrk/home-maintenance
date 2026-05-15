@@ -43,6 +43,7 @@ public static class DependencyInjection
         services.AddSingleton<IAuditLog, FileAuditLog>();
 
         services.AddScoped<IPropertyRepository, PropertyRepository>();
+        services.AddScoped<IJobRepository, JobRepository>();
         services.AddHostedService<MongoIndexInitializer>();
 
         return services;

@@ -23,9 +23,17 @@ internal sealed class MongoIndexInitializer : IHostedService
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        var properties = _db.GetCollection<PropertyDocument>(PropertyRepository.CollectionName);
+        await EnsurePropertyIndexes(cancellationToken);
+        await EnsureJobIndexes(cancellationToken);
+        _logger.LogInformation("MongoDB indexes ensured.");
+    }
 
-        await properties.Indexes.CreateManyAsync(
+    public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
+
+    private Task EnsurePropertyIndexes(CancellationToken ct)
+    {
+        var collection = _db.GetCollection<PropertyDocument>(PropertyRepository.CollectionName);
+        return collection.Indexes.CreateManyAsync(
             new[]
             {
                 new CreateIndexModel<PropertyDocument>(
@@ -37,10 +45,29 @@ internal sealed class MongoIndexInitializer : IHostedService
                         .Ascending(d => d.Name),
                     new CreateIndexOptions { Name = "owner_name_idx" }),
             },
-            cancellationToken);
-
-        _logger.LogInformation("MongoDB indexes ensured for collection {Collection}", PropertyRepository.CollectionName);
+            ct);
     }
 
-    public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
+    private Task EnsureJobIndexes(CancellationToken ct)
+    {
+        var collection = _db.GetCollection<JobDocument>(JobRepository.CollectionName);
+        return collection.Indexes.CreateManyAsync(
+            new[]
+            {
+                new CreateIndexModel<JobDocument>(
+                    Builders<JobDocument>.IndexKeys.Ascending(d => d.OwnerId),
+                    new CreateIndexOptions { Name = "owner_idx" }),
+                new CreateIndexModel<JobDocument>(
+                    Builders<JobDocument>.IndexKeys
+                        .Ascending(d => d.OwnerId)
+                        .Ascending(d => d.PropertyId),
+                    new CreateIndexOptions { Name = "owner_property_idx" }),
+                new CreateIndexModel<JobDocument>(
+                    Builders<JobDocument>.IndexKeys
+                        .Ascending(d => d.OwnerId)
+                        .Ascending(d => d.Status),
+                    new CreateIndexOptions { Name = "owner_status_idx" }),
+            },
+            ct);
+    }
 }

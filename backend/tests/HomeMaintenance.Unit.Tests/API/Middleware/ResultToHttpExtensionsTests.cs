@@ -23,7 +23,7 @@ public sealed class ResultToHttpExtensionsTests
     [Theory]
     [InlineData(typeof(NotFoundError), 404, "not_found")]
     [InlineData(typeof(ValidationError), 400, "validation")]
-    [InlineData(typeof(BusinessRuleError), 400, "business_rule")]
+    [InlineData(typeof(BusinessRuleError), 400, "rule_x")] // surfaces Rule, not generic Code
     [InlineData(typeof(UnauthorizedError), 401, "unauthorized")]
     [InlineData(typeof(ForbiddenError), 404, "forbidden")] // R5: no leak
     public void ToHttp_Failure_MapsErrorVariantToHttpStatus(
