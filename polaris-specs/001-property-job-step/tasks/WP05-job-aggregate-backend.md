@@ -1,11 +1,15 @@
 ---
 work_package_id: WP05
-lane: planned
-dependencies: ["WP02"]
+lane: "doing"
+dependencies: [WP02]
+base_branch: 001-property-job-step-WP02
+base_commit: f469a5ac99802743e58a36a6dcb9d7ee04a30e94
+created_at: '2026-05-15T10:03:42.001870+00:00'
 subtasks: [T026, T027, T028, T029, T030, T031]
 test_status: required
 test_file: tests/e2e/WP05-wp05-job-aggregate-backend.e2e.js
 domain: backend-logic
+shell_pid: "60117"
 ---
 
 # WP05 - Job aggregate backend
