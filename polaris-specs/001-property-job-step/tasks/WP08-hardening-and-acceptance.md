@@ -1,11 +1,15 @@
 ---
 work_package_id: WP08
-lane: planned
-dependencies: ["WP07"]
+lane: "doing"
+dependencies: [WP07]
+base_branch: 001-property-job-step-WP07
+base_commit: 14f28ec535b7674ff32b7e8cadfcc044ebb4f8d4
+created_at: '2026-05-17T17:04:41.070534+00:00'
 subtasks: [T045, T046, T047, T048, T049, T050]
 test_status: required
 test_file: tests/e2e/WP08-wp08-hardening-and-acceptance.e2e.js
 domain: testing-specialist
+shell_pid: "88497"
 ---
 
 # WP08 - Hardening + acceptance
