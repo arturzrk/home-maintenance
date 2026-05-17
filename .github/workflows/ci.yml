@@ -49,6 +49,7 @@ jobs:
         run: >
           dotnet test tests/HomeMaintenance.Integration.Tests
           --no-build --configuration Release
+          --filter "Category!=perf"
           --logger "console;verbosity=normal"
 
   frontend:

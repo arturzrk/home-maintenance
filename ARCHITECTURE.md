@@ -109,3 +109,24 @@ home-maintenance/
 7. Write unit tests for the handler.
 8. Write integration tests for the repository + endpoint.
 9. Open a PR - no feature merges without green tests.
+
+---
+
+## Security and audit
+
+This file captures the architectural shape. The durable security
+baseline lives in [.polaris/memory/constitution.md](.polaris/memory/constitution.md):
+
+- **Authentication**: Google OIDC. The OwnerId is the verified `sub`
+  claim. A local OIDC stub (`Auth:UseStub=true`) is gated to the
+  Development environment; production startup refuses to enable it.
+- **Authorization**: ownership-based, default-deny. Cross-owner
+  requests return 404 (not 403) to prevent enumeration leaks.
+- **Audit log**: append-only JSONL at `audit-trail/property-job-step.jsonl`
+  in local dev (gitignored). Captures auth outcomes, authorization
+  denials, and every write against owned data. Production swaps in a
+  managed sink behind the `IAuditLog` interface; the producer side
+  does not change.
+
+The full event-type catalogue, retention policy, and threat-model
+boundaries are documented in the constitution.
