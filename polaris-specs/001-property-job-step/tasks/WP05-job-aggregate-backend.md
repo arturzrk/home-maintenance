@@ -1,6 +1,6 @@
 ---
 work_package_id: WP05
-lane: "doing"
+lane: "done"
 dependencies: [WP02]
 base_branch: 001-property-job-step-WP02
 base_commit: f469a5ac99802743e58a36a6dcb9d7ee04a30e94
@@ -10,6 +10,8 @@ test_status: required
 test_file: tests/e2e/WP05-wp05-job-aggregate-backend.e2e.js
 domain: backend-logic
 shell_pid: "60117"
+reviewed_by: "Artur Żurek"
+review_status: "approved"
 ---
 
 # WP05 - Job aggregate backend
@@ -269,3 +271,7 @@ Use `dev-alice` + `dev-bob` with shared Testcontainers MongoDB.
 ```
 polaris implement WP05 --base WP02
 ```
+
+## Activity Log
+
+- 2026-05-17T11:39:17Z – unknown – shell_pid=60117 – lane=done – Merged via PR #12
