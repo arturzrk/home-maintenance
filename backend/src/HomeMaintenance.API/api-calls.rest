@@ -76,3 +76,125 @@ Content-Type: application/json
 {
   "name": ""
 }
+
+
+###############################################################################
+# Jobs (WP05)
+# Owns the lifecycle: create -> tick steps -> complete. Step mutation
+# beyond initial creation is WP07 and not represented here.
+###############################################################################
+
+### Step 0: ensure Alice has a property to host the job (sets createProperty
+###         again so the rest of the file can chain off it; harmless re-run).
+# @name createProperty
+POST http://localhost:5000/api/properties
+Authorization: Bearer {{alice}}
+Content-Type: application/json
+
+{
+  "name": "Main House"
+}
+
+### Create a Job under that property with three steps
+# @name createJob
+POST http://localhost:5000/api/jobs
+Authorization: Bearer {{alice}}
+Content-Type: application/json
+
+{
+  "propertyId": "{{createProperty.response.body.id}}",
+  "name": "Service boiler",
+  "dueDate": "2026-06-01",
+  "steps": [
+    { "description": "Shut off gas" },
+    { "description": "Drain system" },
+    { "description": "Replace filter" }
+  ]
+}
+
+### List all of Alice's jobs
+GET http://localhost:5000/api/jobs
+Authorization: Bearer {{alice}}
+
+### List jobs filtered by property
+GET http://localhost:5000/api/jobs?propertyId={{createProperty.response.body.id}}
+Authorization: Bearer {{alice}}
+
+### List only Active jobs
+GET http://localhost:5000/api/jobs?status=Active
+Authorization: Bearer {{alice}}
+
+### Get the job by id (includes embedded steps)
+GET http://localhost:5000/api/jobs/{{createJob.response.body.id}}
+Authorization: Bearer {{alice}}
+
+### Tick step 1
+POST http://localhost:5000/api/jobs/{{createJob.response.body.id}}/steps/{{createJob.response.body.steps[0].id}}/tick
+Authorization: Bearer {{alice}}
+
+### Tick step 2
+POST http://localhost:5000/api/jobs/{{createJob.response.body.id}}/steps/{{createJob.response.body.steps[1].id}}/tick
+Authorization: Bearer {{alice}}
+
+### Try to complete the job - expect 400 steps_incomplete (one step still unticked)
+POST http://localhost:5000/api/jobs/{{createJob.response.body.id}}/complete
+Authorization: Bearer {{alice}}
+
+### Tick the last step
+POST http://localhost:5000/api/jobs/{{createJob.response.body.id}}/steps/{{createJob.response.body.steps[2].id}}/tick
+Authorization: Bearer {{alice}}
+
+### Complete the job - now succeeds (200, status flips to Completed)
+POST http://localhost:5000/api/jobs/{{createJob.response.body.id}}/complete
+Authorization: Bearer {{alice}}
+
+### Try to tick again on the completed job -> 400 job_completed
+POST http://localhost:5000/api/jobs/{{createJob.response.body.id}}/steps/{{createJob.response.body.steps[0].id}}/tick
+Authorization: Bearer {{alice}}
+
+### Untick attempt on completed job -> 400 job_completed
+POST http://localhost:5000/api/jobs/{{createJob.response.body.id}}/steps/{{createJob.response.body.steps[0].id}}/untick
+Authorization: Bearer {{alice}}
+
+### Complete an already-completed job -> 400 job_already_completed
+POST http://localhost:5000/api/jobs/{{createJob.response.body.id}}/complete
+Authorization: Bearer {{alice}}
+
+### Bob tries to read Alice's job -> 404 (no leak)
+GET http://localhost:5000/api/jobs/{{createJob.response.body.id}}
+Authorization: Bearer {{bob}}
+
+### Anonymous create -> 401 problem+json
+POST http://localhost:5000/api/jobs
+Content-Type: application/json
+
+{
+  "propertyId": "{{createProperty.response.body.id}}",
+  "name": "Should be rejected",
+  "steps": []
+}
+
+### Validation: empty name -> 400
+POST http://localhost:5000/api/jobs
+Authorization: Bearer {{alice}}
+Content-Type: application/json
+
+{
+  "propertyId": "{{createProperty.response.body.id}}",
+  "name": "",
+  "steps": []
+}
+
+### Validation: cross-owner property id -> 404 (no leak)
+###   Run this AFTER signing in as Bob to a fresh property elsewhere if you
+###   want a real cross-owner check; the simple shape below uses an
+###   intentionally bogus id so the API treats it as not-found.
+POST http://localhost:5000/api/jobs
+Authorization: Bearer {{alice}}
+Content-Type: application/json
+
+{
+  "propertyId": "non-existent-id",
+  "name": "Hijack attempt",
+  "steps": []
+}
