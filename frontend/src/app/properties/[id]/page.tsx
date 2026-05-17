@@ -7,6 +7,7 @@ import {
 import { requireSession } from "@/lib/session";
 import { CreateJobForm } from "@/components/create-job-form";
 import { JobCard } from "@/components/job-card";
+import { PropertyHeader } from "@/components/property-header";
 
 export const dynamic = "force-dynamic";
 
@@ -32,10 +33,7 @@ export default async function PropertyDetailPage({
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
-      <header className="space-y-1">
-        <p className="text-xs text-gray-500">Property</p>
-        <h1 className="text-2xl font-bold tracking-tight">{property.name}</h1>
-      </header>
+      <PropertyHeader property={property} />
 
       <CreateJobForm propertyId={property.id} />
 

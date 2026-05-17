@@ -82,3 +82,99 @@ export async function completeJob(jobId: string): Promise<ActionResult<JobDetail
     return failureFrom(err);
   }
 }
+
+// ---- WP07 step mutation + job rename/due date ----
+
+export async function addStep(
+  jobId: string,
+  description: string,
+): Promise<ActionResult<JobDetail>> {
+  const trimmed = description.trim();
+  if (!trimmed) return { ok: false, error: "Description is required" };
+  if (trimmed.length > 500)
+    return { ok: false, error: "Description must be 500 characters or fewer" };
+
+  const session = await requireSession();
+  try {
+    const updated = await jobs.addStep(jobId, trimmed, session.idToken);
+    revalidatePath(`/jobs/${jobId}`);
+    return { ok: true, value: updated };
+  } catch (err) {
+    return failureFrom(err);
+  }
+}
+
+export async function removeStep(
+  jobId: string,
+  stepId: string,
+): Promise<ActionResult<JobDetail>> {
+  const session = await requireSession();
+  try {
+    const updated = await jobs.removeStep(jobId, stepId, session.idToken);
+    revalidatePath(`/jobs/${jobId}`);
+    return { ok: true, value: updated };
+  } catch (err) {
+    return failureFrom(err);
+  }
+}
+
+export async function editStepDescription(
+  jobId: string,
+  stepId: string,
+  description: string,
+): Promise<ActionResult<JobDetail>> {
+  const trimmed = description.trim();
+  if (!trimmed) return { ok: false, error: "Description is required" };
+  if (trimmed.length > 500)
+    return { ok: false, error: "Description must be 500 characters or fewer" };
+
+  const session = await requireSession();
+  try {
+    const updated = await jobs.editStepDescription(
+      jobId,
+      stepId,
+      trimmed,
+      session.idToken,
+    );
+    revalidatePath(`/jobs/${jobId}`);
+    return { ok: true, value: updated };
+  } catch (err) {
+    return failureFrom(err);
+  }
+}
+
+export async function reorderSteps(
+  jobId: string,
+  orderedStepIds: string[],
+): Promise<ActionResult<JobDetail>> {
+  const session = await requireSession();
+  try {
+    const updated = await jobs.reorderSteps(jobId, orderedStepIds, session.idToken);
+    revalidatePath(`/jobs/${jobId}`);
+    return { ok: true, value: updated };
+  } catch (err) {
+    return failureFrom(err);
+  }
+}
+
+export async function updateJob(
+  jobId: string,
+  patch: { name?: string; dueDate?: string | null },
+): Promise<ActionResult<JobDetail>> {
+  if (patch.name !== undefined) {
+    const trimmed = patch.name.trim();
+    if (!trimmed) return { ok: false, error: "Name is required" };
+    if (trimmed.length > 200)
+      return { ok: false, error: "Name must be 200 characters or fewer" };
+    patch.name = trimmed;
+  }
+
+  const session = await requireSession();
+  try {
+    const updated = await jobs.update(jobId, patch, session.idToken);
+    revalidatePath(`/jobs/${jobId}`);
+    return { ok: true, value: updated };
+  } catch (err) {
+    return failureFrom(err);
+  }
+}

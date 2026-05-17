@@ -28,6 +28,13 @@ public static class DependencyInjection
         services.AddScoped<UntickStepHandler>();
         services.AddScoped<CompleteJobHandler>();
 
+        // Job mutation (WP07)
+        services.AddScoped<AddStepHandler>();
+        services.AddScoped<RemoveStepHandler>();
+        services.AddScoped<EditStepDescriptionHandler>();
+        services.AddScoped<ReorderStepsHandler>();
+        services.AddScoped<UpdateJobHandler>();
+
         return services;
     }
 }
