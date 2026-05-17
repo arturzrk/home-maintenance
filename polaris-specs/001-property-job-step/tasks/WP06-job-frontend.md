@@ -1,6 +1,6 @@
 ---
 work_package_id: WP06
-lane: "doing"
+lane: "done"
 dependencies: [WP04, WP05]
 base_branch: main
 base_commit: 0063b0c055c0cca3c0a46e2d12e1a15b74feac6b
@@ -10,6 +10,8 @@ test_status: required
 test_file: tests/e2e/WP06-wp06-job-frontend.e2e.js
 domain: frontend-craft
 shell_pid: "82041"
+reviewed_by: "Artur Żurek"
+review_status: "approved"
 ---
 
 # WP06 - Job frontend
@@ -317,3 +319,7 @@ Mock fetch via `global.fetch = jest.fn(...)`. Mock
 ```
 polaris implement WP06 --base WP05
 ```
+
+## Activity Log
+
+- 2026-05-17T13:07:54Z – unknown – shell_pid=82041 – lane=done – Merged via PR #13
