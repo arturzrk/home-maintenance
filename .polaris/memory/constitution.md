@@ -14,7 +14,10 @@ match.
 
 ## Project Identity
 
-- **Name**: home-maintenance
+- **Name**: home-maintenance (codebase / repo).
+- **Intended production domain**: `maintained.house`. Reserved as the
+  public branding target; not yet purchased or provisioned. Any future
+  rebrand of this codename to "maintained" should align with the domain.
 - **Purpose**: A clean-architecture home maintenance tracking application. A
   single owner records and tracks the maintenance lifecycle of their property
   and assets. Personal-scale, opinionated, test-driven.

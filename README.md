@@ -3,6 +3,9 @@
 A clean-architecture home maintenance tracking application.
 See [ARCHITECTURE.md](./ARCHITECTURE.md) for all project rules and decisions.
 
+**Working title**: `home-maintenance` (codebase, repo).
+**Intended production domain**: [`maintained.house`](https://maintained.house) (reserved as the public branding target; not yet provisioned).
+
 ## Prerequisites
 
 - [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9)

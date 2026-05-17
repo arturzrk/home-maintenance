@@ -181,23 +181,23 @@ from the Property page. Delivers US3, US4, US5.
 
 Mutation beyond initial creation. P2 (US6) and P3 (US7) priorities.
 
-- [ ] T038 Application: `AddStep`, `RemoveStep`, `ReorderSteps`,
+- [x] T038 Application: `AddStep`, `RemoveStep`, `ReorderSteps`,
       `EditStepDescription` use cases with handler unit tests.
-- [ ] T039 Application: `RenameJob`, `SetJobDueDate`, `RenameProperty`
+- [x] T039 Application: `RenameJob`, `SetJobDueDate`, `RenameProperty`
       use cases with handler unit tests.
-- [ ] T040 API: step sub-resource endpoints. POST /api/jobs/{id}/steps,
+- [x] T040 API: step sub-resource endpoints. POST /api/jobs/{id}/steps,
       DELETE /api/jobs/{id}/steps/{stepId}, PATCH
       /api/jobs/{id}/steps/{stepId}, PUT /api/jobs/{id}/steps/order.
-- [ ] T041 API: PATCH /api/jobs/{id} for rename and due date; PATCH
+- [x] T041 API: PATCH /api/jobs/{id} for rename and due date; PATCH
       /api/properties/{id} already exists from WP03.
-- [ ] T042 Integration tests: full step-mutation matrix on Active Job;
+- [x] T042 Integration tests: full step-mutation matrix on Active Job;
       every mutation rejected on Completed Job (sealing matrix from
       FR-019 and FR-027).
-- [ ] T043 Frontend: step add (inline input), remove (trash icon),
+- [x] T043 Frontend: step add (inline input), remove (trash icon),
       reorder (drag handle backed by `@dnd-kit`), edit description
       (in-place edit). All operations call API and revalidate via
       `router.refresh()`.
-- [ ] T044 Frontend: edit Job name + due date controls on /jobs/[id]
+- [x] T044 Frontend: edit Job name + due date controls on /jobs/[id]
       header; edit Property name on /properties/[id] header.
 
 ## WP08 - Hardening + acceptance

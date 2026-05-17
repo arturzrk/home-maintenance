@@ -24,6 +24,38 @@
       "agent": "unknown",
       "source": "implement",
       "drift_type": "expansion"
+    },
+    {
+      "amendment_id": "amd-002",
+      "text": "Files changed outside declared WP scope: frontend/src/app/properties/[id]/page.tsx, frontend/src/components/create-job-form.tsx, frontend/src/components/job-card.tsx (and 1 more)",
+      "timestamp": "2026-05-17T13:07:52.832649+00:00",
+      "affected_sections": [],
+      "artifacts_updated": {
+        "spec_sections": [],
+        "plan_files": [],
+        "wps_regenerated": [],
+        "wps_locked": [],
+        "wps_created": []
+      },
+      "agent": "unknown",
+      "source": "implement",
+      "drift_type": "expansion"
+    },
+    {
+      "amendment_id": "amd-003",
+      "text": "Files changed outside declared WP scope: backend/src/HomeMaintenance.API/Endpoints/JobEndpoints.cs, backend/src/HomeMaintenance.API/Middleware/ResultToHttpExtensions.cs, backend/src/HomeMaintenance.API/Program.cs (and 6 more)",
+      "timestamp": "2026-05-17T13:07:54.737235+00:00",
+      "affected_sections": [],
+      "artifacts_updated": {
+        "spec_sections": [],
+        "plan_files": [],
+        "wps_regenerated": [],
+        "wps_locked": [],
+        "wps_created": []
+      },
+      "agent": "unknown",
+      "source": "implement",
+      "drift_type": "expansion"
     }
   ]
 }
