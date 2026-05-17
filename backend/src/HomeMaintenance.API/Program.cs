@@ -92,6 +92,9 @@ if (app.Environment.IsDevelopment())
 // Property aggregate (WP03).
 app.MapPropertyEndpoints();
 
+// Job aggregate (WP05).
+app.MapJobEndpoints();
+
 app.Run();
 
 // Needed for integration test WebApplicationFactory

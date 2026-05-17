@@ -1,3 +1,5 @@
+using HomeMaintenance.Application.Jobs.Commands;
+using HomeMaintenance.Application.Jobs.Queries;
 using HomeMaintenance.Application.Properties.Commands;
 using HomeMaintenance.Application.Properties.Queries;
 using Microsoft.Extensions.DependencyInjection;
@@ -12,10 +14,19 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
+        // Properties (WP03)
         services.AddScoped<CreatePropertyHandler>();
         services.AddScoped<RenamePropertyHandler>();
         services.AddScoped<ListPropertiesHandler>();
         services.AddScoped<GetPropertyHandler>();
+
+        // Jobs (WP05)
+        services.AddScoped<CreateJobHandler>();
+        services.AddScoped<GetJobHandler>();
+        services.AddScoped<ListJobsHandler>();
+        services.AddScoped<TickStepHandler>();
+        services.AddScoped<UntickStepHandler>();
+        services.AddScoped<CompleteJobHandler>();
 
         return services;
     }
