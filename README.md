@@ -86,10 +86,21 @@ cd frontend
 npm test
 ```
 
-## Setting up Google sign-in (production)
+## Setting up Google sign-in (staging / production)
 
-In Development the local OIDC stub bypasses Google. For any non-local
-deployment:
+See [`docs/oidc-setup.md`](./docs/oidc-setup.md) for the full
+operational runbook: per-environment Google Cloud Console setup,
+backend + frontend env-var matrix, verification checklist, and the
+common error catalogue.
+
+Short version: each non-dev environment gets its own Google OAuth
+Client (separate redirect URI + audience). The backend reads
+`Auth:Google:ClientId` and treats it as both issuer + audience for ID
+token validation. The frontend uses NextAuth + the Google provider
+with the same Client ID and a per-environment Client Secret.
+Production startup refuses to enable the dev stub.
+
+Brief sketch (full detail in the runbook):
 
 1. Create an OAuth 2.0 Client ID in the
    [Google Cloud Console](https://console.cloud.google.com/apis/credentials)
