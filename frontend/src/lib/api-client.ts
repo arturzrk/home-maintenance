@@ -126,3 +126,81 @@ export const properties = {
       idToken,
     }),
 };
+
+// ---------------------------------------------------------------------------
+// Jobs (WP05 backend)
+// Server-only.
+// ---------------------------------------------------------------------------
+
+export type JobStatus = "Active" | "Completed";
+
+export interface StepDto {
+  id: string;
+  order: number;
+  description: string;
+  isCompleted: boolean;
+  completedAt: string | null;
+}
+
+export interface JobSummary {
+  id: string;
+  propertyId: string;
+  name: string;
+  dueDate: string | null;
+  status: JobStatus;
+  completedAt: string | null;
+  stepCount: number;
+  completedStepCount: number;
+}
+
+export interface JobDetail {
+  id: string;
+  propertyId: string;
+  name: string;
+  dueDate: string | null;
+  status: JobStatus;
+  completedAt: string | null;
+  steps: StepDto[];
+}
+
+export interface JobList {
+  jobs: JobSummary[];
+}
+
+export interface CreateJobInput {
+  propertyId: string;
+  name: string;
+  dueDate: string | null;
+  steps: { description: string }[];
+}
+
+export const jobs = {
+  list: (idToken: string, filters?: { propertyId?: string; status?: JobStatus }) => {
+    const params = new URLSearchParams();
+    if (filters?.propertyId) params.set("propertyId", filters.propertyId);
+    if (filters?.status) params.set("status", filters.status);
+    const qs = params.toString();
+    return apiFetch<JobList>(`/api/jobs${qs ? "?" + qs : ""}`, { idToken });
+  },
+
+  get: (id: string, idToken: string) =>
+    apiFetch<JobDetail>(`/api/jobs/${id}`, { idToken }),
+
+  create: (input: CreateJobInput, idToken: string) =>
+    apiFetch<JobDetail>("/api/jobs", { method: "POST", body: input, idToken }),
+
+  complete: (id: string, idToken: string) =>
+    apiFetch<JobDetail>(`/api/jobs/${id}/complete`, { method: "POST", idToken }),
+
+  tickStep: (jobId: string, stepId: string, idToken: string) =>
+    apiFetch<JobDetail>(`/api/jobs/${jobId}/steps/${stepId}/tick`, {
+      method: "POST",
+      idToken,
+    }),
+
+  untickStep: (jobId: string, stepId: string, idToken: string) =>
+    apiFetch<JobDetail>(`/api/jobs/${jobId}/steps/${stepId}/untick`, {
+      method: "POST",
+      idToken,
+    }),
+};
