@@ -1,11 +1,15 @@
 ---
 work_package_id: WP06
-lane: planned
-dependencies: ["WP04", "WP05"]
+lane: "doing"
+dependencies: [WP04, WP05]
+base_branch: main
+base_commit: 0063b0c055c0cca3c0a46e2d12e1a15b74feac6b
+created_at: '2026-05-17T11:39:31.433036+00:00'
 subtasks: [T032, T033, T034, T035, T036, T037]
 test_status: required
 test_file: tests/e2e/WP06-wp06-job-frontend.e2e.js
 domain: frontend-craft
+shell_pid: "82041"
 ---
 
 # WP06 - Job frontend
