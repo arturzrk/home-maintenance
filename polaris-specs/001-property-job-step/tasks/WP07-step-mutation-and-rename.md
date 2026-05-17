@@ -1,11 +1,15 @@
 ---
 work_package_id: WP07
-lane: planned
-dependencies: ["WP05", "WP06"]
+lane: "doing"
+dependencies: [WP05, WP06]
+base_branch: main
+base_commit: 5dcf4fdbe30f1d0fb36f5a1fb2292b86ee6702e0
+created_at: '2026-05-17T13:07:57.631582+00:00'
 subtasks: [T038, T039, T040, T041, T042, T043, T044]
 test_status: required
 test_file: tests/e2e/WP07-wp07-step-mutation-and-rename.e2e.js
 domain: backend-logic
+shell_pid: "16074"
 ---
 
 # WP07 - Step mutation + Property/Job rename (US6, US7)

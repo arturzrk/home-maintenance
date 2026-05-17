@@ -203,4 +203,43 @@ export const jobs = {
       method: "POST",
       idToken,
     }),
+
+  // WP07: step mutation + job rename/due date
+  addStep: (jobId: string, description: string, idToken: string) =>
+    apiFetch<JobDetail>(`/api/jobs/${jobId}/steps`, {
+      method: "POST",
+      body: { description },
+      idToken,
+    }),
+
+  removeStep: (jobId: string, stepId: string, idToken: string) =>
+    apiFetch<JobDetail>(`/api/jobs/${jobId}/steps/${stepId}`, {
+      method: "DELETE",
+      idToken,
+    }),
+
+  editStepDescription: (jobId: string, stepId: string, description: string, idToken: string) =>
+    apiFetch<JobDetail>(`/api/jobs/${jobId}/steps/${stepId}`, {
+      method: "PATCH",
+      body: { description },
+      idToken,
+    }),
+
+  reorderSteps: (jobId: string, orderedStepIds: string[], idToken: string) =>
+    apiFetch<JobDetail>(`/api/jobs/${jobId}/steps/order`, {
+      method: "PUT",
+      body: { orderedStepIds },
+      idToken,
+    }),
+
+  update: (
+    id: string,
+    body: { name?: string; dueDate?: string | null },
+    idToken: string,
+  ) =>
+    apiFetch<JobDetail>(`/api/jobs/${id}`, {
+      method: "PATCH",
+      body,
+      idToken,
+    }),
 };

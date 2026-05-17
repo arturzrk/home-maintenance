@@ -198,3 +198,213 @@ Content-Type: application/json
   "name": "Hijack attempt",
   "steps": []
 }
+
+
+###############################################################################
+# Step mutation + Job rename / due-date (WP07)
+# Builds on the createProperty + createJob named requests above. Run the
+# Properties + Jobs blocks first so {{createJob.response.body.id}} resolves.
+###############################################################################
+
+### Reset state: create a fresh property + job for the WP07 block
+# @name wp07Property
+POST http://localhost:5000/api/properties
+Authorization: Bearer {{alice}}
+Content-Type: application/json
+
+{
+  "name": "WP07 House"
+}
+
+# @name wp07Job
+POST http://localhost:5000/api/jobs
+Authorization: Bearer {{alice}}
+Content-Type: application/json
+
+{
+  "propertyId": "{{wp07Property.response.body.id}}",
+  "name": "Service boiler",
+  "dueDate": "2026-06-01",
+  "steps": [
+    { "description": "Shut off gas" },
+    { "description": "Drain system" },
+    { "description": "Replace filter" }
+  ]
+}
+
+### Add a step at the end of the checklist
+POST http://localhost:5000/api/jobs/{{wp07Job.response.body.id}}/steps
+Authorization: Bearer {{alice}}
+Content-Type: application/json
+
+{
+  "description": "Refill expansion tank"
+}
+
+### Add step: empty description -> 400 validation
+POST http://localhost:5000/api/jobs/{{wp07Job.response.body.id}}/steps
+Authorization: Bearer {{alice}}
+Content-Type: application/json
+
+{
+  "description": ""
+}
+
+### Edit a step's description (uses the FIRST step from job create)
+PATCH http://localhost:5000/api/jobs/{{wp07Job.response.body.id}}/steps/{{wp07Job.response.body.steps[0].id}}
+Authorization: Bearer {{alice}}
+Content-Type: application/json
+
+{
+  "description": "Shut off gas at the meter"
+}
+
+### Edit step: over 500 chars -> 400
+PATCH http://localhost:5000/api/jobs/{{wp07Job.response.body.id}}/steps/{{wp07Job.response.body.steps[0].id}}
+Authorization: Bearer {{alice}}
+Content-Type: application/json
+
+{
+  "description": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+}
+
+### Reorder: reverse the step list
+###   Body lists all step ids in the desired new order. Server renumbers
+###   Order to 0..N-1.
+PUT http://localhost:5000/api/jobs/{{wp07Job.response.body.id}}/steps/order
+Authorization: Bearer {{alice}}
+Content-Type: application/json
+
+{
+  "orderedStepIds": [
+    "{{wp07Job.response.body.steps[2].id}}",
+    "{{wp07Job.response.body.steps[1].id}}",
+    "{{wp07Job.response.body.steps[0].id}}"
+  ]
+}
+
+### Reorder: partial list -> 400 validation
+PUT http://localhost:5000/api/jobs/{{wp07Job.response.body.id}}/steps/order
+Authorization: Bearer {{alice}}
+Content-Type: application/json
+
+{
+  "orderedStepIds": ["{{wp07Job.response.body.steps[0].id}}"]
+}
+
+### Remove the LAST step
+DELETE http://localhost:5000/api/jobs/{{wp07Job.response.body.id}}/steps/{{wp07Job.response.body.steps[2].id}}
+Authorization: Bearer {{alice}}
+
+### Remove: unknown id -> 404
+DELETE http://localhost:5000/api/jobs/{{wp07Job.response.body.id}}/steps/no-such-step
+Authorization: Bearer {{alice}}
+
+### Rename the job (PATCH /api/jobs/{id} with just `name`)
+PATCH http://localhost:5000/api/jobs/{{wp07Job.response.body.id}}
+Authorization: Bearer {{alice}}
+Content-Type: application/json
+
+{
+  "name": "Annual boiler service"
+}
+
+### Update the due date (PATCH with just `dueDate`)
+PATCH http://localhost:5000/api/jobs/{{wp07Job.response.body.id}}
+Authorization: Bearer {{alice}}
+Content-Type: application/json
+
+{
+  "dueDate": "2026-12-31"
+}
+
+### Clear the due date (explicit null, not omitted)
+PATCH http://localhost:5000/api/jobs/{{wp07Job.response.body.id}}
+Authorization: Bearer {{alice}}
+Content-Type: application/json
+
+{
+  "dueDate": null
+}
+
+### Rename + reschedule in one call
+PATCH http://localhost:5000/api/jobs/{{wp07Job.response.body.id}}
+Authorization: Bearer {{alice}}
+Content-Type: application/json
+
+{
+  "name": "Spring boiler service",
+  "dueDate": "2027-03-15"
+}
+
+### PATCH /api/jobs/{id} with empty body -> 400 (no fields to change)
+PATCH http://localhost:5000/api/jobs/{{wp07Job.response.body.id}}
+Authorization: Bearer {{alice}}
+Content-Type: application/json
+
+{
+}
+
+### Rename the property (PATCH /api/properties/{id})
+PATCH http://localhost:5000/api/properties/{{wp07Property.response.body.id}}
+Authorization: Bearer {{alice}}
+Content-Type: application/json
+
+{
+  "name": "WP07 House (renamed)"
+}
+
+### Tick all remaining steps, then test sealing matrix
+POST http://localhost:5000/api/jobs/{{wp07Job.response.body.id}}/steps/{{wp07Job.response.body.steps[0].id}}/tick
+Authorization: Bearer {{alice}}
+
+###
+POST http://localhost:5000/api/jobs/{{wp07Job.response.body.id}}/steps/{{wp07Job.response.body.steps[1].id}}/tick
+Authorization: Bearer {{alice}}
+
+### Complete the job
+POST http://localhost:5000/api/jobs/{{wp07Job.response.body.id}}/complete
+Authorization: Bearer {{alice}}
+
+### Sealing matrix: add step on completed job -> 400 job_completed
+POST http://localhost:5000/api/jobs/{{wp07Job.response.body.id}}/steps
+Authorization: Bearer {{alice}}
+Content-Type: application/json
+
+{
+  "description": "Should be rejected"
+}
+
+### Sealing matrix: remove step on completed job -> 400 job_completed
+DELETE http://localhost:5000/api/jobs/{{wp07Job.response.body.id}}/steps/{{wp07Job.response.body.steps[0].id}}
+Authorization: Bearer {{alice}}
+
+### Sealing matrix: edit step on completed job -> 400 job_completed
+PATCH http://localhost:5000/api/jobs/{{wp07Job.response.body.id}}/steps/{{wp07Job.response.body.steps[0].id}}
+Authorization: Bearer {{alice}}
+Content-Type: application/json
+
+{
+  "description": "Should be rejected"
+}
+
+### Sealing matrix: reorder on completed job -> 400 job_completed
+PUT http://localhost:5000/api/jobs/{{wp07Job.response.body.id}}/steps/order
+Authorization: Bearer {{alice}}
+Content-Type: application/json
+
+{
+  "orderedStepIds": [
+    "{{wp07Job.response.body.steps[1].id}}",
+    "{{wp07Job.response.body.steps[0].id}}"
+  ]
+}
+
+### Sealing matrix: PATCH job on completed job -> 400 job_completed
+PATCH http://localhost:5000/api/jobs/{{wp07Job.response.body.id}}
+Authorization: Bearer {{alice}}
+Content-Type: application/json
+
+{
+  "name": "Should be rejected"
+}

@@ -45,3 +45,28 @@ public sealed record CreateJobRequest(
     DateOnly? DueDate,
     [property: Required]
     IReadOnlyList<CreateJobStepRequest> Steps);
+
+public sealed record AddStepRequest(
+    [property: Required]
+    [property: StringLength(500, MinimumLength = 1)]
+    string Description);
+
+public sealed record EditStepDescriptionRequest(
+    [property: Required]
+    [property: StringLength(500, MinimumLength = 1)]
+    string Description);
+
+public sealed record ReorderStepsRequest(
+    [property: Required]
+    [property: MinLength(1)]
+    IReadOnlyList<string> OrderedStepIds);
+
+/// <summary>
+/// PATCH /api/jobs/{id} request body. Both fields are optional; the
+/// server treats an explicit "dueDate": null as "clear the due date"
+/// and an omitted "dueDate" as "leave unchanged".
+/// </summary>
+public sealed record UpdateJobRequest(
+    [property: StringLength(200, MinimumLength = 1)]
+    string? Name,
+    DateOnly? DueDate);

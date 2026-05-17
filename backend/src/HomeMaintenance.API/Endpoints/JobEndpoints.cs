@@ -109,6 +109,113 @@ public static class JobEndpoints
         })
         .WithName("UntickStep");
 
+        // ---- Step mutation (WP07) ----
+
+        group.MapPost("/{jobId}/steps", async (
+            string jobId,
+            AddStepRequest body,
+            AddStepHandler handler,
+            HttpContext ctx,
+            CancellationToken ct) =>
+        {
+            if (!MiniValidator.TryValidate(body, out var errors))
+                return Results.ValidationProblem(errors);
+
+            var result = await handler.Handle(new AddStepCommand(jobId, body.Description), ct);
+            return result.ToHttp(ctx);
+        })
+        .WithName("AddStep");
+
+        group.MapDelete("/{jobId}/steps/{stepId}", async (
+            string jobId,
+            string stepId,
+            RemoveStepHandler handler,
+            HttpContext ctx,
+            CancellationToken ct) =>
+        {
+            var result = await handler.Handle(new RemoveStepCommand(jobId, stepId), ct);
+            return result.ToHttp(ctx);
+        })
+        .WithName("RemoveStep");
+
+        group.MapPatch("/{jobId}/steps/{stepId}", async (
+            string jobId,
+            string stepId,
+            EditStepDescriptionRequest body,
+            EditStepDescriptionHandler handler,
+            HttpContext ctx,
+            CancellationToken ct) =>
+        {
+            if (!MiniValidator.TryValidate(body, out var errors))
+                return Results.ValidationProblem(errors);
+
+            var result = await handler.Handle(
+                new EditStepDescriptionCommand(jobId, stepId, body.Description), ct);
+            return result.ToHttp(ctx);
+        })
+        .WithName("EditStepDescription");
+
+        group.MapPut("/{jobId}/steps/order", async (
+            string jobId,
+            ReorderStepsRequest body,
+            ReorderStepsHandler handler,
+            HttpContext ctx,
+            CancellationToken ct) =>
+        {
+            if (!MiniValidator.TryValidate(body, out var errors))
+                return Results.ValidationProblem(errors);
+
+            var result = await handler.Handle(
+                new ReorderStepsCommand(jobId, body.OrderedStepIds), ct);
+            return result.ToHttp(ctx);
+        })
+        .WithName("ReorderSteps");
+
+        // ---- Job-level rename + due date (WP07) ----
+
+        group.MapPatch("/{id}", async (
+            string id,
+            HttpRequest request,
+            UpdateJobHandler handler,
+            HttpContext ctx,
+            CancellationToken ct) =>
+        {
+            // Read raw JSON so we can distinguish "dueDate" omitted from
+            // "dueDate": null (clear). System.Text.Json deserialization to
+            // UpdateJobRequest would collapse both to null.
+            using var doc = await System.Text.Json.JsonDocument.ParseAsync(request.Body, cancellationToken: ct);
+            var root = doc.RootElement;
+
+            string? name = null;
+            if (root.TryGetProperty("name", out var nameEl) && nameEl.ValueKind == System.Text.Json.JsonValueKind.String)
+                name = nameEl.GetString();
+
+            bool dueDateProvided = root.TryGetProperty("dueDate", out var dueEl);
+            DateOnly? dueDate = null;
+            if (dueDateProvided && dueEl.ValueKind == System.Text.Json.JsonValueKind.String)
+            {
+                var s = dueEl.GetString();
+                if (!string.IsNullOrEmpty(s))
+                {
+                    if (!DateOnly.TryParse(s, out var parsed))
+                        return Results.ValidationProblem(new Dictionary<string, string[]>
+                        {
+                            ["dueDate"] = new[] { "Must be ISO-8601 date (YYYY-MM-DD)." },
+                        });
+                    dueDate = parsed;
+                }
+            }
+
+            var body = new UpdateJobRequest(name, dueDate);
+            if (!MiniValidator.TryValidate(body, out var errors))
+                return Results.ValidationProblem(errors);
+
+            var result = await handler.Handle(
+                new UpdateJobCommand(id, name, dueDateProvided, dueDate), ct);
+            return result.ToHttp(ctx);
+        })
+        .WithName("UpdateJob");
+
         return app;
     }
 }
