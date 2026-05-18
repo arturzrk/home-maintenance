@@ -1,0 +1,80 @@
+name: Deploy backend to Azure App Service
+
+# Triggers
+# --------
+# - Every push to main that touches backend/** or this workflow.
+# - Manual run via the Actions tab (workflow_dispatch).
+#
+# Note: this runs in parallel with ci.yml. CI exercises the tests on
+# PRs; the deploy workflow assumes those passed before merge. If you
+# want belt-and-braces, change `paths:` to `paths-ignore` or add a
+# `workflow_run` trigger gating on a successful CI run.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/deploy-backend.yml'
+  workflow_dispatch:
+
+# Required GitHub configuration (repo Settings -> Secrets and variables -> Actions)
+# --------------------------------------------------------------------------------
+# Repository variable:
+#   AZURE_BACKEND_APP_NAME   - the App Service name, e.g. "home-maintenance-staging"
+#
+# Repository secret:
+#   AZURE_BACKEND_PUBLISH_PROFILE - the full XML content of the App Service
+#                                   publish profile. Download via the Azure
+#                                   portal: App Service -> Overview -> "Get
+#                                   publish profile" -> open the .PublishSettings
+#                                   file in a text editor and paste everything.
+
+env:
+  DOTNET_VERSION: 9.0.x
+  PROJECT_PATH: backend/src/HomeMaintenance.API/HomeMaintenance.API.csproj
+  PUBLISH_DIR: backend/publish
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-deploy:
+    name: build + deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up .NET ${{ env.DOTNET_VERSION }}
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('backend/**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Restore
+        run: dotnet restore ${{ env.PROJECT_PATH }}
+
+      - name: Build (Release)
+        run: dotnet build ${{ env.PROJECT_PATH }} --no-restore --configuration Release
+
+      - name: Publish
+        run: >
+          dotnet publish ${{ env.PROJECT_PATH }}
+          --no-build --configuration Release
+          --output ${{ env.PUBLISH_DIR }}
+
+      - name: Deploy to Azure App Service
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ vars.AZURE_BACKEND_APP_NAME }}
+          publish-profile: ${{ secrets.AZURE_BACKEND_PUBLISH_PROFILE }}
+          package: ${{ env.PUBLISH_DIR }}
