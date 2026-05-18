@@ -1,5 +1,8 @@
 # Home Maintenance Software
 
+[![CI](https://github.com/arturzrk/home-maintenance/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/arturzrk/home-maintenance/actions/workflows/ci.yml)
+[![Deploy backend](https://github.com/arturzrk/home-maintenance/actions/workflows/deploy-backend.yml/badge.svg?branch=main)](https://github.com/arturzrk/home-maintenance/actions/workflows/deploy-backend.yml)
+
 A clean-architecture home maintenance tracking application.
 See [ARCHITECTURE.md](./ARCHITECTURE.md) for all project rules and decisions.
 
@@ -143,6 +146,22 @@ One-time setup:
 
 Manual deploy: Actions tab -> "Deploy backend to Azure App Service"
 -> "Run workflow".
+
+**Where to watch deploys from GitHub:**
+
+- **Status badge** at the top of this README - green on the latest
+  successful deploy, red on failure.
+- **Repo -> Environments -> staging** - history of every deploy with
+  the commit, time, who triggered it, and a click-through to the App
+  Service URL.
+- **Workflow run page** - the "build + deploy" job has a markdown
+  summary with the commit SHA, App Service URL, and a post-deploy
+  health-probe result (status code + body of `/health`).
+
+Optional: if the App Service is not on the default
+`*.azurewebsites.net` hostname, set a repo variable `AZURE_BACKEND_URL`
+(e.g. `https://api.staging.maintained.house`) and both the summary
+and the Environments URL will pick it up.
 
 ### Frontend - Vercel
 
