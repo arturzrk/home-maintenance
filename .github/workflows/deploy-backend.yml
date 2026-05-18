@@ -44,6 +44,16 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
+    # Binds this job to the "staging" GitHub Environment. After the first
+    # run, the repo's Environments tab shows deployment history, the
+    # current commit at staging, and a click-through to the URL below.
+    # The URL assumes the default *.azurewebsites.net hostname; override
+    # by setting a repo variable AZURE_BACKEND_URL if you use a custom
+    # domain.
+    environment:
+      name: staging
+      url: ${{ vars.AZURE_BACKEND_URL || format('https://{0}.azurewebsites.net', vars.AZURE_BACKEND_APP_NAME) }}
+
     steps:
       - uses: actions/checkout@v4
 
@@ -78,3 +88,71 @@ jobs:
           app-name: ${{ vars.AZURE_BACKEND_APP_NAME }}
           publish-profile: ${{ secrets.AZURE_BACKEND_PUBLISH_PROFILE }}
           package: ${{ env.PUBLISH_DIR }}
+
+      # App Service can take 30-60s to warm up after a deploy. Retry the
+      # health probe for up to ~2 minutes before giving up.
+      - name: Probe /health
+        id: health
+        if: success()
+        env:
+          BASE_URL: ${{ vars.AZURE_BACKEND_URL || format('https://{0}.azurewebsites.net', vars.AZURE_BACKEND_APP_NAME) }}
+        run: |
+          set +e
+          url="$BASE_URL/health"
+          status=000
+          body=""
+          for attempt in 1 2 3 4 5 6 7 8; do
+            status=$(curl -sS -o /tmp/health.txt -w "%{http_code}" --max-time 10 "$url" || echo 000)
+            body=$(cat /tmp/health.txt 2>/dev/null || true)
+            if [ "$status" = "200" ]; then
+              echo "Healthy on attempt $attempt"
+              break
+            fi
+            echo "attempt $attempt: HTTP $status, retrying in 15s..."
+            sleep 15
+          done
+          {
+            echo "status=$status"
+            echo "url=$url"
+            echo "body<<HEALTH_EOF"
+            echo "$body"
+            echo "HEALTH_EOF"
+          } >> "$GITHUB_OUTPUT"
+          [ "$status" = "200" ]
+
+      - name: Write deployment summary
+        if: always()
+        env:
+          APP_NAME: ${{ vars.AZURE_BACKEND_APP_NAME }}
+          APP_URL: ${{ vars.AZURE_BACKEND_URL || format('https://{0}.azurewebsites.net', vars.AZURE_BACKEND_APP_NAME) }}
+          DEPLOY_STATUS: ${{ job.status }}
+          HEALTH_STATUS: ${{ steps.health.outputs.status }}
+          HEALTH_URL: ${{ steps.health.outputs.url }}
+          HEALTH_BODY: ${{ steps.health.outputs.body }}
+        run: |
+          {
+            echo "## Backend deployment"
+            echo ""
+            echo "| Field | Value |"
+            echo "|---|---|"
+            echo "| App Service | \`$APP_NAME\` |"
+            echo "| URL | $APP_URL |"
+            echo "| Commit | \`${GITHUB_SHA::7}\` (${GITHUB_REF_NAME}) |"
+            echo "| Triggered by | @$GITHUB_ACTOR |"
+            echo "| Job status | $DEPLOY_STATUS |"
+            echo ""
+            echo "### Health probe"
+            echo ""
+            if [ -z "$HEALTH_STATUS" ]; then
+              echo "_Skipped (deploy did not complete)._"
+            else
+              echo "- Endpoint: \`$HEALTH_URL\`"
+              echo "- HTTP status: \`$HEALTH_STATUS\`"
+              echo ""
+              echo "Body:"
+              echo ""
+              echo '```'
+              echo "$HEALTH_BODY"
+              echo '```'
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
