@@ -1,3 +1,4 @@
+using Azure.Monitor.OpenTelemetry.AspNetCore;
 using HomeMaintenance.API.Endpoints;
 using HomeMaintenance.API.Middleware;
 using HomeMaintenance.Application;
@@ -5,6 +6,7 @@ using HomeMaintenance.Application.Common.Interfaces;
 using HomeMaintenance.Infrastructure;
 using HomeMaintenance.Infrastructure.Auth;
 using MongoDB.Driver;
+using OpenTelemetry;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +15,16 @@ builder.Services
     .AddApplication()
     .AddInfrastructure(builder.Configuration)
     .AddAppAuthentication(builder.Configuration, builder.Environment);
+
+// Azure Monitor OpenTelemetry distro. Auto-instruments ASP.NET Core
+// (every request becomes a span), HttpClient, and exceptions. Reads the
+// connection string from the APPLICATIONINSIGHTS_CONNECTION_STRING env
+// var; silently no-ops when the var is unset, so local dev is unaffected
+// unless a developer opts in.
+if (!string.IsNullOrEmpty(builder.Configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"]))
+{
+    builder.Services.AddOpenTelemetry().UseAzureMonitor();
+}
 
 // Health checks
 builder.Services
