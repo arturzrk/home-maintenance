@@ -1,3 +1,5 @@
+using System.Diagnostics;
+
 namespace HomeMaintenance.API.Middleware;
 
 /// <summary>
@@ -5,13 +7,15 @@ namespace HomeMaintenance.API.Middleware;
 /// from the inbound <c>X-Correlation-Id</c> header if present, or
 /// generated as a GUID-N otherwise. The same id is echoed back as a
 /// response header, surfaced to handlers via <c>HttpContext.Items</c>,
-/// and pushed onto the logging scope so every log line emitted during
-/// the request carries it.
+/// pushed onto the logging scope, AND attached to the current
+/// <see cref="Activity"/> so OpenTelemetry / Application Insights
+/// surface it as a custom dimension on every span.
 /// </summary>
 public sealed class CorrelationIdMiddleware
 {
     public const string HeaderName = "X-Correlation-Id";
     private const string ItemKey = "CorrelationId";
+    private const string ActivityTag = "correlationId";
 
     private readonly RequestDelegate _next;
 
@@ -29,6 +33,7 @@ public sealed class CorrelationIdMiddleware
 
         ctx.Items[ItemKey] = id;
         ctx.Response.Headers[HeaderName] = id;
+        Activity.Current?.SetTag(ActivityTag, id);
 
         using (logger.BeginScope(new Dictionary<string, object>
         {
