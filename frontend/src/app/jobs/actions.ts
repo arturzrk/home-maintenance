@@ -12,7 +12,9 @@ function failureFrom(err: unknown): ActionResult<never> {
   if (err instanceof ApiError) {
     return { ok: false, error: err.message, code: err.code };
   }
-  return { ok: false, error: "Unexpected error" };
+  // Let NEXT_REDIRECT (thrown by api-client on 401) and any other
+  // framework error bubble up so Next.js can handle it.
+  throw err;
 }
 
 export async function createJob(formData: FormData): Promise<ActionResult<{ id: string }>> {
