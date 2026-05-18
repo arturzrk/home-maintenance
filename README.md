@@ -117,6 +117,39 @@ Brief sketch (full detail in the runbook):
    `.polaris/memory/constitution.md` for the audit-log baseline that
    then applies.
 
+## Deployment
+
+### Backend - Azure App Service
+
+Auto-deploys on every push to `main` that touches `backend/**`. The
+workflow is at `.github/workflows/deploy-backend.yml`; setup steps
+documented in the file header.
+
+One-time setup:
+
+1. **Get the publish profile**. Azure portal -> your App Service ->
+   Overview -> "Get publish profile" (downloads a `.PublishSettings`
+   XML file).
+2. **Add a GitHub repository secret** named
+   `AZURE_BACKEND_PUBLISH_PROFILE` with the full XML content.
+3. **Add a GitHub repository variable** named
+   `AZURE_BACKEND_APP_NAME` with the App Service name (e.g.
+   `home-maintenance-staging`).
+4. **App Service runtime config** is set in the Azure portal under
+   Configuration -> Application settings (see `docs/oidc-setup.md`
+   for the staging env-var matrix).
+5. Disable any other CD configured under Deployment Center to avoid
+   double-deploys.
+
+Manual deploy: Actions tab -> "Deploy backend to Azure App Service"
+-> "Run workflow".
+
+### Frontend - Vercel
+
+Auto-deploys on every push to `main` via the Vercel-GitHub integration.
+Configuration lives in the Vercel project (Settings -> Git, Settings
+-> Environment Variables). No workflow file required.
+
 ## Audit log
 
 Every authenticated write (Property create/rename, Job create/update/
