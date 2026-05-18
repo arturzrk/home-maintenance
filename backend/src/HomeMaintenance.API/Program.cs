@@ -82,7 +82,7 @@ app.MapHealthChecks("/health").AllowAnonymous();
 app.MapGet("/", () => Results.Ok(new
 {
     Service = "HomeMaintenance API",
-    Version = "0.1.0",
+    Version = "0.1.1",
     Status = "Running"
 }))
 .WithName("Root")
