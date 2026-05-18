@@ -133,6 +133,35 @@ Before declaring staging "open":
    the most likely cause is `Auth__Google__ClientId` on the backend
    not matching the frontend's `GOOGLE_CLIENT_ID`.
 
+## ID token refresh
+
+Google ID tokens live ~1 hour. NextAuth caches whatever was issued at
+sign-in and does not refresh on its own, so any backend call made more
+than an hour after sign-in would be rejected with 401.
+
+The frontend handles this with two cooperating pieces:
+
+- `lib/auth.ts` sets `access_type=offline` + `prompt=consent` on the
+  Google authorization request so a `refresh_token` is issued, then
+  in the `jwt` callback it calls Google's token endpoint to mint a
+  new `id_token` whenever the cached one is within 60s of expiry. On
+  refresh failure it sets `session.error = "RefreshAccessTokenError"`.
+- `lib/api-client.ts` detects 401 responses to authenticated calls
+  and `redirect()`s to `/signin`, so anything that slips past the
+  refresh (revoked credentials, deleted Google account, rotated
+  refresh_token gone wrong) becomes a graceful sign-in bounce rather
+  than a 500 page.
+
+Operational notes:
+
+- The consent screen now appears on every fresh sign-in (because of
+  `prompt=consent`). This is the price of getting a refresh_token.
+- Existing sessions issued before this change has no refresh_token,
+  so the next time their id_token expires the api-client 401 handler
+  bounces them to `/signin`. That's a one-time cost.
+- Nothing on the GCP side needs to change: `access_type=offline` is
+  a runtime parameter, not a client setting.
+
 ## Common errors
 
 | Symptom | Cause |

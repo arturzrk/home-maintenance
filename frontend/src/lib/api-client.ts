@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import type { ApiInfo } from "@/types/api";
 
 // Server-side base URL (Server Components, Server Actions, Route Handlers).
@@ -60,6 +61,14 @@ async function apiFetch<T>(path: string, opts: FetchOptions = {}): Promise<T> {
       detail?: string;
       title?: string;
     };
+    // 401 with a bearer token = the token was rejected (expired,
+    // audience mismatch, revoked). Bounce to /signin so NextAuth can
+    // mint a fresh one. redirect() throws NEXT_REDIRECT, which Next.js
+    // converts into a real redirect in Server Components / Server
+    // Actions / Route Handlers - callers MUST let it propagate.
+    if (res.status === 401 && opts.idToken) {
+      redirect("/signin");
+    }
     throw new ApiError(
       problem.code ?? "error",
       res.status,

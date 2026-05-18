@@ -26,7 +26,9 @@ export async function createProperty(formData: FormData): Promise<ActionResult> 
     if (err instanceof ApiError) {
       return { ok: false, error: err.message };
     }
-    return { ok: false, error: "Failed to create property" };
+    // Let NEXT_REDIRECT (thrown by api-client on 401) and any other
+    // framework error bubble up so Next.js can handle it.
+    throw err;
   }
 }
 
@@ -47,6 +49,6 @@ export async function renameProperty(
     return { ok: true };
   } catch (err) {
     if (err instanceof ApiError) return { ok: false, error: err.message };
-    return { ok: false, error: "Failed to rename property" };
+    throw err;
   }
 }
