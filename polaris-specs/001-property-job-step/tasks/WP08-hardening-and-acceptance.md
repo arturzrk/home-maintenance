@@ -10,6 +10,8 @@ test_status: required
 test_file: tests/e2e/WP08-wp08-hardening-and-acceptance.e2e.js
 domain: testing-specialist
 shell_pid: "88497"
+agent: "claude"
+assignee: "arturzrk@gmail.com"
 ---
 
 # WP08 - Hardening + acceptance

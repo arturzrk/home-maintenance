@@ -10,6 +10,8 @@ test_status: required
 test_file: tests/e2e/WP05-wp05-job-aggregate-backend.e2e.js
 domain: backend-logic
 shell_pid: "60117"
+agent: "claude"
+assignee: "arturzrk@gmail.com"
 reviewed_by: "Artur Żurek"
 review_status: "approved"
 ---

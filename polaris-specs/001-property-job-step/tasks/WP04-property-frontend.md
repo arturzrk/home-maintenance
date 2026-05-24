@@ -10,6 +10,8 @@ test_status: required
 test_file: tests/e2e/WP04-wp04-property-frontend.e2e.js
 domain: frontend-craft
 shell_pid: "29162"
+agent: "claude"
+assignee: "arturzrk@gmail.com"
 reviewed_by: "Artur Żurek"
 review_status: "approved"
 ---

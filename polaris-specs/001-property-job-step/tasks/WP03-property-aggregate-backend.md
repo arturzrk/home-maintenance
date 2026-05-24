@@ -10,6 +10,8 @@ test_status: required
 test_file: tests/e2e/WP03-wp03-property-aggregate-backend.e2e.js
 domain: backend-logic
 shell_pid: "13951"
+agent: "claude"
+assignee: "arturzrk@gmail.com"
 ---
 
 # WP03 - Property aggregate backend

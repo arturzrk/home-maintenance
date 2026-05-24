@@ -11,6 +11,7 @@ test_status: required
 test_file: tests/e2e/WP01-wp01-authentication-foundation.e2e.js
 domain: backend-logic
 agent: "claude"
+assignee: "arturzrk@gmail.com"
 ---
 
 # WP01 - Authentication foundation

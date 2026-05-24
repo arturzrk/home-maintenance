@@ -10,6 +10,8 @@ test_status: required
 test_file: tests/e2e/WP02-wp02-cross-cutting-infrastructure.e2e.js
 domain: backend-logic
 shell_pid: "82073"
+agent: "claude"
+assignee: "arturzrk@gmail.com"
 ---
 
 # WP02 - Cross-cutting infrastructure

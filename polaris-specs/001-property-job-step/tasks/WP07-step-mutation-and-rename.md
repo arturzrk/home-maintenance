@@ -10,6 +10,8 @@ test_status: required
 test_file: tests/e2e/WP07-wp07-step-mutation-and-rename.e2e.js
 domain: backend-logic
 shell_pid: "16074"
+agent: "claude"
+assignee: "arturzrk@gmail.com"
 ---
 
 # WP07 - Step mutation + Property/Job rename (US6, US7)
