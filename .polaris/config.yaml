@@ -7,3 +7,8 @@ agents:
     strategy: preferred
     preferred_implementer: claude
     preferred_reviewer: claude
+paths:
+  workspace: "backend/src/"
+  tests: "backend/tests/"
+  deliverables: "polaris-specs/001-property-job-step/contracts/"
+  documentation: "docs/"
