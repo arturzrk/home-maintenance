@@ -1,6 +1,6 @@
 ---
 work_package_id: WP08
-lane: "doing"
+lane: "done"
 dependencies: [WP07]
 base_branch: 001-property-job-step-WP07
 base_commit: 14f28ec535b7674ff32b7e8cadfcc044ebb4f8d4
@@ -10,6 +10,8 @@ test_status: required
 test_file: tests/e2e/WP08-wp08-hardening-and-acceptance.e2e.js
 domain: testing-specialist
 shell_pid: "88497"
+agent: "claude"
+assignee: "arturzrk@gmail.com"
 ---
 
 # WP08 - Hardening + acceptance
@@ -176,3 +178,8 @@ After this WP merges, Slice 1 is shippable. The natural follow-ups:
 ```
 polaris implement WP08 --base WP07
 ```
+
+## Activity Log
+
+- 2026-05-17T17:04:41Z – claude – shell_pid=88497 – lane=doing – Assigned agent via workflow command
+- 2026-05-24T00:00:00Z – claude – lane=done – All subtasks T045-T050 completed and merged

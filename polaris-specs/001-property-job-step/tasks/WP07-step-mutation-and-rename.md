@@ -1,6 +1,6 @@
 ---
 work_package_id: WP07
-lane: "doing"
+lane: "done"
 dependencies: [WP05, WP06]
 base_branch: main
 base_commit: 5dcf4fdbe30f1d0fb36f5a1fb2292b86ee6702e0
@@ -10,6 +10,8 @@ test_status: required
 test_file: tests/e2e/WP07-wp07-step-mutation-and-rename.e2e.js
 domain: backend-logic
 shell_pid: "16074"
+agent: "claude"
+assignee: "arturzrk@gmail.com"
 ---
 
 # WP07 - Step mutation + Property/Job rename (US6, US7)
@@ -196,3 +198,8 @@ either or both of `name` and `dueDate`.
 ```
 polaris implement WP07 --base WP06
 ```
+
+## Activity Log
+
+- 2026-05-17T13:07:57Z – claude – shell_pid=16074 – lane=doing – Assigned agent via workflow command
+- 2026-05-24T00:00:00Z – claude – lane=done – All subtasks T038-T044 completed and merged

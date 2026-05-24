@@ -1,6 +1,6 @@
 ---
 work_package_id: WP01
-lane: doing
+lane: done
 dependencies: []
 base_branch: main
 base_commit: 50b56c07e3510a40f5d3327f0f815d736566f6ac
@@ -11,6 +11,7 @@ test_status: required
 test_file: tests/e2e/WP01-wp01-authentication-foundation.e2e.js
 domain: backend-logic
 agent: "claude"
+assignee: "arturzrk@gmail.com"
 ---
 
 # WP01 - Authentication foundation
@@ -308,3 +309,4 @@ polaris implement WP01
 ## Activity Log
 
 - 2026-05-14T14:18:31Z – claude – shell_pid=62492 – lane=doing – Assigned agent via workflow command
+- 2026-05-24T00:00:00Z – claude – lane=done – All subtasks T001-T007 completed and merged

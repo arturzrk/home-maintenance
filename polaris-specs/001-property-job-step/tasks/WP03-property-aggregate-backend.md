@@ -1,6 +1,6 @@
 ---
 work_package_id: WP03
-lane: "doing"
+lane: "done"
 dependencies: [WP02]
 base_branch: 001-property-job-step-WP02
 base_commit: c6ebfd5d2a99f98313309ca18aa30bcec4f43767
@@ -10,6 +10,8 @@ test_status: required
 test_file: tests/e2e/WP03-wp03-property-aggregate-backend.e2e.js
 domain: backend-logic
 shell_pid: "13951"
+agent: "claude"
+assignee: "arturzrk@gmail.com"
 ---
 
 # WP03 - Property aggregate backend
@@ -346,3 +348,8 @@ Use `dev-alice` / `dev-bob` as test owners via the DevStub.
 ```
 polaris implement WP03 --base WP02
 ```
+
+## Activity Log
+
+- 2026-05-14T17:06:29Z – claude – shell_pid=13951 – lane=doing – Assigned agent via workflow command
+- 2026-05-24T00:00:00Z – claude – lane=done – All subtasks T015-T020 completed and merged

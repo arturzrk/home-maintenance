@@ -1,6 +1,6 @@
 ---
 work_package_id: WP02
-lane: "doing"
+lane: "done"
 dependencies: [WP01]
 base_branch: 001-property-job-step-WP01
 base_commit: e70515a6fa348c82bbdbcd87c47e740325df033a
@@ -10,6 +10,8 @@ test_status: required
 test_file: tests/e2e/WP02-wp02-cross-cutting-infrastructure.e2e.js
 domain: backend-logic
 shell_pid: "82073"
+agent: "claude"
+assignee: "arturzrk@gmail.com"
 ---
 
 # WP02 - Cross-cutting infrastructure
@@ -283,3 +285,8 @@ move the assertion into the real Property endpoint integration tests.
 ```
 polaris implement WP02 --base WP01
 ```
+
+## Activity Log
+
+- 2026-05-14T15:25:02Z – claude – shell_pid=82073 – lane=doing – Assigned agent via workflow command
+- 2026-05-24T00:00:00Z – claude – lane=done – All subtasks T008-T014 completed and merged
