@@ -181,5 +181,5 @@ polaris implement WP08 --base WP07
 
 ## Activity Log
 
-- 2026-05-17T17:04:41Z – claude – shell_pid=88497 – lane=doing – Assigned agent via workflow command
-- 2026-05-24T00:00:00Z – claude – lane=done – All subtasks T045-T050 completed and merged
+- 2026-05-17T17:04:41Z -- claude -- shell_pid=88497 -- lane=doing -- Assigned agent via workflow command
+- 2026-05-24T00:00:00Z -- claude -- lane=done -- All subtasks T045-T050 completed and merged

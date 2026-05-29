@@ -276,5 +276,5 @@ polaris implement WP05 --base WP02
 
 ## Activity Log
 
-- 2026-05-17T11:39:17Z – unknown – shell_pid=60117 – lane=done – Merged via PR #12
-- 2026-05-17T13:07:52Z – unknown – shell_pid=60117 – lane=done – Merged via PR #12
+- 2026-05-17T11:39:17Z -- unknown -- shell_pid=60117 -- lane=done -- Merged via PR #12
+- 2026-05-17T13:07:52Z -- unknown -- shell_pid=60117 -- lane=done -- Merged via PR #12
