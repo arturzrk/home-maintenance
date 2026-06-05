@@ -52,6 +52,7 @@ public sealed class Job : Entity
     public DateTime? CompletedAt { get; private set; }
 
     public IReadOnlyList<Step> Steps => _steps.AsReadOnly();
+    public string? JobDefinitionId { get; private set; }
 
     private Job(string id, OwnerId owner, string propertyId, string name, DateOnly? dueDate)
         : base(id)
@@ -70,14 +71,18 @@ public sealed class Job : Entity
         string propertyId,
         string name,
         DateOnly? dueDate,
-        IEnumerable<string> initialStepDescriptions)
+        IEnumerable<string> initialStepDescriptions,
+        string? jobDefinitionId = null)
     {
         ArgumentNullException.ThrowIfNull(owner);
         if (string.IsNullOrWhiteSpace(propertyId))
             throw new ArgumentException("PropertyId is required.", nameof(propertyId));
         ValidateName(name);
 
-        var job = new Job(NormaliseId(id), owner, propertyId, name.Trim(), dueDate);
+        var job = new Job(NormaliseId(id), owner, propertyId, name.Trim(), dueDate)
+        {
+            JobDefinitionId = jobDefinitionId,
+        };
         var order = 0;
         foreach (var description in initialStepDescriptions)
         {
@@ -100,12 +105,14 @@ public sealed class Job : Entity
         DateOnly? dueDate,
         JobStatus status,
         DateTime? completedAt,
-        IEnumerable<Step> steps)
+        IEnumerable<Step> steps,
+        string? jobDefinitionId = null)
     {
         var job = new Job(id, owner, propertyId, name, dueDate)
         {
             Status = status,
             CompletedAt = completedAt,
+            JobDefinitionId = jobDefinitionId,
         };
         job._steps.AddRange(steps);
         return job;
