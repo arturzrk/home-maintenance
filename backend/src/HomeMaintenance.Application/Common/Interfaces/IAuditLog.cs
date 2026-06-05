@@ -47,4 +47,11 @@ public static class AuditEventTypes
     public const string StepDescriptionEdited = "step.description_edited";
     public const string StepTicked = "step.ticked";
     public const string StepUnticked = "step.unticked";
+
+    public const string JobGenerated = "job.generated";
+
+    public const string JobDefinitionCreated = "job_definition.created";
+    public const string JobDefinitionRenamed = "job_definition.renamed";
+    public const string JobDefinitionScheduleChanged = "job_definition.schedule_changed";
+    public const string JobDefinitionStepTemplateMutated = "job_definition.step_template_mutated";
 }

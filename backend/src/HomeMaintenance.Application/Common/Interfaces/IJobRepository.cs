@@ -21,4 +21,8 @@ public interface IJobRepository
     Task AddAsync(Job job, CancellationToken ct = default);
 
     Task UpdateAsync(Job job, CancellationToken ct = default);
+
+    Task<bool> HasGeneratedJobForOccurrenceAsync(string definitionId, DateOnly dueDate, CancellationToken ct = default);
+
+    Task<DateOnly?> LatestGeneratedJobDueDateAsync(string definitionId, CancellationToken ct = default);
 }

@@ -18,7 +18,8 @@ public sealed record JobSummaryDto(
     JobStatus Status,
     DateTime? CompletedAt,
     int StepCount,
-    int CompletedStepCount);
+    int CompletedStepCount,
+    string? JobDefinitionId = null);
 
 public sealed record JobDetailDto(
     string Id,
@@ -27,7 +28,8 @@ public sealed record JobDetailDto(
     DateOnly? DueDate,
     JobStatus Status,
     DateTime? CompletedAt,
-    IReadOnlyList<StepDto> Steps);
+    IReadOnlyList<StepDto> Steps,
+    string? JobDefinitionId = null);
 
 public sealed record JobListDto(IReadOnlyList<JobSummaryDto> Jobs);
 
