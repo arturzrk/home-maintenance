@@ -8,7 +8,7 @@ base_commit: e4e79a6ef99a106868cf6d6c95256861defcf4db
 created_at: '2026-06-05T13:08:30.837784+00:00'
 subtasks: [T008, T009, T010, T011, T012, T013, T014]
 assignee: ''
-agent: ''
+agent: "claude"
 shell_pid: "90162"
 test_status: required
 test_file: tests/e2e/WP02-application-interfaces-use-cases-generation-logic.e2e.js
@@ -284,3 +284,7 @@ Unit tests in `backend/tests/HomeMaintenance.Unit.Tests/Application/JobDefinitio
 ```bash
 polaris implement WP02 --base WP01
 ```
+
+## Activity Log
+
+- 2026-06-05T13:08:31Z – claude – shell_pid=90162 – lane=doing – Assigned agent via workflow command
