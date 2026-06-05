@@ -1,12 +1,15 @@
 ---
 work_package_id: WP01
 title: 'Domain: ScheduleDefinition + JobDefinition + Job extension'
-lane: planned
+lane: "doing"
 dependencies: []
+base_branch: main
+base_commit: 2d51765c74f8ebe35d737e018221801277be69ef
+created_at: '2026-06-05T10:49:31.513708+00:00'
 subtasks: [T001, T002, T003, T004, T005, T006, T007]
 assignee: ''
 agent: ''
-shell_pid: ''
+shell_pid: "32252"
 test_status: required
 test_file: tests/e2e/WP01-domain-scheduledefinition-jobdefinition-job-extens.e2e.js
 review_status: ''
