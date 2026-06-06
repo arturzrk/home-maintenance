@@ -1,12 +1,15 @@
 ---
 work_package_id: WP04
 title: 'API: endpoints + JobDto update'
-lane: planned
+lane: "doing"
 dependencies: []
+base_branch: main
+base_commit: fa9ee4eeb21174e97588bc76f342dc063db81278
+created_at: '2026-06-06T17:09:10.058736+00:00'
 subtasks: [T022, T023, T024, T025, T026]
 assignee: ''
 agent: ''
-shell_pid: ''
+shell_pid: "73841"
 test_status: required
 test_file: tests/e2e/WP04-api-endpoints-jobdto-update.e2e.js
 review_status: ''
