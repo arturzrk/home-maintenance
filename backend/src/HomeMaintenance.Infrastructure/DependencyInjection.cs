@@ -1,7 +1,9 @@
 using HomeMaintenance.Application.Common.Interfaces;
+using HomeMaintenance.Application.JobDefinitions;
 using HomeMaintenance.Infrastructure.AuditLog;
 using HomeMaintenance.Infrastructure.Auth;
 using HomeMaintenance.Infrastructure.Persistence;
+using HomeMaintenance.Infrastructure.Scheduling;
 using HomeMaintenance.Infrastructure.Time;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -46,7 +48,10 @@ public static class DependencyInjection
 
         services.AddScoped<IPropertyRepository, PropertyRepository>();
         services.AddScoped<IJobRepository, JobRepository>();
+        services.AddScoped<IJobDefinitionRepository, JobDefinitionRepository>();
+        services.AddScoped<JobGenerationService>();
         services.AddHostedService<MongoIndexInitializer>();
+        services.AddHostedService<JobGeneratorService>();
 
         return services;
     }

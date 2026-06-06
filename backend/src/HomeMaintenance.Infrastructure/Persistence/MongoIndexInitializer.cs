@@ -25,6 +25,7 @@ internal sealed class MongoIndexInitializer : IHostedService
     {
         await EnsurePropertyIndexes(cancellationToken);
         await EnsureJobIndexes(cancellationToken);
+        await EnsureJobDefinitionIndexes(cancellationToken);
         _logger.LogInformation("MongoDB indexes ensured.");
     }
 
@@ -67,6 +68,27 @@ internal sealed class MongoIndexInitializer : IHostedService
                         .Ascending(d => d.OwnerId)
                         .Ascending(d => d.Status),
                     new CreateIndexOptions { Name = "owner_status_idx" }),
+                new CreateIndexModel<JobDocument>(
+                    Builders<JobDocument>.IndexKeys.Ascending(d => d.JobDefinitionId),
+                    new CreateIndexOptions { Name = "job_definition_idx", Sparse = true }),
+            },
+            ct);
+    }
+
+    private Task EnsureJobDefinitionIndexes(CancellationToken ct)
+    {
+        var collection = _db.GetCollection<JobDefinitionDocument>(JobDefinitionRepository.CollectionName);
+        return collection.Indexes.CreateManyAsync(
+            new[]
+            {
+                new CreateIndexModel<JobDefinitionDocument>(
+                    Builders<JobDefinitionDocument>.IndexKeys.Ascending(d => d.OwnerId),
+                    new CreateIndexOptions { Name = "owner_idx" }),
+                new CreateIndexModel<JobDefinitionDocument>(
+                    Builders<JobDefinitionDocument>.IndexKeys
+                        .Ascending(d => d.OwnerId)
+                        .Ascending(d => d.PropertyId),
+                    new CreateIndexOptions { Name = "owner_property_idx" }),
             },
             ct);
     }

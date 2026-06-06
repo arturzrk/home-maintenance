@@ -28,6 +28,10 @@ internal sealed class JobDocument
     [BsonIgnoreIfNull]
     public DateOnly? DueDate { get; set; }
 
+    [BsonElement("jobDefinitionId")]
+    [BsonIgnoreIfNull]
+    public string? JobDefinitionId { get; set; }
+
     [BsonElement("status")]
     [BsonRepresentation(BsonType.String)]
     public JobStatus Status { get; set; } = JobStatus.Active;
