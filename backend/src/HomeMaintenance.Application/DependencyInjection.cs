@@ -1,3 +1,5 @@
+using HomeMaintenance.Application.JobDefinitions.Commands;
+using HomeMaintenance.Application.JobDefinitions.Queries;
 using HomeMaintenance.Application.Jobs.Commands;
 using HomeMaintenance.Application.Jobs.Queries;
 using HomeMaintenance.Application.Properties.Commands;
@@ -34,6 +36,13 @@ public static class DependencyInjection
         services.AddScoped<EditStepDescriptionHandler>();
         services.AddScoped<ReorderStepsHandler>();
         services.AddScoped<UpdateJobHandler>();
+
+        // JobDefinitions (WP04 - 002-recurring-jobs)
+        services.AddScoped<CreateJobDefinitionHandler>();
+        services.AddScoped<ListJobDefinitionsHandler>();
+        services.AddScoped<GetJobDefinitionHandler>();
+        services.AddScoped<UpdateJobDefinitionHandler>();
+        services.AddScoped<GenerateNextOccurrenceHandler>();
 
         return services;
     }
