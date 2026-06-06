@@ -96,38 +96,38 @@ All Application-layer code. No Infrastructure or API code yet.
 
 MongoDB persistence and the scheduled generator. Depends on WP02 interfaces.
 
-- [ ] T015 `JobDefinitionDocument` in
+- [x] T015 `JobDefinitionDocument` in
       `backend/src/HomeMaintenance.Infrastructure/Persistence/Documents/JobDefinitionDocument.cs`
       and `JobDefinitionRepository` in
       `backend/src/HomeMaintenance.Infrastructure/Persistence/JobDefinitionRepository.cs`
       implementing `IJobDefinitionRepository`.
       Bootstrap `job_definitions` collection indexes: `{ ownerId: 1 }`,
       `{ ownerId: 1, propertyId: 1 }` via the existing `MongoIndexInitializer`.
-- [ ] T016 Extend `JobDocument` with nullable `jobDefinitionId` field.
+- [x] T016 Extend `JobDocument` with nullable `jobDefinitionId` field.
       Add sparse index `{ jobDefinitionId: 1 }` on `jobs` collection.
       Implement `HasGeneratedJobForOccurrence` and
       `LatestGeneratedJobDueDateAsync` on `JobRepository` (queries on the
       sparse index). No migration needed -- missing field reads as null.
-- [ ] T017 `SystemDateTimeProvider` in
+- [x] T017 `SystemDateTimeProvider` in
       `backend/src/HomeMaintenance.Infrastructure/Scheduling/SystemDateTimeProvider.cs`
       implementing `IDateTimeProvider`. Returns
       `DateOnly.FromDateTime(DateTime.UtcNow)`. Registered as `Singleton`.
-- [ ] T018 `JobGeneratorService` in
+- [x] T018 `JobGeneratorService` in
       `backend/src/HomeMaintenance.Infrastructure/Scheduling/JobGeneratorService.cs`
       extending `BackgroundService`. Uses `PeriodicTimer` with 24-hour
       interval. Runs one immediate generation pass on startup before
       entering the periodic loop. Calls
       `JobGenerationService.GenerateForDefinition` for every definition
       returned by `IJobDefinitionRepository.ListAllActiveAsync`.
-- [ ] T019 Register all new services in `Infrastructure.DependencyInjection`:
+- [x] T019 Register all new services in `Infrastructure.DependencyInjection`:
       `JobDefinitionRepository` (scoped), `SystemDateTimeProvider`
       (singleton), `JobGeneratorService` (hosted service),
       `JobGenerationService` (scoped, Application layer).
-- [ ] T020 Integration tests for `JobDefinitionRepository` in
+- [x] T020 Integration tests for `JobDefinitionRepository` in
       `backend/tests/HomeMaintenance.Integration.Tests/JobDefinitions/JobDefinitionRepositoryTests.cs`:
       Add, Get (owned), Get (cross-owner returns null), List (by owner),
       List (filtered by propertyId), Update round-trips schedule and steps.
-- [ ] T021 Integration tests for the scheduler in
+- [x] T021 Integration tests for the scheduler in
       `backend/tests/HomeMaintenance.Integration.Tests/JobDefinitions/JobGeneratorServiceTests.cs`:
       inject `StubDateTimeProvider`; verify horizon generation for monthly
       cadence; verify second run produces no duplicates (idempotency);
