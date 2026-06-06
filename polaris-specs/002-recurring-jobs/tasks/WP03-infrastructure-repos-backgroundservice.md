@@ -1,7 +1,7 @@
 ---
 work_package_id: WP03
 title: 'Infrastructure: repositories + BackgroundService'
-lane: "for_review"
+lane: "done"
 dependencies: []
 subtasks: [T015, T016, T017, T018, T019, T020, T021]
 assignee: ''
@@ -9,8 +9,8 @@ agent: ''
 shell_pid: ''
 test_status: required
 test_file: tests/e2e/WP03-infrastructure-repositories-backgroundservice.e2e.js
-review_status: ''
-reviewed_by: ''
+review_status: "approved"
+reviewed_by: "Artur Żurek"
 history:
 - timestamp: '2026-05-29T00:00:00Z'
   lane: planned
@@ -282,3 +282,4 @@ polaris implement WP03 --base WP02
 - 2026-06-06T12:20:40Z – unknown – lane=doing – Implementation in progress
 - 2026-06-06T12:20:46Z – unknown – lane=testing – dotnet test green: 154 unit + 131 integration tests pass
 - 2026-06-06T12:21:23Z – unknown – lane=for_review – polaris runtests crashed (NameError: get_specs_dir not defined - tooling bug); ran dotnet test directly: 154 unit + 131 integration tests pass against real MongoDB via Testcontainers
+- 2026-06-06T13:34:22Z – unknown – lane=done – PR #32 merged into main
