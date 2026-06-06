@@ -1,15 +1,12 @@
 ---
 work_package_id: WP04
 title: 'API: endpoints + JobDto update'
-lane: "doing"
+lane: "for_review"
 dependencies: []
-base_branch: main
-base_commit: fa9ee4eeb21174e97588bc76f342dc063db81278
-created_at: '2026-06-06T17:09:10.058736+00:00'
 subtasks: [T022, T023, T024, T025, T026]
 assignee: ''
-agent: "claude"
-shell_pid: "73841"
+agent: ''
+shell_pid: ''
 test_status: required
 test_file: tests/e2e/WP04-api-endpoints-jobdto-update.e2e.js
 review_status: ''
@@ -169,4 +166,6 @@ polaris implement WP04 --base WP03
 
 ## Activity Log
 
-- 2026-06-06T17:09:10Z – claude – shell_pid=73841 – lane=doing – Assigned agent via workflow command
+- 2026-06-06T18:43:15Z – unknown – lane=doing – Resume: implementation already complete, moving through required lane transitions
+- 2026-06-06T18:43:16Z – unknown – lane=testing – dotnet test green: 154/154 Unit.Tests + 150/150 Integration.Tests (19 new JobDefinition endpoint tests)
+- 2026-06-06T18:43:39Z – unknown – lane=for_review – Implementation complete: 5 endpoints (POST/GET-list/GET-by-id/PATCH/generate-next), DI registration fix, 19 integration tests added. dotnet test green: 154/154 Unit + 150/150 Integration. polaris runtests CLI bug (get_specs_dir undefined, same as WP02/WP03) - ran dotnet test directly.
