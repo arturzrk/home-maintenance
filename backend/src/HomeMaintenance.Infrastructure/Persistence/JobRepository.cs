@@ -80,12 +80,24 @@ internal sealed class JobRepository : IJobRepository
             cancellationToken: ct);
     }
 
-    // Implemented in WP03 once JobDefinitionId is persisted on the document.
-    public Task<bool> HasGeneratedJobForOccurrenceAsync(string definitionId, DateOnly dueDate, CancellationToken ct = default)
-        => throw new NotImplementedException("Implemented in WP03");
+    public async Task<bool> HasGeneratedJobForOccurrenceAsync(string definitionId, DateOnly dueDate, CancellationToken ct = default)
+    {
+        var count = await _collection
+            .Find(d => d.JobDefinitionId == definitionId && d.DueDate == dueDate)
+            .Limit(1)
+            .CountDocumentsAsync(ct);
+        return count > 0;
+    }
 
-    public Task<DateOnly?> LatestGeneratedJobDueDateAsync(string definitionId, CancellationToken ct = default)
-        => throw new NotImplementedException("Implemented in WP03");
+    public async Task<DateOnly?> LatestGeneratedJobDueDateAsync(string definitionId, CancellationToken ct = default)
+    {
+        var doc = await _collection
+            .Find(d => d.JobDefinitionId == definitionId)
+            .SortByDescending(d => d.DueDate)
+            .Limit(1)
+            .FirstOrDefaultAsync(ct);
+        return doc?.DueDate;
+    }
 
     // ---- Mappers ----
 
@@ -103,7 +115,8 @@ internal sealed class JobRepository : IJobRepository
             doc.DueDate,
             doc.Status,
             doc.CompletedAt,
-            steps);
+            steps,
+            doc.JobDefinitionId);
     }
 
     private static JobDocument ToDocument(Job job)
@@ -114,6 +127,7 @@ internal sealed class JobRepository : IJobRepository
             PropertyId = job.PropertyId,
             Name = job.Name,
             DueDate = job.DueDate,
+            JobDefinitionId = job.JobDefinitionId,
             Status = job.Status,
             CompletedAt = job.CompletedAt,
             Steps = job.Steps.Select(s => new StepDocument
