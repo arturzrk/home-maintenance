@@ -107,6 +107,9 @@ app.MapPropertyEndpoints();
 // Job aggregate (WP05).
 app.MapJobEndpoints();
 
+// JobDefinition aggregate (WP04 - 002-recurring-jobs).
+app.MapJobDefinitionEndpoints();
+
 app.Run();
 
 // Needed for integration test WebApplicationFactory
