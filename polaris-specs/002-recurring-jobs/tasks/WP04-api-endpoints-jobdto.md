@@ -1,7 +1,7 @@
 ---
 work_package_id: WP04
 title: 'API: endpoints + JobDto update'
-lane: planned
+lane: "testing"
 dependencies: []
 subtasks: [T022, T023, T024, T025, T026]
 assignee: ''
@@ -163,3 +163,8 @@ Required tests:
 ```bash
 polaris implement WP04 --base WP03
 ```
+
+## Activity Log
+
+- 2026-06-06T18:43:15Z – unknown – lane=doing – Resume: implementation already complete, moving through required lane transitions
+- 2026-06-06T18:43:16Z – unknown – lane=testing – dotnet test green: 154/154 Unit.Tests + 150/150 Integration.Tests (19 new JobDefinition endpoint tests)
