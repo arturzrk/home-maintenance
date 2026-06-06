@@ -2,6 +2,7 @@ using HomeMaintenance.Application.Common.Interfaces;
 using HomeMaintenance.Infrastructure.AuditLog;
 using HomeMaintenance.Infrastructure.Auth;
 using HomeMaintenance.Infrastructure.Persistence;
+using HomeMaintenance.Infrastructure.Time;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -37,6 +38,7 @@ public static class DependencyInjection
         services.AddHttpContextAccessor();
         services.AddScoped<IIdentityProvider, HttpContextIdentityProvider>();
         services.AddScoped<ICorrelationContext, HttpContextCorrelationContext>();
+        services.AddSingleton<IDateTimeProvider, SystemDateTimeProvider>();
 
         services.Configure<AuditLogOptions>(
             configuration.GetSection(AuditLogOptions.SectionName));

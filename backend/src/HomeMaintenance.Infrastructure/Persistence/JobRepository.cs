@@ -80,6 +80,13 @@ internal sealed class JobRepository : IJobRepository
             cancellationToken: ct);
     }
 
+    // Implemented in WP03 once JobDefinitionId is persisted on the document.
+    public Task<bool> HasGeneratedJobForOccurrenceAsync(string definitionId, DateOnly dueDate, CancellationToken ct = default)
+        => throw new NotImplementedException("Implemented in WP03");
+
+    public Task<DateOnly?> LatestGeneratedJobDueDateAsync(string definitionId, CancellationToken ct = default)
+        => throw new NotImplementedException("Implemented in WP03");
+
     // ---- Mappers ----
 
     private static Job ToDomain(JobDocument doc)
