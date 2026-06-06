@@ -21,6 +21,13 @@ public sealed class GetJobDefinitionHandlerTests
             new ScheduleDefinition(CadenceUnit.Month, 1, new DateOnly(2026, 1, 1)),
             Array.Empty<string>());
 
+    private static IIdentityProvider IdentityFor(OwnerId owner)
+    {
+        var identity = Substitute.For<IIdentityProvider>();
+        identity.CurrentOwner.Returns(owner);
+        return identity;
+    }
+
     [Fact]
     public async Task GetById_Owned_ReturnsDtoSuccess()
     {
@@ -28,8 +35,8 @@ public sealed class GetJobDefinitionHandlerTests
         repo.GetAsync("def-1", Alice, Arg.Any<CancellationToken>())
             .Returns(MakeDefinition(Alice));
 
-        var handler = new GetJobDefinitionHandler(repo);
-        var result = await handler.Handle(new GetJobDefinitionQuery("def-1", Alice));
+        var handler = new GetJobDefinitionHandler(repo, IdentityFor(Alice));
+        var result = await handler.Handle(new GetJobDefinitionQuery("def-1"));
 
         result.IsSuccess.ShouldBeTrue();
         result.Value!.Id.ShouldBe("def-1");
@@ -43,8 +50,8 @@ public sealed class GetJobDefinitionHandlerTests
         repo.GetAsync(Arg.Any<string>(), Arg.Any<OwnerId>(), Arg.Any<CancellationToken>())
             .Returns((JobDefinition?)null);
 
-        var handler = new GetJobDefinitionHandler(repo);
-        var result = await handler.Handle(new GetJobDefinitionQuery("missing", Alice));
+        var handler = new GetJobDefinitionHandler(repo, IdentityFor(Alice));
+        var result = await handler.Handle(new GetJobDefinitionQuery("missing"));
 
         result.IsFailure.ShouldBeTrue();
         result.Error!.Code.ShouldBe("not_found");
@@ -57,8 +64,8 @@ public sealed class GetJobDefinitionHandlerTests
         repo.GetAsync("def-1", Bob, Arg.Any<CancellationToken>())
             .Returns((JobDefinition?)null);
 
-        var handler = new GetJobDefinitionHandler(repo);
-        var result = await handler.Handle(new GetJobDefinitionQuery("def-1", Bob));
+        var handler = new GetJobDefinitionHandler(repo, IdentityFor(Bob));
+        var result = await handler.Handle(new GetJobDefinitionQuery("def-1"));
 
         result.IsFailure.ShouldBeTrue();
         result.Error!.Code.ShouldBe("not_found");
@@ -71,8 +78,8 @@ public sealed class GetJobDefinitionHandlerTests
         repo.ListAsync(Alice, null, Arg.Any<CancellationToken>())
             .Returns(new List<JobDefinition> { MakeDefinition(Alice) });
 
-        var handler = new ListJobDefinitionsHandler(repo);
-        var result = await handler.Handle(new ListJobDefinitionsQuery(Alice));
+        var handler = new ListJobDefinitionsHandler(repo, IdentityFor(Alice));
+        var result = await handler.Handle(new ListJobDefinitionsQuery());
 
         result.IsSuccess.ShouldBeTrue();
         result.Value!.Count.ShouldBe(1);
@@ -86,8 +93,8 @@ public sealed class GetJobDefinitionHandlerTests
         repo.ListAsync(Alice, "prop-1", Arg.Any<CancellationToken>())
             .Returns(new List<JobDefinition> { MakeDefinition(Alice) });
 
-        var handler = new ListJobDefinitionsHandler(repo);
-        var result = await handler.Handle(new ListJobDefinitionsQuery(Alice, "prop-1"));
+        var handler = new ListJobDefinitionsHandler(repo, IdentityFor(Alice));
+        var result = await handler.Handle(new ListJobDefinitionsQuery("prop-1"));
 
         result.IsSuccess.ShouldBeTrue();
         await repo.Received(1).ListAsync(Alice, "prop-1", Arg.Any<CancellationToken>());

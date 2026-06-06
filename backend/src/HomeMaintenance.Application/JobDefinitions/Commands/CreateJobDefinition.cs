@@ -1,13 +1,11 @@
 using HomeMaintenance.Application.Common;
 using HomeMaintenance.Application.Common.Interfaces;
 using HomeMaintenance.Application.JobDefinitions.Dto;
-using HomeMaintenance.Domain.Identity;
 using HomeMaintenance.Domain.JobDefinitions;
 
 namespace HomeMaintenance.Application.JobDefinitions.Commands;
 
 public sealed record CreateJobDefinitionCommand(
-    OwnerId Owner,
     string PropertyId,
     string Name,
     ScheduleDefinitionDto Schedule,
@@ -17,6 +15,7 @@ public sealed class CreateJobDefinitionHandler
 {
     private readonly IJobDefinitionRepository _definitions;
     private readonly IPropertyRepository _properties;
+    private readonly IIdentityProvider _identity;
     private readonly IDateTimeProvider _clock;
     private readonly JobGenerationService _generationService;
     private readonly IAuditLog _audit;
@@ -25,6 +24,7 @@ public sealed class CreateJobDefinitionHandler
     public CreateJobDefinitionHandler(
         IJobDefinitionRepository definitions,
         IPropertyRepository properties,
+        IIdentityProvider identity,
         IDateTimeProvider clock,
         JobGenerationService generationService,
         IAuditLog audit,
@@ -32,6 +32,7 @@ public sealed class CreateJobDefinitionHandler
     {
         _definitions = definitions;
         _properties = properties;
+        _identity = identity;
         _clock = clock;
         _generationService = generationService;
         _audit = audit;
@@ -42,7 +43,9 @@ public sealed class CreateJobDefinitionHandler
         CreateJobDefinitionCommand cmd,
         CancellationToken ct = default)
     {
-        var property = await _properties.GetAsync(cmd.PropertyId, cmd.Owner, ct);
+        var owner = _identity.CurrentOwner;
+
+        var property = await _properties.GetAsync(cmd.PropertyId, owner, ct);
         if (property is null)
             return Result<JobDefinitionDto>.Failure(new NotFoundError("Property", cmd.PropertyId));
 
@@ -61,7 +64,7 @@ public sealed class CreateJobDefinitionHandler
         {
             definition = JobDefinition.Create(
                 IdFactory.NewId(),
-                cmd.Owner,
+                owner,
                 cmd.PropertyId,
                 cmd.Name,
                 schedule,
@@ -77,7 +80,7 @@ public sealed class CreateJobDefinitionHandler
 
         await _audit.RecordAsync(new AuditEvent(
             AuditEventTypes.JobDefinitionCreated,
-            cmd.Owner.Value,
+            owner.Value,
             $"job_definition:{definition.Id}",
             DateTime.UtcNow,
             _correlation.CurrentId,

@@ -24,6 +24,8 @@ public sealed class UpdateJobDefinitionHandlerTests
     private static (IJobDefinitionRepository repo, IAuditLog audit, UpdateJobDefinitionHandler handler) Build(JobDefinition? definition = null)
     {
         var repo = Substitute.For<IJobDefinitionRepository>();
+        var identity = Substitute.For<IIdentityProvider>();
+        identity.CurrentOwner.Returns(Alice);
         var audit = Substitute.For<IAuditLog>();
         var correlation = Substitute.For<ICorrelationContext>();
         correlation.CurrentId.Returns("corr-1");
@@ -31,7 +33,7 @@ public sealed class UpdateJobDefinitionHandlerTests
         var def = definition ?? MakeDefinition();
         repo.GetAsync("def-1", Alice, Arg.Any<CancellationToken>()).Returns(def);
 
-        var handler = new UpdateJobDefinitionHandler(repo, audit, correlation);
+        var handler = new UpdateJobDefinitionHandler(repo, identity, audit, correlation);
         return (repo, audit, handler);
     }
 
@@ -39,7 +41,7 @@ public sealed class UpdateJobDefinitionHandlerTests
     public async Task Rename_ValidName_Succeeds()
     {
         var (repo, _, handler) = Build();
-        var result = await handler.Handle(new UpdateJobDefinitionCommand("def-1", Alice, Name: "New Name"));
+        var result = await handler.Handle(new UpdateJobDefinitionCommand("def-1", Name: "New Name"));
 
         result.IsSuccess.ShouldBeTrue();
         result.Value!.Name.ShouldBe("New Name");
@@ -50,7 +52,7 @@ public sealed class UpdateJobDefinitionHandlerTests
     public async Task Rename_EmptyName_ReturnsValidationError()
     {
         var (_, _, handler) = Build();
-        var result = await handler.Handle(new UpdateJobDefinitionCommand("def-1", Alice, Name: ""));
+        var result = await handler.Handle(new UpdateJobDefinitionCommand("def-1", Name: ""));
 
         result.IsFailure.ShouldBeTrue();
         result.Error!.Code.ShouldBe("validation");
@@ -62,7 +64,7 @@ public sealed class UpdateJobDefinitionHandlerTests
         var (repo, _, handler) = Build();
         var newSchedule = new ScheduleDefinitionDto("Year", 1, new DateOnly(2026, 6, 1), null);
 
-        var result = await handler.Handle(new UpdateJobDefinitionCommand("def-1", Alice, Schedule: newSchedule));
+        var result = await handler.Handle(new UpdateJobDefinitionCommand("def-1", Schedule: newSchedule));
 
         result.IsSuccess.ShouldBeTrue();
         result.Value!.Schedule.Unit.ShouldBe("Year");
@@ -74,7 +76,7 @@ public sealed class UpdateJobDefinitionHandlerTests
     {
         var (_, _, handler) = Build(MakeDefinition(Array.Empty<string>()));
         var result = await handler.Handle(new UpdateJobDefinitionCommand(
-            "def-1", Alice, AddStepDescriptions: new[] { "New Step" }));
+            "def-1", AddStepDescriptions: new[] { "New Step" }));
 
         result.IsSuccess.ShouldBeTrue();
         result.Value!.StepTemplates.Count.ShouldBe(1);
@@ -89,7 +91,7 @@ public sealed class UpdateJobDefinitionHandlerTests
         var (_, _, handler) = Build(def);
 
         var result = await handler.Handle(new UpdateJobDefinitionCommand(
-            "def-1", Alice, RemoveStepTemplateIds: new[] { idToRemove }));
+            "def-1", RemoveStepTemplateIds: new[] { idToRemove }));
 
         result.IsSuccess.ShouldBeTrue();
         result.Value!.StepTemplates.Count.ShouldBe(1);
@@ -100,7 +102,7 @@ public sealed class UpdateJobDefinitionHandlerTests
     {
         var (_, _, handler) = Build();
         var result = await handler.Handle(new UpdateJobDefinitionCommand(
-            "def-1", Alice, RemoveStepTemplateIds: new[] { "ghost-id" }));
+            "def-1", RemoveStepTemplateIds: new[] { "ghost-id" }));
 
         result.IsFailure.ShouldBeTrue();
         result.Error!.Code.ShouldBe("not_found");
@@ -112,11 +114,13 @@ public sealed class UpdateJobDefinitionHandlerTests
         var repo = Substitute.For<IJobDefinitionRepository>();
         repo.GetAsync(Arg.Any<string>(), Arg.Any<OwnerId>(), Arg.Any<CancellationToken>())
             .Returns((JobDefinition?)null);
+        var identity = Substitute.For<IIdentityProvider>();
+        identity.CurrentOwner.Returns(Alice);
         var audit = Substitute.For<IAuditLog>();
         var correlation = Substitute.For<ICorrelationContext>();
-        var handler = new UpdateJobDefinitionHandler(repo, audit, correlation);
+        var handler = new UpdateJobDefinitionHandler(repo, identity, audit, correlation);
 
-        var result = await handler.Handle(new UpdateJobDefinitionCommand("missing", Alice));
+        var result = await handler.Handle(new UpdateJobDefinitionCommand("missing"));
 
         result.IsFailure.ShouldBeTrue();
         result.Error!.Code.ShouldBe("not_found");

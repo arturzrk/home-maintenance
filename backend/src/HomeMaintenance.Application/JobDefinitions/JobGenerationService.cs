@@ -9,11 +9,13 @@ public sealed class JobGenerationService
 {
     private readonly IJobRepository _jobs;
     private readonly IAuditLog _audit;
+    private readonly ICorrelationContext _correlation;
 
-    public JobGenerationService(IJobRepository jobs, IAuditLog audit)
+    public JobGenerationService(IJobRepository jobs, IAuditLog audit, ICorrelationContext correlation)
     {
         _jobs = jobs;
         _audit = audit;
+        _correlation = correlation;
     }
 
     public async Task GenerateForDefinition(
@@ -45,7 +47,7 @@ public sealed class JobGenerationService
                 "system",
                 $"job:{job.Id}",
                 DateTime.UtcNow,
-                string.Empty,
+                _correlation.CurrentId,
                 new Dictionary<string, object?>
                 {
                     ["trigger"] = "scheduler",

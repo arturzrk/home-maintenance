@@ -32,6 +32,8 @@ public sealed class GenerateNextOccurrenceHandlerTests
     {
         var defs = Substitute.For<IJobDefinitionRepository>();
         var jobs = Substitute.For<IJobRepository>();
+        var identity = Substitute.For<IIdentityProvider>();
+        identity.CurrentOwner.Returns(Alice);
         var audit = Substitute.For<IAuditLog>();
         var correlation = Substitute.For<ICorrelationContext>();
         correlation.CurrentId.Returns("corr-1");
@@ -39,7 +41,7 @@ public sealed class GenerateNextOccurrenceHandlerTests
         var def = definition ?? MakeDefinition();
         defs.GetAsync("def-1", Alice, Arg.Any<CancellationToken>()).Returns(def);
 
-        var handler = new GenerateNextOccurrenceHandler(defs, jobs, audit, correlation);
+        var handler = new GenerateNextOccurrenceHandler(defs, jobs, identity, audit, correlation);
         return (defs, jobs, audit, correlation, handler);
     }
 
@@ -52,7 +54,7 @@ public sealed class GenerateNextOccurrenceHandlerTests
         jobs.HasGeneratedJobForOccurrenceAsync("def-1", new DateOnly(2026, 1, 1), Arg.Any<CancellationToken>())
             .Returns(false);
 
-        var result = await handler.Handle(new GenerateNextOccurrenceCommand("def-1", Alice));
+        var result = await handler.Handle(new GenerateNextOccurrenceCommand("def-1"));
 
         result.IsSuccess.ShouldBeTrue();
         result.Value!.DueDate.ShouldBe(new DateOnly(2026, 1, 1));
@@ -68,7 +70,7 @@ public sealed class GenerateNextOccurrenceHandlerTests
         jobs.HasGeneratedJobForOccurrenceAsync("def-1", new DateOnly(2026, 2, 1), Arg.Any<CancellationToken>())
             .Returns(false);
 
-        var result = await handler.Handle(new GenerateNextOccurrenceCommand("def-1", Alice));
+        var result = await handler.Handle(new GenerateNextOccurrenceCommand("def-1"));
 
         result.IsSuccess.ShouldBeTrue();
         result.Value!.DueDate.ShouldBe(new DateOnly(2026, 2, 1));
@@ -83,7 +85,7 @@ public sealed class GenerateNextOccurrenceHandlerTests
         jobs.HasGeneratedJobForOccurrenceAsync("def-1", new DateOnly(2026, 1, 1), Arg.Any<CancellationToken>())
             .Returns(true);
 
-        var result = await handler.Handle(new GenerateNextOccurrenceCommand("def-1", Alice));
+        var result = await handler.Handle(new GenerateNextOccurrenceCommand("def-1"));
 
         result.IsFailure.ShouldBeTrue();
         result.Error!.Code.ShouldBe("business_rule");
@@ -96,13 +98,16 @@ public sealed class GenerateNextOccurrenceHandlerTests
         var defs = Substitute.For<IJobDefinitionRepository>();
         defs.GetAsync(Arg.Any<string>(), Arg.Any<OwnerId>(), Arg.Any<CancellationToken>())
             .Returns((JobDefinition?)null);
+        var identity = Substitute.For<IIdentityProvider>();
+        identity.CurrentOwner.Returns(Alice);
         var handler = new GenerateNextOccurrenceHandler(
             defs,
             Substitute.For<IJobRepository>(),
+            identity,
             Substitute.For<IAuditLog>(),
             Substitute.For<ICorrelationContext>());
 
-        var result = await handler.Handle(new GenerateNextOccurrenceCommand("missing", Alice));
+        var result = await handler.Handle(new GenerateNextOccurrenceCommand("missing"));
 
         result.IsFailure.ShouldBeTrue();
         result.Error!.Code.ShouldBe("not_found");

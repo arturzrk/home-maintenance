@@ -30,6 +30,8 @@ public sealed class CreateJobDefinitionHandlerTests
     {
         var defs = Substitute.For<IJobDefinitionRepository>();
         var properties = Substitute.For<IPropertyRepository>();
+        var identity = Substitute.For<IIdentityProvider>();
+        identity.CurrentOwner.Returns(Alice);
         var clock = Substitute.For<IDateTimeProvider>();
         clock.UtcToday.Returns(new DateOnly(2026, 6, 1));
         var jobs = Substitute.For<IJobRepository>();
@@ -37,8 +39,8 @@ public sealed class CreateJobDefinitionHandlerTests
         var correlation = Substitute.For<ICorrelationContext>();
         correlation.CurrentId.Returns("corr-1");
 
-        var generationService = new JobGenerationService(jobs, audit);
-        var handler = new CreateJobDefinitionHandler(defs, properties, clock, generationService, audit, correlation);
+        var generationService = new JobGenerationService(jobs, audit, correlation);
+        var handler = new CreateJobDefinitionHandler(defs, properties, identity, clock, generationService, audit, correlation);
         return (defs, properties, clock, jobs, audit, correlation, handler);
     }
 
@@ -50,7 +52,7 @@ public sealed class CreateJobDefinitionHandlerTests
             .Returns(Property.Create("prop-1", Alice, "Main House"));
 
         var cmd = new CreateJobDefinitionCommand(
-            Alice, PropertyId, "Boiler service", MonthlyScheduleDto(), new[] { "Shut off gas" });
+            PropertyId, "Boiler service", MonthlyScheduleDto(), new[] { "Shut off gas" });
 
         var result = await handler.Handle(cmd);
 
@@ -72,7 +74,7 @@ public sealed class CreateJobDefinitionHandlerTests
             .Returns(Property.Create("prop-1", Alice, "Main House"));
 
         var badSchedule = new ScheduleDefinitionDto("Month", 0, new DateOnly(2026, 1, 1), null);
-        var cmd = new CreateJobDefinitionCommand(Alice, PropertyId, "Test", badSchedule, Array.Empty<string>());
+        var cmd = new CreateJobDefinitionCommand(PropertyId, "Test", badSchedule, Array.Empty<string>());
 
         var result = await handler.Handle(cmd);
 
@@ -88,7 +90,7 @@ public sealed class CreateJobDefinitionHandlerTests
             .Returns((Property?)null);
 
         var cmd = new CreateJobDefinitionCommand(
-            Alice, PropertyId, "Test", MonthlyScheduleDto(), Array.Empty<string>());
+            PropertyId, "Test", MonthlyScheduleDto(), Array.Empty<string>());
 
         var result = await handler.Handle(cmd);
 

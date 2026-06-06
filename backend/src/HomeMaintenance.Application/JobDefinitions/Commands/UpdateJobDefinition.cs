@@ -8,7 +8,6 @@ namespace HomeMaintenance.Application.JobDefinitions.Commands;
 
 public sealed record UpdateJobDefinitionCommand(
     string Id,
-    OwnerId Owner,
     string? Name = null,
     ScheduleDefinitionDto? Schedule = null,
     IReadOnlyList<string>? AddStepDescriptions = null,
@@ -19,15 +18,18 @@ public sealed record UpdateJobDefinitionCommand(
 public sealed class UpdateJobDefinitionHandler
 {
     private readonly IJobDefinitionRepository _definitions;
+    private readonly IIdentityProvider _identity;
     private readonly IAuditLog _audit;
     private readonly ICorrelationContext _correlation;
 
     public UpdateJobDefinitionHandler(
         IJobDefinitionRepository definitions,
+        IIdentityProvider identity,
         IAuditLog audit,
         ICorrelationContext correlation)
     {
         _definitions = definitions;
+        _identity = identity;
         _audit = audit;
         _correlation = correlation;
     }
@@ -36,9 +38,13 @@ public sealed class UpdateJobDefinitionHandler
         UpdateJobDefinitionCommand cmd,
         CancellationToken ct = default)
     {
-        var definition = await _definitions.GetAsync(cmd.Id, cmd.Owner, ct);
+        var owner = _identity.CurrentOwner;
+
+        var definition = await _definitions.GetAsync(cmd.Id, owner, ct);
         if (definition is null)
             return Result<JobDefinitionDto>.Failure(new NotFoundError("JobDefinition", cmd.Id));
+
+        var pendingAudits = new List<(string EventType, Dictionary<string, object?> Payload)>();
 
         if (cmd.Name is not null)
         {
@@ -47,7 +53,7 @@ public sealed class UpdateJobDefinitionHandler
             {
                 return Result<JobDefinitionDto>.Failure(new ValidationError(ex.ParamName ?? "name", ex.Message));
             }
-            await EmitAudit(AuditEventTypes.JobDefinitionRenamed, cmd, new Dictionary<string, object?> { ["name"] = cmd.Name }, ct);
+            pendingAudits.Add((AuditEventTypes.JobDefinitionRenamed, new Dictionary<string, object?> { ["name"] = cmd.Name }));
         }
 
         if (cmd.Schedule is not null)
@@ -59,7 +65,7 @@ public sealed class UpdateJobDefinitionHandler
                 return Result<JobDefinitionDto>.Failure(new ValidationError("schedule", ex.Message));
             }
             definition.UpdateSchedule(schedule);
-            await EmitAudit(AuditEventTypes.JobDefinitionScheduleChanged, cmd, new Dictionary<string, object?> { ["schedule"] = cmd.Schedule }, ct);
+            pendingAudits.Add((AuditEventTypes.JobDefinitionScheduleChanged, new Dictionary<string, object?> { ["schedule"] = cmd.Schedule }));
         }
 
         if (cmd.RemoveStepTemplateIds is not null)
@@ -70,44 +76,66 @@ public sealed class UpdateJobDefinitionHandler
                 if (outcome == StepTemplateMutationOutcome.StepTemplateNotFound)
                     return Result<JobDefinitionDto>.Failure(new NotFoundError("StepTemplate", id));
             }
-            await EmitAudit(AuditEventTypes.JobDefinitionStepTemplateMutated, cmd, new Dictionary<string, object?> { ["mutation_type"] = "removed" }, ct);
+            pendingAudits.Add((AuditEventTypes.JobDefinitionStepTemplateMutated, new Dictionary<string, object?> { ["mutation_type"] = "removed" }));
         }
 
         if (cmd.ReorderStepTemplateIds is not null)
         {
             var outcome = definition.ReorderStepTemplates(cmd.ReorderStepTemplateIds);
-            if (outcome != ReorderStepTemplatesOutcome.Success)
-                return Result<JobDefinitionDto>.Failure(new ValidationError("reorderStepTemplateIds", outcome.ToString()));
-            await EmitAudit(AuditEventTypes.JobDefinitionStepTemplateMutated, cmd, new Dictionary<string, object?> { ["mutation_type"] = "reordered" }, ct);
+            var error = outcome switch
+            {
+                ReorderStepTemplatesOutcome.WrongCount => "Must list every existing step template id exactly once.",
+                ReorderStepTemplatesOutcome.DuplicateId => "Duplicate step template id in the order list.",
+                ReorderStepTemplatesOutcome.UnknownId => "Unknown step template id in the order list.",
+                _ => null,
+            };
+            if (error is not null)
+                return Result<JobDefinitionDto>.Failure(new ValidationError("reorderStepTemplateIds", error));
+            pendingAudits.Add((AuditEventTypes.JobDefinitionStepTemplateMutated, new Dictionary<string, object?> { ["mutation_type"] = "reordered" }));
         }
 
         if (cmd.EditStepTemplates is not null)
         {
             foreach (var (id, description) in cmd.EditStepTemplates)
             {
-                var outcome = definition.EditStepTemplateDescription(id, description);
+                StepTemplateMutationOutcome outcome;
+                try { outcome = definition.EditStepTemplateDescription(id, description); }
+                catch (ArgumentException ex)
+                {
+                    return Result<JobDefinitionDto>.Failure(new ValidationError("description", ex.Message));
+                }
                 if (outcome == StepTemplateMutationOutcome.StepTemplateNotFound)
                     return Result<JobDefinitionDto>.Failure(new NotFoundError("StepTemplate", id));
             }
-            await EmitAudit(AuditEventTypes.JobDefinitionStepTemplateMutated, cmd, new Dictionary<string, object?> { ["mutation_type"] = "edited" }, ct);
+            pendingAudits.Add((AuditEventTypes.JobDefinitionStepTemplateMutated, new Dictionary<string, object?> { ["mutation_type"] = "edited" }));
         }
 
         if (cmd.AddStepDescriptions is not null)
         {
             foreach (var description in cmd.AddStepDescriptions)
-                definition.AddStepTemplate(description);
-            await EmitAudit(AuditEventTypes.JobDefinitionStepTemplateMutated, cmd, new Dictionary<string, object?> { ["mutation_type"] = "added" }, ct);
+            {
+                try { definition.AddStepTemplate(description); }
+                catch (ArgumentException ex)
+                {
+                    return Result<JobDefinitionDto>.Failure(new ValidationError("description", ex.Message));
+                }
+            }
+            pendingAudits.Add((AuditEventTypes.JobDefinitionStepTemplateMutated, new Dictionary<string, object?> { ["mutation_type"] = "added" }));
         }
 
         await _definitions.UpdateAsync(definition, ct);
+
+        foreach (var (eventType, payload) in pendingAudits)
+            await EmitAudit(eventType, cmd.Id, owner, payload, ct);
+
         return Result<JobDefinitionDto>.Success(definition.ToDto());
     }
 
-    private Task EmitAudit(string eventType, UpdateJobDefinitionCommand cmd, Dictionary<string, object?> payload, CancellationToken ct)
+    private Task EmitAudit(string eventType, string definitionId, OwnerId owner, Dictionary<string, object?> payload, CancellationToken ct)
         => _audit.RecordAsync(new AuditEvent(
             eventType,
-            cmd.Owner.Value,
-            $"job_definition:{cmd.Id}",
+            owner.Value,
+            $"job_definition:{definitionId}",
             DateTime.UtcNow,
             _correlation.CurrentId,
             payload), ct);

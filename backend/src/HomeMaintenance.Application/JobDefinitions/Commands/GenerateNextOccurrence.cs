@@ -2,28 +2,30 @@ using HomeMaintenance.Application.Common;
 using HomeMaintenance.Application.Common.Interfaces;
 using HomeMaintenance.Application.Jobs;
 using HomeMaintenance.Application.Jobs.Dto;
-using HomeMaintenance.Domain.Identity;
 using HomeMaintenance.Domain.Jobs;
 
 namespace HomeMaintenance.Application.JobDefinitions.Commands;
 
-public sealed record GenerateNextOccurrenceCommand(string DefinitionId, OwnerId Owner);
+public sealed record GenerateNextOccurrenceCommand(string DefinitionId);
 
 public sealed class GenerateNextOccurrenceHandler
 {
     private readonly IJobDefinitionRepository _definitions;
     private readonly IJobRepository _jobs;
+    private readonly IIdentityProvider _identity;
     private readonly IAuditLog _audit;
     private readonly ICorrelationContext _correlation;
 
     public GenerateNextOccurrenceHandler(
         IJobDefinitionRepository definitions,
         IJobRepository jobs,
+        IIdentityProvider identity,
         IAuditLog audit,
         ICorrelationContext correlation)
     {
         _definitions = definitions;
         _jobs = jobs;
+        _identity = identity;
         _audit = audit;
         _correlation = correlation;
     }
@@ -32,7 +34,9 @@ public sealed class GenerateNextOccurrenceHandler
         GenerateNextOccurrenceCommand cmd,
         CancellationToken ct = default)
     {
-        var definition = await _definitions.GetAsync(cmd.DefinitionId, cmd.Owner, ct);
+        var owner = _identity.CurrentOwner;
+
+        var definition = await _definitions.GetAsync(cmd.DefinitionId, owner, ct);
         if (definition is null)
             return Result<JobDetailDto>.Failure(new NotFoundError("JobDefinition", cmd.DefinitionId));
 
@@ -74,7 +78,7 @@ public sealed class GenerateNextOccurrenceHandler
 
         await _audit.RecordAsync(new AuditEvent(
             AuditEventTypes.JobGenerated,
-            cmd.Owner.Value,
+            owner.Value,
             $"job:{job.Id}",
             DateTime.UtcNow,
             _correlation.CurrentId,
