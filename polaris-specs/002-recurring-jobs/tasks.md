@@ -137,28 +137,28 @@ MongoDB persistence and the scheduled generator. Depends on WP02 interfaces.
 
 REST endpoints wired to Application handlers.
 
-- [ ] T022 `JobDefinitionEndpoints` in
+- [x] T022 `JobDefinitionEndpoints` in
       `backend/src/HomeMaintenance.API/Endpoints/JobDefinitionEndpoints.cs`:
       POST `/api/job-definitions`, GET `/api/job-definitions`,
       GET `/api/job-definitions/{id}`, PATCH `/api/job-definitions/{id}`.
       All use MiniValidator for DTO validation; wire Result -> HTTP via
       existing translator. Register handlers in DI; call
       `app.MapJobDefinitionEndpoints()` in `Program.cs`.
-- [ ] T023 Add `POST /api/job-definitions/{id}/generate-next` to
+- [x] T023 Add `POST /api/job-definitions/{id}/generate-next` to
       `JobDefinitionEndpoints`. Returns 201 + `JobDto` on success,
       400 + `code: "next_occurrence_already_exists"` on duplicate.
       `Location` header points to `/api/jobs/{newJobId}`.
-- [ ] T024 Add `jobDefinitionId` (nullable string) to `JobDto` and
+- [x] T024 Add `jobDefinitionId` (nullable string) to `JobDto` and
       update `JobEndpoints` response mapping. Existing `GET /api/jobs`
       and `GET /api/jobs/{id}` now surface the field -- no endpoint
       routing changes needed.
-- [ ] T025 Integration tests in
+- [x] T025 Integration tests in
       `backend/tests/HomeMaintenance.Integration.Tests/JobDefinitions/JobDefinitionEndpointsTests.cs`:
       POST success (definition stored + jobs generated), POST validation
       (empty name, multiplier 0), cross-owner GET/PATCH -> 404,
       anonymous POST/GET/PATCH -> 401, PATCH step mutations round-trip,
       PATCH schedule change persisted.
-- [ ] T026 Integration tests for generate-next in the same file:
+- [x] T026 Integration tests for generate-next in the same file:
       success (201 + correct JobDto + Location header), duplicate -> 400
       with correct error code, cross-owner -> 404, anonymous -> 401.
 
