@@ -8,7 +8,7 @@ base_commit: 2e79ca1bff1250fd341110c745110ee238906ef5
 created_at: '2026-06-06T12:09:31.060512+00:00'
 subtasks: [T015, T016, T017, T018, T019, T020, T021]
 assignee: ''
-agent: ''
+agent: "claude"
 shell_pid: "19245"
 test_status: required
 test_file: tests/e2e/WP03-infrastructure-repositories-backgroundservice.e2e.js
@@ -279,3 +279,7 @@ with a short-lived `CancellationToken`.
 ```bash
 polaris implement WP03 --base WP02
 ```
+
+## Activity Log
+
+- 2026-06-06T12:09:31Z – claude – shell_pid=19245 – lane=doing – Assigned agent via workflow command
