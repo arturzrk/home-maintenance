@@ -54,37 +54,37 @@ New Domain entities and value objects. No Application or Infrastructure changes 
 
 All Application-layer code. No Infrastructure or API code yet.
 
-- [ ] T008 [P] `IJobDefinitionRepository` interface in
+- [x] T008 [P] `IJobDefinitionRepository` interface in
       `backend/src/HomeMaintenance.Application/Common/Interfaces/IJobDefinitionRepository.cs`
       and `IDateTimeProvider` in the same folder.
-- [ ] T009 [P] `JobDefinitionDto`, `ScheduleDefinitionDto`, `StepTemplateDto`
+- [x] T009 [P] `JobDefinitionDto`, `ScheduleDefinitionDto`, `StepTemplateDto`
       records in `backend/src/HomeMaintenance.Application/JobDefinitions/Dto/JobDefinitionDtos.cs`
       plus `Mapping.cs` extension methods. Add nullable `JobDefinitionId`
       to existing `JobDto` and update `Job` -> `JobDto` mapping.
-- [ ] T010 `JobGenerationService` in
+- [x] T010 `JobGenerationService` in
       `backend/src/HomeMaintenance.Application/JobDefinitions/JobGenerationService.cs`:
       `GenerateForDefinition(JobDefinition, DateOnly today)` calls
       `OccurrencesInRange`, checks `IJobRepository` for duplicates,
       creates and persists jobs, emits `job.generated` audit event.
       Takes `IJobRepository`, `IJobDefinitionRepository`, `IAuditLog`.
-- [ ] T011 `CreateJobDefinition` command + handler in
+- [x] T011 `CreateJobDefinition` command + handler in
       `backend/src/HomeMaintenance.Application/JobDefinitions/Commands/CreateJobDefinition.cs`:
       verify property ownership via `IPropertyRepository`, create aggregate,
       persist, call `JobGenerationService.GenerateForDefinition` for the
       inline initial generation, emit `job_definition.created` audit event.
       Unit tests: success, validation failure, cross-property 404.
-- [ ] T012 `ListJobDefinitions` and `GetJobDefinition` query handlers in
+- [x] T012 `ListJobDefinitions` and `GetJobDefinition` query handlers in
       `backend/src/HomeMaintenance.Application/JobDefinitions/Queries/`.
       List scoped to `CurrentOwner`, optional `propertyId` filter.
       GetJobDefinition returns `NotFoundError` on miss or cross-owner.
       Unit tests: success, not-found, cross-owner.
-- [ ] T013 `UpdateJobDefinition` command + handler in
+- [x] T013 `UpdateJobDefinition` command + handler in
       `backend/src/HomeMaintenance.Application/JobDefinitions/Commands/UpdateJobDefinition.cs`:
       accepts optional name, schedule, and step-template mutations (add,
       remove, reorder, edit); applies each present mutation; persists once;
       emits appropriate audit events per field changed.
       Unit tests: each mutation path, validation failures, not-found.
-- [ ] T014 `GenerateNextOccurrence` command + handler in
+- [x] T014 `GenerateNextOccurrence` command + handler in
       `backend/src/HomeMaintenance.Application/JobDefinitions/Commands/GenerateNextOccurrence.cs`:
       load definition, find next occurrence date via `IDateTimeProvider` +
       `LatestGeneratedJobDueDateAsync`, reject if already exists
