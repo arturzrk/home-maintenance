@@ -8,7 +8,7 @@ base_commit: fa9ee4eeb21174e97588bc76f342dc063db81278
 created_at: '2026-06-06T17:09:10.058736+00:00'
 subtasks: [T022, T023, T024, T025, T026]
 assignee: ''
-agent: ''
+agent: "claude"
 shell_pid: "73841"
 test_status: required
 test_file: tests/e2e/WP04-api-endpoints-jobdto-update.e2e.js
@@ -166,3 +166,7 @@ Required tests:
 ```bash
 polaris implement WP04 --base WP03
 ```
+
+## Activity Log
+
+- 2026-06-06T17:09:10Z – claude – shell_pid=73841 – lane=doing – Assigned agent via workflow command
