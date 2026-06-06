@@ -120,9 +120,19 @@ public sealed class UpdateJobDefinitionHandlerTests
         var correlation = Substitute.For<ICorrelationContext>();
         var handler = new UpdateJobDefinitionHandler(repo, identity, audit, correlation);
 
-        var result = await handler.Handle(new UpdateJobDefinitionCommand("missing"));
+        var result = await handler.Handle(new UpdateJobDefinitionCommand("missing", Name: "New Name"));
 
         result.IsFailure.ShouldBeTrue();
         result.Error!.Code.ShouldBe("not_found");
+    }
+
+    [Fact]
+    public async Task NoMutationFields_ReturnsValidationError()
+    {
+        var (_, _, handler) = Build();
+        var result = await handler.Handle(new UpdateJobDefinitionCommand("def-1"));
+
+        result.IsFailure.ShouldBeTrue();
+        result.Error!.Code.ShouldBe("validation");
     }
 }

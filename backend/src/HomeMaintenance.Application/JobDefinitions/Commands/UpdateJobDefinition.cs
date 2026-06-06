@@ -13,7 +13,7 @@ public sealed record UpdateJobDefinitionCommand(
     IReadOnlyList<string>? AddStepDescriptions = null,
     IReadOnlyList<string>? RemoveStepTemplateIds = null,
     IReadOnlyList<string>? ReorderStepTemplateIds = null,
-    IReadOnlyList<(string Id, string Description)>? EditStepTemplates = null);
+    IReadOnlyList<StepTemplateEdit>? EditStepTemplates = null);
 
 public sealed class UpdateJobDefinitionHandler
 {
@@ -38,6 +38,17 @@ public sealed class UpdateJobDefinitionHandler
         UpdateJobDefinitionCommand cmd,
         CancellationToken ct = default)
     {
+        if (cmd.Name is null
+            && cmd.Schedule is null
+            && cmd.AddStepDescriptions is null
+            && cmd.RemoveStepTemplateIds is null
+            && cmd.ReorderStepTemplateIds is null
+            && cmd.EditStepTemplates is null)
+        {
+            return Result<JobDefinitionDto>.Failure(
+                new ValidationError("request", "Provide at least one change to apply."));
+        }
+
         var owner = _identity.CurrentOwner;
 
         var definition = await _definitions.GetAsync(cmd.Id, owner, ct);
@@ -60,7 +71,7 @@ public sealed class UpdateJobDefinitionHandler
         {
             ScheduleDefinition schedule;
             try { schedule = CreateJobDefinitionHandler.ParseSchedule(cmd.Schedule); }
-            catch (Exception ex)
+            catch (ArgumentException ex)
             {
                 return Result<JobDefinitionDto>.Failure(new ValidationError("schedule", ex.Message));
             }
@@ -96,16 +107,16 @@ public sealed class UpdateJobDefinitionHandler
 
         if (cmd.EditStepTemplates is not null)
         {
-            foreach (var (id, description) in cmd.EditStepTemplates)
+            foreach (var edit in cmd.EditStepTemplates)
             {
                 StepTemplateMutationOutcome outcome;
-                try { outcome = definition.EditStepTemplateDescription(id, description); }
+                try { outcome = definition.EditStepTemplateDescription(edit.Id, edit.Description); }
                 catch (ArgumentException ex)
                 {
                     return Result<JobDefinitionDto>.Failure(new ValidationError("description", ex.Message));
                 }
                 if (outcome == StepTemplateMutationOutcome.StepTemplateNotFound)
-                    return Result<JobDefinitionDto>.Failure(new NotFoundError("StepTemplate", id));
+                    return Result<JobDefinitionDto>.Failure(new NotFoundError("StepTemplate", edit.Id));
             }
             pendingAudits.Add((AuditEventTypes.JobDefinitionStepTemplateMutated, new Dictionary<string, object?> { ["mutation_type"] = "edited" }));
         }

@@ -11,6 +11,10 @@ public sealed record StepTemplateDto(
     int Order,
     string Description);
 
+public sealed record StepTemplateEdit(
+    string Id,
+    string Description);
+
 public sealed record JobDefinitionDto(
     string Id,
     string PropertyId,

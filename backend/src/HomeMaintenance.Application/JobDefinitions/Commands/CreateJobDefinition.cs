@@ -54,7 +54,7 @@ public sealed class CreateJobDefinitionHandler
         {
             schedule = ParseSchedule(cmd.Schedule);
         }
-        catch (Exception ex)
+        catch (ArgumentException ex)
         {
             return Result<JobDefinitionDto>.Failure(new ValidationError("schedule", ex.Message));
         }
