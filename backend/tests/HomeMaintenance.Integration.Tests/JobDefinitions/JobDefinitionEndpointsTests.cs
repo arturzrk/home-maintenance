@@ -272,6 +272,23 @@ public sealed class JobDefinitionEndpointsTests : IClassFixture<ApiFactory>
     }
 
     [Fact]
+    public async Task PATCH_EmptyAddStepTemplatesArray_Returns400()
+    {
+        var alice = ClientAs($"alice-{Guid.NewGuid():N}");
+        var property = await CreateProperty(alice);
+        var created = await CreateDefinition(alice, property.Id, Schedule("Month", 1, Today));
+
+        // An empty array deserializes to a non-null empty list, which would otherwise
+        // bypass the handler's "at least one field must be non-null" guard and persist
+        // a no-op update plus a spurious audit event. [MinLength(1)] rejects it as 400.
+        var resp = await alice.PatchAsJsonAsync(
+            $"/api/job-definitions/{created.Id}",
+            new { addStepTemplates = Array.Empty<object>() });
+
+        resp.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
     public async Task PATCH_CrossOwner_Returns404()
     {
         var alice = ClientAs($"alice-{Guid.NewGuid():N}");
@@ -313,13 +330,20 @@ public sealed class JobDefinitionEndpointsTests : IClassFixture<ApiFactory>
         var farFuture = Today.AddMonths(6);
         var created = await CreateDefinition(alice, property.Id, Schedule("Month", 1, farFuture));
 
-        // The handler's "already generated?" check and the job insert are two separate
-        // operations (read-then-write), so the duplicate guard is exercised by racing
-        // concurrent requests against the same first-occurrence candidate (no jobs exist
-        // yet, so every racer computes nextOccurrence = Schedule.StartDate). With enough
-        // concurrent racers, at least one is guaranteed to observe a sibling's already-
-        // inserted job and get rejected with the duplicate code.
-        var calls = Enumerable.Range(0, 8)
+        // A sequential "create one, then call again" cannot reach this code path: the
+        // handler always searches for the next candidate strictly AFTER the max existing
+        // due date (LatestGeneratedJobDueDateAsync + AddDays(1)), so a follow-up call can
+        // never recompute a date that was already generated - it either produces a new
+        // occurrence or "no_future_occurrence". The "already generated?" check and the
+        // job insert are two separate operations (read-then-write, no DB unique index on
+        // JobDefinitionId+DueDate), so the only way to exercise the duplicate guard
+        // through the public API is a genuine TOCTOU race: concurrent requests that all
+        // compute the same first-occurrence candidate (no jobs exist yet, so every racer
+        // targets nextOccurrence = Schedule.StartDate) before any of them commits its
+        // insert. Twenty concurrent racers makes it overwhelmingly likely that at least
+        // one observes a sibling's already-inserted job - verified stable across repeated
+        // runs.
+        var calls = Enumerable.Range(0, 20)
             .Select(_ => alice.PostAsync($"/api/job-definitions/{created.Id}/generate-next", content: null))
             .ToArray();
         var responses = await Task.WhenAll(calls);

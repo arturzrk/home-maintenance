@@ -129,7 +129,11 @@ public sealed record UpdateJobDefinitionApiRequest(
     [property: StringLength(200, MinimumLength = 1)]
     string? Name,
     ScheduleDefinitionDto? Schedule,
+    [property: MinLength(1)]
     IReadOnlyList<StepTemplateCreateRequest>? AddStepTemplates,
+    [property: MinLength(1)]
     IReadOnlyList<string>? RemoveStepTemplateIds,
+    [property: MinLength(1)]
     IReadOnlyList<StepTemplateEdit>? EditStepTemplates,
+    [property: MinLength(1)]
     IReadOnlyList<string>? ReorderStepTemplateIds);
