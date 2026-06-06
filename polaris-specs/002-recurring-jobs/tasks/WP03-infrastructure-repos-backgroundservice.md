@@ -1,12 +1,15 @@
 ---
 work_package_id: WP03
 title: 'Infrastructure: repositories + BackgroundService'
-lane: planned
+lane: "doing"
 dependencies: []
+base_branch: main
+base_commit: 2e79ca1bff1250fd341110c745110ee238906ef5
+created_at: '2026-06-06T12:09:31.060512+00:00'
 subtasks: [T015, T016, T017, T018, T019, T020, T021]
 assignee: ''
 agent: ''
-shell_pid: ''
+shell_pid: "19245"
 test_status: required
 test_file: tests/e2e/WP03-infrastructure-repositories-backgroundservice.e2e.js
 review_status: ''
