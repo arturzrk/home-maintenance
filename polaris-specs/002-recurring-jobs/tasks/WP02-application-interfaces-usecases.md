@@ -1,7 +1,7 @@
 ---
 work_package_id: WP02
 title: 'Application: interfaces, use cases, generation logic'
-lane: "doing"
+lane: "testing"
 dependencies: []
 base_branch: main
 base_commit: e4e79a6ef99a106868cf6d6c95256861defcf4db
@@ -288,3 +288,4 @@ polaris implement WP02 --base WP01
 ## Activity Log
 
 - 2026-06-05T13:08:31Z – claude – shell_pid=90162 – lane=doing – Assigned agent via workflow command
+- 2026-06-06T12:03:04Z – claude – shell_pid=90162 – lane=testing – Tests passing (154/154); PR #27 merged
