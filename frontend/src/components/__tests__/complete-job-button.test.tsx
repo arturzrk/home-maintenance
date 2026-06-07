@@ -20,6 +20,7 @@ function job(overrides: Partial<JobDetail> = {}): JobDetail {
       { id: "s1", order: 0, description: "a", isCompleted: false, completedAt: null },
       { id: "s2", order: 1, description: "b", isCompleted: false, completedAt: null },
     ],
+    jobDefinitionId: null,
     ...overrides,
   };
 }
