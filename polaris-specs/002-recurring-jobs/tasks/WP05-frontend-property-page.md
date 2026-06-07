@@ -1,12 +1,15 @@
 ---
 work_package_id: WP05
 title: 'Frontend: JobDefinition create/list on Property page'
-lane: planned
+lane: "doing"
 dependencies: []
+base_branch: main
+base_commit: a0421c76c4b6dff6844ab93c29707231f1d80403
+created_at: '2026-06-07T07:51:07.985659+00:00'
 subtasks: [T027, T028, T029, T030, T031, T032]
 assignee: ''
 agent: ''
-shell_pid: ''
+shell_pid: "70010"
 test_status: required
 test_file: tests/e2e/WP05-frontend-jobdefinition-createlist-on-property-page.e2e.js
 review_status: ''
