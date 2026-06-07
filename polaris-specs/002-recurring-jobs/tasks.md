@@ -166,28 +166,28 @@ REST endpoints wired to Application handlers.
 
 Delivers US1 and US2 end-to-end in the browser.
 
-- [ ] T027 Extend `frontend/src/lib/api-client.ts` with JobDefinition
+- [x] T027 Extend `frontend/src/lib/api-client.ts` with JobDefinition
       methods: `createJobDefinition(propertyId, body)`,
       `listJobDefinitions(propertyId?)`. Mirror existing patterns for
       auth header attachment.
-- [ ] T028 Add `jobDefinitionId: string | null` to the `Job` type in
+- [x] T028 Add `jobDefinitionId: string | null` to the `Job` type in
       `frontend/src/lib/types.ts` (or wherever types live). Update any
       type assertions that spread job objects.
-- [ ] T029 Add "Recurring jobs" section to
+- [x] T029 Add "Recurring jobs" section to
       `frontend/src/app/properties/[id]/page.tsx` (Server Component):
       fetch `listJobDefinitions(propertyId)`, render a list of definition
       names with their schedule summary (e.g. "Every 3 months from Jun 1").
       Link each to `/job-definitions/[id]`.
-- [ ] T030 `CreateJobDefinitionForm` client component at
+- [x] T030 `CreateJobDefinitionForm` client component at
       `frontend/src/app/properties/[id]/components/CreateJobDefinitionForm.tsx`:
       fields: name, schedule (unit dropdown + multiplier number input +
       startDate date picker, optional endDate), dynamic step rows (same
       pattern as Slice 1 CreateJobForm). On submit, POST to api-client,
       then `router.refresh()`.
-- [ ] T031 In the job list on the Property page, display a small
+- [x] T031 In the job list on the Property page, display a small
       "Recurring" badge (or icon) on jobs where `jobDefinitionId != null`.
       One-shot jobs are visually unchanged.
-- [ ] T032 Jest tests:
+- [x] T032 Jest tests:
       `CreateJobDefinitionForm` -- renders fields, submit calls api-client
       with correct payload, validation errors shown to user;
       job list badge -- present when `jobDefinitionId` set, absent when null.

@@ -1,7 +1,7 @@
 ---
 work_package_id: WP05
 title: 'Frontend: JobDefinition create/list on Property page'
-lane: "doing"
+lane: "done"
 dependencies: []
 base_branch: main
 base_commit: a0421c76c4b6dff6844ab93c29707231f1d80403
@@ -19,6 +19,10 @@ history:
   lane: planned
   agent: system
   action: Prompt generated via /polaris.tasks
+- timestamp: '2026-06-07T00:00:00Z'
+  lane: done
+  agent: system
+  action: PR #37 merged; WP05 marked done.
 domain: frontend-craft
 ---
 
