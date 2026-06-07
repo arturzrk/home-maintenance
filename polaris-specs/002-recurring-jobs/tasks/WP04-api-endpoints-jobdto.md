@@ -1,7 +1,7 @@
 ---
 work_package_id: WP04
 title: 'API: endpoints + JobDto update'
-lane: "for_review"
+lane: "done"
 dependencies: []
 subtasks: [T022, T023, T024, T025, T026]
 assignee: ''
@@ -16,6 +16,10 @@ history:
   lane: planned
   agent: system
   action: Prompt generated via /polaris.tasks
+- timestamp: '2026-06-07T00:00:00Z'
+  lane: done
+  agent: system
+  action: PR #35 merged; WP04 marked done.
 domain: backend-logic
 ---
 
