@@ -1,7 +1,7 @@
 ---
 work_package_id: WP01
 title: 'Domain: ScheduleDefinition + JobDefinition + Job extension'
-lane: "doing"
+lane: "done"
 dependencies: []
 base_branch: main
 base_commit: 2d51765c74f8ebe35d737e018221801277be69ef
@@ -19,6 +19,10 @@ history:
   lane: planned
   agent: system
   action: Prompt generated via /polaris.tasks
+- timestamp: '2026-06-07T00:00:00Z'
+  lane: done
+  agent: system
+  action: PR #26 merged; WP01 marked done.
 domain: backend-logic
 ---
 
