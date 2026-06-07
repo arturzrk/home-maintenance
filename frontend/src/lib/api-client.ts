@@ -160,6 +160,7 @@ export interface JobSummary {
   completedAt: string | null;
   stepCount: number;
   completedStepCount: number;
+  jobDefinitionId: string | null;
 }
 
 export interface JobDetail {
@@ -170,6 +171,7 @@ export interface JobDetail {
   status: JobStatus;
   completedAt: string | null;
   steps: StepDto[];
+  jobDefinitionId: string | null;
 }
 
 export interface JobList {
@@ -248,6 +250,55 @@ export const jobs = {
   ) =>
     apiFetch<JobDetail>(`/api/jobs/${id}`, {
       method: "PATCH",
+      body,
+      idToken,
+    }),
+};
+
+// ---------------------------------------------------------------------------
+// Job Definitions (WP05 frontend / WP04 backend)
+// Server-only.
+// ---------------------------------------------------------------------------
+
+export interface ScheduleDefinitionDto {
+  unit: "Day" | "Week" | "Month" | "Year";
+  multiplier: number;
+  startDate: string;
+  endDate?: string | null;
+}
+
+export interface StepTemplateDto {
+  id: string;
+  order: number;
+  description: string;
+}
+
+export interface JobDefinitionDto {
+  id: string;
+  propertyId: string;
+  name: string;
+  schedule: ScheduleDefinitionDto;
+  stepTemplates: StepTemplateDto[];
+}
+
+export interface CreateJobDefinitionBody {
+  propertyId: string;
+  name: string;
+  schedule: ScheduleDefinitionDto;
+  stepTemplates: { description: string }[];
+}
+
+export const jobDefinitions = {
+  list: (idToken: string, filters?: { propertyId?: string }) => {
+    const params = new URLSearchParams();
+    if (filters?.propertyId) params.set("propertyId", filters.propertyId);
+    const qs = params.toString();
+    return apiFetch<JobDefinitionDto[]>(`/api/job-definitions${qs ? "?" + qs : ""}`, { idToken });
+  },
+
+  create: (body: CreateJobDefinitionBody, idToken: string) =>
+    apiFetch<JobDefinitionDto>("/api/job-definitions", {
+      method: "POST",
       body,
       idToken,
     }),
