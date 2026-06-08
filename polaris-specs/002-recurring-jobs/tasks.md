@@ -196,31 +196,31 @@ Delivers US1 and US2 end-to-end in the browser.
 
 Delivers US3 (background generation visibility), US4 (manual generate), US5 (edit).
 
-- [ ] T033 Extend `frontend/src/lib/api-client.ts` with remaining
+- [x] T033 Extend `frontend/src/lib/api-client.ts` with remaining
       JobDefinition methods: `getJobDefinition(id)`,
       `updateJobDefinition(id, body)`, `generateNextOccurrence(id)`.
-- [ ] T034 `frontend/src/app/job-definitions/[id]/page.tsx` (Server
+- [x] T034 `frontend/src/app/job-definitions/[id]/page.tsx` (Server
       Component): fetch definition, render name + schedule header and
       the StepTemplateList and GenerateNextButton client islands, plus
       a read-only list of already-generated jobs (fetched via
       `listJobs` filtered by... or just rendered from the definition page
       jobs data returned in the DTO if extended -- use `listJobs?definitionId=`
       query param, adding it to api-client).
-- [ ] T035 `StepTemplateList` client component at
+- [x] T035 `StepTemplateList` client component at
       `frontend/src/app/job-definitions/[id]/components/StepTemplateList.tsx`:
       add/remove/reorder (dnd-kit, reuse existing drag handle pattern from
       Slice 1) / edit description. Each mutation calls `updateJobDefinition`
       with the appropriate partial body and refreshes.
-- [ ] T036 `GenerateNextButton` client component: POST to
+- [x] T036 `GenerateNextButton` client component: POST to
       `generateNextOccurrence(id)`, on 201 navigate to the new job's page
       (`/jobs/{newJobId}`); on 400 (`next_occurrence_already_exists`)
       show inline error message; disabled while loading.
-- [ ] T037 Inline name and schedule editing on the definition detail
+- [x] T037 Inline name and schedule editing on the definition detail
       header: same in-place edit pattern as Slice 1 Job header. Name:
       click to edit, blur/Enter saves via `updateJobDefinition`. Schedule:
       a small "Edit schedule" affordance opens a form panel with unit,
       multiplier, startDate, endDate fields.
-- [ ] T038 Jest tests: detail page renders definition data; StepTemplateList
+- [x] T038 Jest tests: detail page renders definition data; StepTemplateList
       add step calls api-client with correct body; GenerateNextButton
       navigates on success and shows error on duplicate (mock 400 response).
 
