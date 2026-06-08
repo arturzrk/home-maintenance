@@ -3,10 +3,13 @@ work_package_id: WP06
 title: 'Frontend: JobDefinition detail page + Generate Next'
 lane: "for_review"
 dependencies: []
+base_branch: main
+base_commit: 65861326cc36bb89d148c50f6d94ccb5437cbaef
+created_at: '2026-06-08T06:37:29.680518+00:00'
 subtasks: [T033, T034, T035, T036, T037, T038]
 assignee: ''
-agent: ''
-shell_pid: ''
+agent: "claude-sonnet-4-6"
+shell_pid: "35360"
 test_status: required
 test_file: tests/e2e/WP06-frontend-jobdefinition-detail-page-generate-next.e2e.js
 review_status: ''
