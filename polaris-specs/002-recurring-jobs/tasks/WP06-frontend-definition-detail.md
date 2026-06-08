@@ -1,7 +1,7 @@
 ---
 work_package_id: WP06
 title: 'Frontend: JobDefinition detail page + Generate Next'
-lane: "doing"
+lane: "for_review"
 dependencies: []
 base_branch: main
 base_commit: 65861326cc36bb89d148c50f6d94ccb5437cbaef
@@ -199,4 +199,6 @@ polaris implement WP06 --base WP05
 
 ## Activity Log
 
-- 2026-06-08T06:37:29Z – claude-sonnet-4-6 – shell_pid=35360 – lane=doing – Assigned agent via workflow command
+- 2026-06-08T11:57:58Z – unknown – lane=doing – Moved to doing
+- 2026-06-08T11:57:59Z – unknown – lane=testing – Moved to testing
+- 2026-06-08T11:58:01Z – unknown – lane=for_review – 48/48 tests pass (12 suites)
