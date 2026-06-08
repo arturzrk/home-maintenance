@@ -1,5 +1,5 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import { GenerateNextButton } from "./GenerateNextButton";
+import { GenerateNextButton } from "@/app/job-definitions/[id]/components/GenerateNextButton";
 
 jest.mock("@/app/job-definitions/actions", () => ({
   generateNextOccurrence: jest.fn(),

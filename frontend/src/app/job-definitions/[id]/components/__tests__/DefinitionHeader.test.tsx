@@ -1,6 +1,6 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { DefinitionHeader } from "./DefinitionHeader";
+import { DefinitionHeader } from "@/app/job-definitions/[id]/components/DefinitionHeader";
 import type { JobDefinitionDto } from "@/lib/api-client";
 
 jest.mock("@/app/job-definitions/actions", () => ({

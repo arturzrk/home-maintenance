@@ -1,6 +1,6 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { StepTemplateList } from "./StepTemplateList";
+import { StepTemplateList } from "@/app/job-definitions/[id]/components/StepTemplateList";
 import type { StepTemplateDto } from "@/lib/api-client";
 
 jest.mock("@/app/job-definitions/actions", () => ({
