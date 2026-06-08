@@ -1,7 +1,7 @@
 ---
 work_package_id: WP06
 title: 'Frontend: JobDefinition detail page + Generate Next'
-lane: planned
+lane: "for_review"
 dependencies: []
 subtasks: [T033, T034, T035, T036, T037, T038]
 assignee: ''
@@ -193,3 +193,9 @@ Create test files in `frontend/src/app/job-definitions/[id]/components/`:
 ```bash
 polaris implement WP06 --base WP05
 ```
+
+## Activity Log
+
+- 2026-06-08T11:57:58Z – unknown – lane=doing – Moved to doing
+- 2026-06-08T11:57:59Z – unknown – lane=testing – Moved to testing
+- 2026-06-08T11:58:01Z – unknown – lane=for_review – 48/48 tests pass (12 suites)
