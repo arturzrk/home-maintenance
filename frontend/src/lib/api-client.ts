@@ -186,10 +186,11 @@ export interface CreateJobInput {
 }
 
 export const jobs = {
-  list: (idToken: string, filters?: { propertyId?: string; status?: JobStatus }) => {
+  list: (idToken: string, filters?: { propertyId?: string; status?: JobStatus; definitionId?: string }) => {
     const params = new URLSearchParams();
     if (filters?.propertyId) params.set("propertyId", filters.propertyId);
     if (filters?.status) params.set("status", filters.status);
+    if (filters?.definitionId) params.set("definitionId", filters.definitionId);
     const qs = params.toString();
     return apiFetch<JobList>(`/api/jobs${qs ? "?" + qs : ""}`, { idToken });
   },
@@ -288,6 +289,15 @@ export interface CreateJobDefinitionBody {
   stepTemplates: { description: string }[];
 }
 
+export interface UpdateJobDefinitionBody {
+  name?: string;
+  schedule?: ScheduleDefinitionDto;
+  addStepTemplates?: { description: string }[];
+  removeStepTemplateIds?: string[];
+  editStepTemplates?: { id: string; description: string }[];
+  reorderStepTemplateIds?: string[];
+}
+
 export const jobDefinitions = {
   list: (idToken: string, filters?: { propertyId?: string }) => {
     const params = new URLSearchParams();
@@ -296,10 +306,27 @@ export const jobDefinitions = {
     return apiFetch<JobDefinitionDto[]>(`/api/job-definitions${qs ? "?" + qs : ""}`, { idToken });
   },
 
+  get: (id: string, idToken: string) =>
+    apiFetch<JobDefinitionDto>(`/api/job-definitions/${id}`, { idToken }),
+
   create: (body: CreateJobDefinitionBody, idToken: string) =>
     apiFetch<JobDefinitionDto>("/api/job-definitions", {
       method: "POST",
       body,
+      idToken,
+    }),
+
+  update: (id: string, body: UpdateJobDefinitionBody, idToken: string) =>
+    apiFetch<JobDefinitionDto>(`/api/job-definitions/${id}`, {
+      method: "PATCH",
+      body,
+      idToken,
+    }),
+
+  generateNext: (id: string, idToken: string) =>
+    apiFetch<JobDetail>(`/api/job-definitions/${id}/generate-next`, {
+      method: "POST",
+      body: {},
       idToken,
     }),
 };
