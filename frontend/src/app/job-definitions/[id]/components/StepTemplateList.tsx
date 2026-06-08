@@ -44,8 +44,10 @@ export function StepTemplateList({ definitionId, stepTemplates }: Props) {
     });
   }
 
+  const sorted = [...stepTemplates].sort((a, b) => a.order - b.order);
+
   function handleMove(index: number, direction: "up" | "down") {
-    const next = [...stepTemplates];
+    const next = [...sorted];
     const target = direction === "up" ? index - 1 : index + 1;
     if (target < 0 || target >= next.length) return;
     [next[index], next[target]] = [next[target], next[index]];
@@ -58,8 +60,6 @@ export function StepTemplateList({ definitionId, stepTemplates }: Props) {
       router.refresh();
     });
   }
-
-  const sorted = [...stepTemplates].sort((a, b) => a.order - b.order);
 
   return (
     <div className="space-y-3">
