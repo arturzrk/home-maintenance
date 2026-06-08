@@ -1,12 +1,15 @@
 ---
 work_package_id: WP07
 title: 'Hardening: acceptance + cross-owner + perf tests'
-lane: planned
+lane: "doing"
 dependencies: []
+base_branch: main
+base_commit: 92a46ab49e5a1ffd42b999363c989f87425e04e0
+created_at: '2026-06-08T19:44:04.574600+00:00'
 subtasks: [T039, T040, T041, T042, T043]
 assignee: ''
 agent: ''
-shell_pid: ''
+shell_pid: "73197"
 test_status: required
 test_file: tests/e2e/WP07-hardening-acceptance-cross-owner-perf-tests.e2e.js
 review_status: ''
