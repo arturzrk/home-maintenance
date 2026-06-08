@@ -1,7 +1,7 @@
 ---
 work_package_id: WP06
 title: 'Frontend: JobDefinition detail page + Generate Next'
-lane: "for_review"
+lane: "done"
 dependencies: []
 base_branch: main
 base_commit: 65861326cc36bb89d148c50f6d94ccb5437cbaef
@@ -12,8 +12,8 @@ agent: "claude-sonnet-4-6"
 shell_pid: "35360"
 test_status: required
 test_file: tests/e2e/WP06-frontend-jobdefinition-detail-page-generate-next.e2e.js
-review_status: ''
-reviewed_by: ''
+review_status: "approved"
+reviewed_by: "Artur Żurek"
 history:
 - timestamp: '2026-05-29T00:00:00Z'
   lane: planned
@@ -202,3 +202,4 @@ polaris implement WP06 --base WP05
 - 2026-06-08T11:57:58Z – unknown – lane=doing – Moved to doing
 - 2026-06-08T11:57:59Z – unknown – lane=testing – Moved to testing
 - 2026-06-08T11:58:01Z – unknown – lane=for_review – 48/48 tests pass (12 suites)
+- 2026-06-08T19:27:15Z – claude-sonnet-4-6 – shell_pid=35360 – lane=done – PR #40 merged
