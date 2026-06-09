@@ -119,6 +119,22 @@
       "agent": "claude-sonnet-4-6",
       "source": "implement",
       "drift_type": "expansion"
+    },
+    {
+      "amendment_id": "amd-008",
+      "text": "Files changed outside declared WP scope: frontend/src/app/properties/[id]/page.tsx, frontend/src/app/properties/actions.ts, frontend/src/components/inline-editable-text.tsx (and 5 more)",
+      "timestamp": "2026-06-09T08:13:02.537177+00:00",
+      "affected_sections": [],
+      "artifacts_updated": {
+        "spec_sections": [],
+        "plan_files": [],
+        "wps_regenerated": [],
+        "wps_locked": [],
+        "wps_created": []
+      },
+      "agent": "claude-sonnet-4-6",
+      "source": "implement",
+      "drift_type": "expansion"
     }
   ]
 }

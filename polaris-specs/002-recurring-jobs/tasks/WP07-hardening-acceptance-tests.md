@@ -1,7 +1,7 @@
 ---
 work_package_id: WP07
 title: 'Hardening: acceptance + cross-owner + perf tests'
-lane: "doing"
+lane: "done"
 dependencies: []
 base_branch: main
 base_commit: 92a46ab49e5a1ffd42b999363c989f87425e04e0
@@ -12,8 +12,8 @@ agent: "claude-sonnet-4-6"
 shell_pid: "73197"
 test_status: required
 test_file: tests/e2e/WP07-hardening-acceptance-cross-owner-perf-tests.e2e.js
-review_status: ''
-reviewed_by: ''
+review_status: "approved"
+reviewed_by: "Artur Żurek"
 history:
 - timestamp: '2026-05-29T00:00:00Z'
   lane: planned
@@ -199,3 +199,6 @@ polaris implement WP07 --base WP06
 ## Activity Log
 
 - 2026-06-08T19:44:04Z – claude-sonnet-4-6 – shell_pid=73197 – lane=doing – Assigned agent via workflow command
+- 2026-06-09T08:12:54Z – claude-sonnet-4-6 – shell_pid=73197 – lane=testing – Moved to testing
+- 2026-06-09T08:12:55Z – claude-sonnet-4-6 – shell_pid=73197 – lane=for_review – 151/151 integration tests pass, Copilot review clean
+- 2026-06-09T08:13:02Z – claude-sonnet-4-6 – shell_pid=73197 – lane=done – PR #43 merged
