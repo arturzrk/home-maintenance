@@ -38,6 +38,16 @@ public sealed class AnonymousMatrixTests : IClassFixture<ApiFactory>
         new object[] { HttpMethod.Put, "/api/jobs/some-id/steps/order", new { orderedStepIds = new[] { "x" } } },
         new object[] { HttpMethod.Post, "/api/jobs/some-id/steps/step-id/tick", null! },
         new object[] { HttpMethod.Post, "/api/jobs/some-id/steps/step-id/untick", null! },
+
+        // SC-106: job-definition endpoints (Slice 2)
+        new object[] { HttpMethod.Post, "/api/job-definitions",
+            new { propertyId = "p", name = "n",
+                  schedule = new { unit = "Month", multiplier = 1, startDate = "2026-01-01" },
+                  stepTemplates = Array.Empty<object>() } },
+        new object[] { HttpMethod.Get, "/api/job-definitions", null! },
+        new object[] { HttpMethod.Get, "/api/job-definitions/some-id", null! },
+        new object[] { HttpMethod.Patch, "/api/job-definitions/some-id", new { name = "x" } },
+        new object[] { HttpMethod.Post, "/api/job-definitions/some-id/generate-next", null! },
     };
 
     [Theory]

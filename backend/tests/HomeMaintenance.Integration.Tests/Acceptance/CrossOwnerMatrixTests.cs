@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
+using HomeMaintenance.Application.JobDefinitions.Dto;
 using HomeMaintenance.Application.Jobs.Dto;
 using HomeMaintenance.Application.Properties.Dto;
 using HomeMaintenance.Integration.Tests.Infrastructure;
@@ -174,5 +175,79 @@ public sealed class CrossOwnerMatrixTests : IClassFixture<ApiFactory>
         var resp = await ClientAs($"bob-{Guid.NewGuid():N}")
             .PostAsync($"/api/jobs/{job.Id}/steps/{stepId}/untick", null);
         await AssertNotFoundWithProblemDetails(resp);
+    }
+
+    // ---- SC-105: cross-owner matrix for the 5 new job-definition endpoints ----
+
+    private static DateOnly Today => DateOnly.FromDateTime(DateTime.UtcNow);
+    private static string DateStr(DateOnly d) => d.ToString("yyyy-MM-dd");
+
+    private async Task<(PropertyDto property, JobDefinitionDto definition)> SetupAlicesDefinitionResources()
+    {
+        var alice = ClientAs($"alice-{Guid.NewGuid():N}");
+        var propResp = await alice.PostAsJsonAsync("/api/properties", new { name = "Alice Place" });
+        propResp.EnsureSuccessStatusCode();
+        var property = (await propResp.Content.ReadFromJsonAsync<PropertyDto>())!;
+
+        var defResp = await alice.PostAsJsonAsync("/api/job-definitions", new
+        {
+            propertyId = property.Id,
+            name = "Service boiler",
+            schedule = new { unit = "Month", multiplier = 1, startDate = DateStr(Today) },
+            stepTemplates = new[] { new { description = "Shut off gas" } },
+        });
+        defResp.EnsureSuccessStatusCode();
+        var definition = (await defResp.Content.ReadFromJsonAsync<JobDefinitionDto>())!;
+        return (property, definition);
+    }
+
+    [Fact]
+    public async Task Bob_Get_AlicesJobDefinition_Returns404()
+    {
+        var (_, definition) = await SetupAlicesDefinitionResources();
+        var resp = await ClientAs($"bob-{Guid.NewGuid():N}")
+            .GetAsync($"/api/job-definitions/{definition.Id}");
+        await AssertNotFoundWithProblemDetails(resp);
+    }
+
+    [Fact]
+    public async Task Bob_Patch_AlicesJobDefinition_Returns404()
+    {
+        var (_, definition) = await SetupAlicesDefinitionResources();
+        var resp = await ClientAs($"bob-{Guid.NewGuid():N}")
+            .PatchAsJsonAsync($"/api/job-definitions/{definition.Id}", new { name = "Hijacked" });
+        await AssertNotFoundWithProblemDetails(resp);
+    }
+
+    [Fact]
+    public async Task Bob_GenerateNext_OnAlicesJobDefinition_Returns404()
+    {
+        var (_, definition) = await SetupAlicesDefinitionResources();
+        var resp = await ClientAs($"bob-{Guid.NewGuid():N}")
+            .PostAsync($"/api/job-definitions/{definition.Id}/generate-next", null);
+        await AssertNotFoundWithProblemDetails(resp);
+    }
+
+    [Fact]
+    public async Task Bob_CreateJobDefinition_AgainstAlicesProperty_Returns404()
+    {
+        var (property, _) = await SetupAlicesDefinitionResources();
+        var resp = await ClientAs($"bob-{Guid.NewGuid():N}").PostAsJsonAsync("/api/job-definitions", new
+        {
+            propertyId = property.Id,
+            name = "Hijacked definition",
+            schedule = new { unit = "Month", multiplier = 1, startDate = DateStr(Today) },
+            stepTemplates = Array.Empty<object>(),
+        });
+        await AssertNotFoundWithProblemDetails(resp);
+    }
+
+    [Fact]
+    public async Task Bob_ListJobDefinitions_DoesNotIncludeAlicesDefinitions()
+    {
+        await SetupAlicesDefinitionResources();
+        var bob = ClientAs($"bob-{Guid.NewGuid():N}");
+        var list = await bob.GetFromJsonAsync<List<JobDefinitionDto>>("/api/job-definitions");
+        list!.ShouldBeEmpty();
     }
 }
