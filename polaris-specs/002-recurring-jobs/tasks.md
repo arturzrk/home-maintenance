@@ -228,29 +228,29 @@ Delivers US3 (background generation visibility), US4 (manual generate), US5 (edi
 
 Final quality gate before Slice 2 is declared complete.
 
-- [ ] T039 Cross-owner matrix for all 5 new endpoints in
+- [x] T039 Cross-owner matrix for all 5 new endpoints in
       `backend/tests/HomeMaintenance.Integration.Tests/Acceptance/CrossOwnerMatrixTests.cs`
       (extend existing class or add a new parameterised region):
       GET /api/job-definitions/{id}, PATCH /api/job-definitions/{id},
       POST /api/job-definitions/{id}/generate-next, POST /api/job-definitions
       (with alice's propertyId), GET /api/job-definitions -- each as bob.
       All must return 404 with correlationId. (SC-105)
-- [ ] T040 401 matrix for all 5 new endpoints in
+- [x] T040 401 matrix for all 5 new endpoints in
       `backend/tests/HomeMaintenance.Integration.Tests/Acceptance/AnonymousMatrixTests.cs`
       (extend existing class): no token -> 401; malformed token -> 401.
       Assert body `code: "unauthorized"`. (SC-106)
-- [ ] T041 Non-destructive edit tests in
+- [x] T041 Non-destructive edit tests in
       `backend/tests/HomeMaintenance.Integration.Tests/Acceptance/FrAcceptanceTests.cs`:
       `FR_104_EditJobDefinitionSteps_DoesNotModifyAlreadyGeneratedJob` --
       create definition with 2 step templates, generate a job (verify 2 steps),
       add a 3rd step template via PATCH, re-GET the generated job, assert
       still has 2 steps. (SC-104)
-- [ ] T042 FR-named acceptance tests (add to `FrAcceptanceTests.cs`):
+- [x] T042 FR-named acceptance tests (add to `FrAcceptanceTests.cs`):
       `FR_113_SchedulerRunTwice_ProducesNoDuplicateJobs`,
       `FR_117_GenerateNext_RejectsIfOccurrenceAlreadyExists`,
       `FR_111_Scheduler_GeneratesOccurrencesWithinHorizon`,
       `FR_116_GenerateNext_UsesEarliestOccurrenceAfterLatestJob`.
-- [ ] T043 Performance test in
+- [x] T043 Performance test in
       `backend/tests/HomeMaintenance.Integration.Tests/Performance/GenerateNextPerformanceTests.cs`
       (`[Trait("category","perf")]`, opt-in): warm-up run, then 100 iterations
       of generate-next on a definition with a fresh occurrence each time
