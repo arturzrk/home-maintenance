@@ -1,108 +1,72 @@
-# Implementation Plan: [FEATURE]
-*Path: [templates/plan-template.md](templates/plan-template.md)*
+---
+feature: 003-e2e-properties-page
+title: "E2E: Properties page --- Implementation Plan"
+created_at: "2026-06-10"
+---
 
+# Implementation Plan: E2E --- Properties page
 
-**Branch**: `[###-feature-name]` | **Date**: [DATE] | **Spec**: [link]
-**Input**: Feature specification from `/polaris-specs/[###-feature-name]/spec.md`
-
-**Note**: This template is filled in by the `/polaris.plan` command. See `src/specify_cli/missions/software-dev/command-templates/plan.md` for the execution workflow.
-
-The planner will not begin until all planning questions have been answered-capture those answers in this document before progressing to later phases.
+**Branch**: `003-e2e-properties-page-WP01` | **Date**: 2026-06-10 | **Spec**: [spec.md](spec.md)
 
 ## Summary
 
-[Extract from feature spec: primary requirement + technical approach from research]
+Write 6 Playwright e2e tests covering the Properties list and Property detail
+pages. No production code changes --- one new test file only.
 
 ## Technical Context
 
-<!--
-  ACTION REQUIRED: Replace the content in this section with the technical details
-  for the project. The structure here is presented in advisory capacity to guide
-  the iteration process.
--->
-
-**Language/Version**: [e.g., Python 3.14+, Swift 6.0+, Rust 1.90+ or NEEDS CLARIFICATION]  
-**Primary Dependencies**: [e.g., FastAPI, UIKit, LLVM or NEEDS CLARIFICATION]  
-**Storage**: [if applicable, e.g., PostgreSQL, CoreData, files or N/A]  
-**Testing**: [e.g., pytest, XCTest, cargo test or NEEDS CLARIFICATION]  
-**Target Platform**: [e.g., Linux server, iOS 15+, WASM or NEEDS CLARIFICATION]
-**Project Type**: [single/web/mobile - determines source structure]  
-**Performance Goals**: [domain-specific, e.g., command completes in <3s, <15% overhead on existing commands, full suite <30 min or NEEDS CLARIFICATION]  
-**Constraints**: [domain-specific, e.g., <200ms p95, <100MB memory, offline-capable or NEEDS CLARIFICATION]  
-**Scale/Scope**: [domain-specific, e.g., 10k users, 1M LOC, 50 screens or NEEDS CLARIFICATION]
+**Language/Version**: TypeScript 5.8+
+**Primary Dependencies**: `@playwright/test` 1.60+ (already installed in `frontend/` via PR #45)
+**Storage**: N/A
+**Testing**: Playwright / Chromium
+**Target Platform**: Next.js 15 dev server on localhost:3000 + .NET backend on localhost:5000
+**Performance Goals**: Each test completes in < 15s
+**Constraints**: Requires full local stack running; dev-stub auth enabled
+**Scale/Scope**: 1 file, 6 tests
 
 ## Constitution Check
 
-*GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
-
-[Gates determined based on constitution file]
+No violations. Purely additive --- new test file, no production code touched.
 
 ## Project Structure
 
-### Documentation (this feature)
-
 ```
-polaris-specs/[###-feature]/
-├── plan.md              # This file (/polaris.plan command output)
-├── research.md          # Phase 0 output (/polaris.plan command)
-├── data-model.md        # Phase 1 output (/polaris.plan command)
-├── quickstart.md        # Phase 1 output (/polaris.plan command)
-├── contracts/           # Phase 1 output (/polaris.plan command)
-└── tasks.md             # Phase 2 output (/polaris.tasks command - NOT created by /polaris.plan)
-```
-
-### Source Code (repository root)
-<!--
-  ACTION REQUIRED: Replace the placeholder tree below with the concrete layout
-  for this feature. Delete unused options and expand the chosen structure with
-  real paths (e.g., apps/admin, packages/something). The delivered plan must
-  not include Option labels.
--->
-
-```
-# [REMOVE IF UNUSED] Option 1: Single project (DEFAULT)
-src/
-├── models/
-├── services/
-├── cli/
-└── lib/
-
-tests/
-├── contract/
-├── integration/
-└── unit/
-
-# [REMOVE IF UNUSED] Option 2: Web application (when "frontend" + "backend" detected)
-backend/
-├── src/
-│   ├── models/
-│   ├── services/
-│   └── api/
-└── tests/
-
 frontend/
-├── src/
-│   ├── components/
-│   ├── pages/
-│   └── services/
-└── tests/
-
-# [REMOVE IF UNUSED] Option 3: Mobile + API (when "iOS/Android" detected)
-api/
-└── [same as backend above]
-
-ios/ or android/
-└── [platform-specific structure: feature modules, UI flows, platform tests]
+└── e2e/
+    ├── helpers/
+    │   └── setup.ts          ← existing (no changes needed)
+    └── wp04-properties.spec.ts  ← NEW (this feature)
 ```
 
-**Structure Decision**: [Document the selected structure and reference the real
-directories captured above]
+## Work Packages
 
-## Complexity Tracking
+### WP01 --- Write `frontend/e2e/wp04-properties.spec.ts`
 
-*Fill ONLY if Constitution Check has violations that must be justified*
+Single WP. All 6 tests in one file.
 
-| Violation | Why Needed | Simpler Alternative Rejected Because |
-|-----------|------------|-------------------------------------|
-| [e.g., 4th project] | [current need] | [why 3 projects insufficient] |
-| [e.g., Repository pattern] | [specific problem] | [why direct DB access insufficient] |
+| Test ID | Name | Key assertions |
+|---------|------|----------------|
+| WP04-1 | Empty state | h1 "My properties", "No properties yet." text, placeholder input + "Create" button visible |
+| WP04-2 | Create property → appears in list | "My House" card link visible after submit; input cleared |
+| WP04-3 | Click card → property detail | URL matches `/properties/{id}`; property heading, "Jobs" section, "Recurring jobs" section visible |
+| WP04-4 | Rename via inline edit | Click `aria-label="Edit property name"` button → input → type "New Name" → Enter → heading shows "New Name" |
+| WP04-5 | Jobs empty state | "No jobs yet. Create one above." visible |
+| WP04-6 | Unauthenticated redirect | Visit `/properties` without session → URL contains `/signin` |
+
+**Implementation notes:**
+
+- WP04-1/2: locate the name input by `page.getByPlaceholder('Property name')` (no id attribute on the input).
+- WP04-3: after clicking the card, use `page.waitForURL(/\/properties\/.+/)` before asserting sections.
+- WP04-4: the displayed button has `aria-label="Edit property name"`; once editing, the input shares that aria-label. After pressing Enter, assert the *button* text changed (not the input).
+- WP04-6: fresh `page.goto('/properties')` without calling `signInAs` first.
+
+**No new helpers.** All use `uniqueUser`, `signInAs`, `createPropertyViaApi` from `e2e/helpers/setup.ts`.
+
+**Dependency**: PR #45 (`feat/playwright-e2e-wp05`) must be merged first so the Playwright setup and helpers are on main.
+
+## Definition of Done
+
+- [ ] `npx playwright test e2e/wp04-properties.spec.ts` → 6/6 pass
+- [ ] Each test uses an isolated unique user
+- [ ] No production code changes
+- [ ] PR merged to main
