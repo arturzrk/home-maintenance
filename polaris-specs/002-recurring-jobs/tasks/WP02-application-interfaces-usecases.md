@@ -287,7 +287,7 @@ polaris implement WP02 --base WP01
 
 ## Activity Log
 
-- 2026-06-05T13:08:31Z – claude – shell_pid=90162 – lane=doing – Assigned agent via workflow command
-- 2026-06-06T12:03:04Z – claude – shell_pid=90162 – lane=testing – Tests passing (154/154); PR #27 merged
-- 2026-06-06T12:04:05Z – claude – shell_pid=90162 – lane=for_review – PR #27 merged into main
-- 2026-06-06T12:04:07Z – claude – shell_pid=90162 – lane=done – PR #27 merged into main (commit 18ebc59)
+- 2026-06-05T13:08:31Z -- claude -- shell_pid=90162 -- lane=doing -- Assigned agent via workflow command
+- 2026-06-06T12:03:04Z -- claude -- shell_pid=90162 -- lane=testing -- Tests passing (154/154); PR #27 merged
+- 2026-06-06T12:04:05Z -- claude -- shell_pid=90162 -- lane=for_review -- PR #27 merged into main
+- 2026-06-06T12:04:07Z -- claude -- shell_pid=90162 -- lane=done -- PR #27 merged into main (commit 18ebc59)

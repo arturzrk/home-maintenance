@@ -198,7 +198,7 @@ polaris implement WP07 --base WP06
 
 ## Activity Log
 
-- 2026-06-08T19:44:04Z – claude-sonnet-4-6 – shell_pid=73197 – lane=doing – Assigned agent via workflow command
-- 2026-06-09T08:12:54Z – claude-sonnet-4-6 – shell_pid=73197 – lane=testing – Moved to testing
-- 2026-06-09T08:12:55Z – claude-sonnet-4-6 – shell_pid=73197 – lane=for_review – 151/151 integration tests pass, Copilot review clean
-- 2026-06-09T08:13:02Z – claude-sonnet-4-6 – shell_pid=73197 – lane=done – PR #43 merged
+- 2026-06-08T19:44:04Z -- claude-sonnet-4-6 -- shell_pid=73197 -- lane=doing -- Assigned agent via workflow command
+- 2026-06-09T08:12:54Z -- claude-sonnet-4-6 -- shell_pid=73197 -- lane=testing -- Moved to testing
+- 2026-06-09T08:12:55Z -- claude-sonnet-4-6 -- shell_pid=73197 -- lane=for_review -- 151/151 integration tests pass, Copilot review clean
+- 2026-06-09T08:13:02Z -- claude-sonnet-4-6 -- shell_pid=73197 -- lane=done -- PR #43 merged

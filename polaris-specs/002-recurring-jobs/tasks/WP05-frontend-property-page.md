@@ -212,4 +212,4 @@ polaris implement WP05 --base WP04
 
 ## Activity Log
 
-- 2026-06-07T07:51:08Z – claude – shell_pid=70010 – lane=doing – Assigned agent via workflow command
+- 2026-06-07T07:51:08Z -- claude -- shell_pid=70010 -- lane=doing -- Assigned agent via workflow command
