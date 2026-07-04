@@ -28,6 +28,36 @@ export async function createPropertyViaApi(
   return data.id;
 }
 
+export interface CreateJobDefinitionBody {
+  name: string;
+  schedule: {
+    unit: "Day" | "Week" | "Month" | "Year";
+    multiplier: number;
+    startDate: string;
+    endDate?: string | null;
+  };
+  stepTemplates?: { description: string }[];
+}
+
+/** Create a job definition directly via the backend API and return its id. */
+export async function createJobDefinitionViaApi(
+  token: string,
+  propertyId: string,
+  body: CreateJobDefinitionBody,
+): Promise<string> {
+  const resp = await fetch(`${API_BASE}/api/job-definitions`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ propertyId, ...body }),
+  });
+  if (!resp.ok) throw new Error(`createJobDefinition failed: ${resp.status}`);
+  const data = (await resp.json()) as { id: string };
+  return data.id;
+}
+
 /** Return a unique user sub + matching bearer token for a fully isolated test. */
 export function uniqueUser(): { sub: string; token: string } {
   const sub = `e2e-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
