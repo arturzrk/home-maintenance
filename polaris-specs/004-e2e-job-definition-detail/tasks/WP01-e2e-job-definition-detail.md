@@ -268,6 +268,6 @@ polaris implement WP01
 
 ## Activity Log
 
-- 2026-07-04T12:51:44Z – unknown – shell_pid=69665 – lane=testing – Playwright suite running
-- 2026-07-04T12:51:46Z – unknown – shell_pid=69665 – lane=for_review – 15/15 e2e tests pass (6 new WP06 tests); WP06-6 amended to exhausted-schedule error; PR #58
-- 2026-07-04T14:12:47Z – unknown – shell_pid=69665 – lane=done – PR #58 (implementation) and PR #59 (kanban/spec amendment) merged
+- 2026-07-04T12:51:44Z -- unknown -- shell_pid=69665 -- lane=testing -- Playwright suite running
+- 2026-07-04T12:51:46Z -- unknown -- shell_pid=69665 -- lane=for_review -- 15/15 e2e tests pass (6 new WP06 tests); WP06-6 amended to exhausted-schedule error; PR #58
+- 2026-07-04T14:12:47Z -- unknown -- shell_pid=69665 -- lane=done -- PR #58 (implementation) and PR #59 (kanban/spec amendment) merged
