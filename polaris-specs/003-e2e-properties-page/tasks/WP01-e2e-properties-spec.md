@@ -11,6 +11,7 @@ test_status: required
 test_file: frontend/e2e/wp04-properties.spec.ts
 domain: testing-specialist
 shell_pid: "29672"
+agent: "claude-sonnet-4-6"
 ---
 
 # WP01 - E2E: Properties page test suite
@@ -179,3 +180,7 @@ test.describe("WP04: Properties page", () => {
 ```bash
 polaris implement WP01
 ```
+
+## Activity Log
+
+- 2026-07-04T10:56:58Z – claude-sonnet-4-6 – shell_pid=29672 – lane=doing – Assigned agent via workflow command
