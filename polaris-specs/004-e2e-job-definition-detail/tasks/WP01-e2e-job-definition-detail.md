@@ -1,13 +1,16 @@
 ---
 work_package_id: WP01
-title: "E2E: JobDefinition detail page test suite"
-lane: "planned"
+title: 'E2E: JobDefinition detail page test suite'
+lane: "doing"
 dependencies: []
 base_branch: main
+base_commit: 161701eaef4b5fe1de8c9d47a0cb75ab4d919e52
+created_at: '2026-07-04T12:19:20.753827+00:00'
 subtasks: [T001, T002, T003, T004, T005, T006, T007]
-domain: testing-specialist
 test_status: required
 test_file: frontend/e2e/wp06-job-definition-detail.spec.ts
+domain: testing-specialist
+shell_pid: "69665"
 ---
 
 # WP01 - E2E: JobDefinition detail page test suite
