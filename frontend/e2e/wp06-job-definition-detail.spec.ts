@@ -7,6 +7,13 @@ import {
   todayIso,
 } from "./helpers/setup";
 
+/** A date `days` from now as "yyyy-MM-dd" (same format as todayIso). */
+function isoDaysFromNow(days: number): string {
+  return new Date(Date.now() + days * 24 * 60 * 60 * 1000)
+    .toISOString()
+    .split("T")[0];
+}
+
 test.describe("WP06: JobDefinition detail page", () => {
   test("WP06-1: shows definition name, schedule label, step templates", async ({
     page,
@@ -129,16 +136,15 @@ test.describe("WP06: JobDefinition detail page", () => {
     const { sub, token } = uniqueUser();
     const propertyId = await createPropertyViaApi(token, "My House");
     // Start beyond the 3-month inline-generation horizon so the first
-    // occurrence is only created by the Generate next click.
-    const start = new Date(Date.now() + 200 * 24 * 60 * 60 * 1000);
-    const end = new Date(start.getTime() + 5 * 24 * 60 * 60 * 1000);
+    // occurrence is only created by the Generate next click; the end date
+    // caps the schedule at that single occurrence.
     const defId = await createJobDefinitionViaApi(token, propertyId, {
       name: "Service boiler",
       schedule: {
         unit: "Month",
         multiplier: 1,
-        startDate: start.toISOString().split("T")[0],
-        endDate: end.toISOString().split("T")[0],
+        startDate: isoDaysFromNow(200),
+        endDate: isoDaysFromNow(205),
       },
     });
 

@@ -51,7 +51,7 @@ export async function createJobDefinitionViaApi(
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify({ propertyId, ...body }),
+    body: JSON.stringify({ ...body, propertyId }),
   });
   if (!resp.ok) throw new Error(`createJobDefinition failed: ${resp.status}`);
   const data = (await resp.json()) as { id: string };
