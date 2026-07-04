@@ -42,9 +42,16 @@ disappears from the list.
 The homeowner clicks "Generate next". The browser navigates to the newly
 created job's detail page at `/jobs/{id}`.
 
-### US6 -- Duplicate generate-next shows error
-When the next occurrence already exists, clicking "Generate next" shows
-"The next occurrence is already scheduled." inline without navigating.
+### US6 -- Exhausted schedule shows error on generate-next
+When the schedule has no further occurrences (its end date has passed the
+last one), clicking "Generate next" shows "The schedule has no future
+occurrences." inline without navigating.
+
+> Amended during implementation: the originally specified duplicate error
+> ("The next occurrence is already scheduled.") is only reachable under
+> concurrent requests -- sequential clicks always advance to a later
+> occurrence, so it cannot be triggered deterministically end-to-end. The
+> duplicate branch remains covered by the GenerateNextButton component test.
 
 ## Functional Requirements
 
@@ -57,7 +64,7 @@ When the next occurrence already exists, clicking "Generate next" shows
 | FR-05 | Submitting the add-step form appends a new step to the list. |
 | FR-06 | Clicking Remove on a step removes it from the list. |
 | FR-07 | Clicking "Generate next" navigates to `/jobs/{newJobId}` on success. |
-| FR-08 | Clicking "Generate next" when the next occurrence exists shows the duplicate error message inline. |
+| FR-08 | Clicking "Generate next" when the schedule is exhausted shows the error message inline without navigating. |
 
 ## Success Criteria
 
@@ -79,9 +86,11 @@ When the next occurrence already exists, clicking "Generate next" shows
 - When a definition is created with `startDate = today`, the backend
   generates occurrences inline -- the first "generate next" call produces
   the occurrence after the last already-generated one.
-- For US6, creating a definition and immediately calling generate-next
-  twice in a row reliably triggers the duplicate error (backend is
-  idempotent on same occurrence date).
+- For US6, a definition whose end date allows exactly one occurrence,
+  with a start date beyond the 3-month inline-generation horizon, makes
+  the second generate-next click deterministically return the
+  "no future occurrences" error. (The original duplicate-error assumption
+  was disproved during implementation -- see US6.)
 
 ## Out of Scope
 

@@ -52,7 +52,7 @@ Tests:
 | WP06-3 | Add step template | fill placeholder "Add a step template", click "Add", step visible |
 | WP06-4 | Remove step template | click Remove button, step no longer visible |
 | WP06-5 | Generate next navigates to job | click "Generate next", URL matches /jobs/.+ |
-| WP06-6 | Duplicate generate-next shows error | generate-next twice, "already scheduled" error appears |
+| WP06-6 | Exhausted schedule shows error | generate-next twice on single-occurrence schedule, "no future occurrences" error appears |
 
 Key locators:
 - Name heading: page.getByRole('button', { name: 'Edit definition name' })
@@ -61,11 +61,16 @@ Key locators:
 - Add step button: page.getByRole('button', { name: 'Add' })
 - Remove step: page.getByRole('button', { name: /Remove step template/ })
 - Generate next: page.getByRole('button', { name: 'Generate next' })
-- Duplicate error: page.getByText('The next occurrence is already scheduled.')
+- Inline error: page.getByText('The schedule has no future occurrences.')
 
-WP06-6 approach: create definition with startDate far in the future so
-inline generation produces no jobs, then click Generate next once
-(creates first occurrence), then click again (duplicate error).
+WP06-6 approach (amended during implementation): the duplicate error is
+unreachable sequentially -- generate-next always advances past the latest
+generated job, so a job at the computed occurrence can never pre-exist
+except under concurrent requests. Instead: create a definition whose
+endDate allows exactly one occurrence, with startDate beyond the 3-month
+inline-generation horizon. First click creates that occurrence and
+navigates; second click returns no_future_occurrence and the error shows
+inline.
 
 ## Definition of Done
 
