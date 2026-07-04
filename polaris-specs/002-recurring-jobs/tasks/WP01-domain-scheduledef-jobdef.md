@@ -231,4 +231,4 @@ polaris implement WP01
 
 ## Activity Log
 
-- 2026-06-05T10:49:31Z – claude – shell_pid=32252 – lane=doing – Assigned agent via workflow command
+- 2026-06-05T10:49:31Z -- claude -- shell_pid=32252 -- lane=doing -- Assigned agent via workflow command
