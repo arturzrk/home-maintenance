@@ -1,17 +1,13 @@
 ---
 work_package_id: WP01
-title: 'E2E: Properties page test suite'
-lane: "doing"
+title: "E2E: Properties page test suite"
+lane: "for_review"
 dependencies: []
 base_branch: main
-base_commit: d6149152ce9b69a41b1cedaf582322f99848bfc0
-created_at: '2026-07-04T10:56:58.619121+00:00'
 subtasks: [T001, T002, T003, T004, T005, T006]
+domain: testing-specialist
 test_status: required
 test_file: frontend/e2e/wp04-properties.spec.ts
-domain: testing-specialist
-shell_pid: "29672"
-agent: "claude-sonnet-4-6"
 ---
 
 # WP01 - E2E: Properties page test suite
@@ -183,4 +179,6 @@ polaris implement WP01
 
 ## Activity Log
 
-- 2026-07-04T10:56:58Z – claude-sonnet-4-6 – shell_pid=29672 – lane=doing – Assigned agent via workflow command
+- 2026-07-04T11:00:06Z – unknown – lane=doing – Moved to doing
+- 2026-07-04T11:00:07Z – unknown – lane=testing – Moved to testing
+- 2026-07-04T11:00:09Z – unknown – lane=for_review – 6/6 Playwright e2e tests pass
