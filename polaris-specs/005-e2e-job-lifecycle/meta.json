@@ -1,3 +1,17 @@
 {
-  "target_branch": "main"
+  "feature_number": "005",
+  "slug": "005-e2e-job-lifecycle",
+  "friendly_name": "E2E: Job lifecycle",
+  "mission": "software-dev",
+  "source_description": "https://github.com/arturzrk/home-maintenance/issues/47",
+  "github_issue": 47,
+  "created_at": "2026-07-04T00:00:00Z",
+  "target_branch": "main",
+  "vcs": "git",
+  "estimation": {
+    "baseline_raw": "skip",
+    "baseline_hours": null,
+    "source": "developer",
+    "captured_at": "2026-07-04T00:00:00Z"
+  }
 }
