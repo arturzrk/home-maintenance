@@ -1,7 +1,7 @@
 ---
 work_package_id: WP01
 title: 'E2E: JobDefinition detail page test suite'
-lane: "doing"
+lane: "for_review"
 dependencies: []
 base_branch: main
 base_commit: 161701eaef4b5fe1de8c9d47a0cb75ab4d919e52
@@ -167,29 +167,30 @@ On success `GenerateNextButton` calls `router.push('/jobs/{id}')`. With
 create time, so Generate next produces the following occurrence --- still a
 success, still navigates.
 
-### T007 --- WP06-6: Duplicate generate-next shows error
+### T007 --- WP06-6: Exhausted schedule shows inline error (amended)
+
+> Amended during implementation: the duplicate error
+> (`next_occurrence_already_exists`) is unreachable via sequential clicks --
+> the handler always computes the occurrence strictly after the latest
+> generated job's due date, so it only fires under concurrent requests.
+> The reachable inline-error path is an exhausted schedule.
 
 ```
-Scenario: Second generate-next for the same occurrence shows inline error
-- futureDate = today + 1 year (e.g. new Date(Date.now() + 365*864e5).toISOString().split('T')[0])
-- Create property + definition with startDate: futureDate
-  (far-future start -> no inline occurrence generated at create time)
+Scenario: Second generate-next on a single-occurrence schedule shows inline error
+- start = today + 200 days (beyond the 3-month inline-generation horizon)
+- end = start + 5 days (schedule allows exactly one occurrence)
+- Create property + definition with schedule { unit: Month, multiplier: 1, startDate: start, endDate: end }
 - signInAs + goto detail page
 - Click page.getByRole('button', { name: 'Generate next' })
 - page.waitForURL(/\/jobs\/.+/)   // first click succeeds, navigates
-- page.goBack(); wait for detail page (Generate next button visible)
+- page.goto(`/job-definitions/${defId}`); assert Generate next visible
 - Click page.getByRole('button', { name: 'Generate next' }) again
-- Assert: page.getByText('The next occurrence is already scheduled.') is visible
+- Assert: page.getByText('The schedule has no future occurrences.') is visible
 - Assert: page URL still matches /\/job-definitions\/.+/ (no navigation)
 ```
 
-The error branch fires on result code `next_occurrence_already_exists`.
-After `goBack()`, re-assert the button is visible before clicking (the
-page is server-rendered with `force-dynamic`, so it refetches).
-
-If the first click's navigation makes `goBack` flaky, alternative: after
-the first click, `page.goto(`/job-definitions/${defId}`)` explicitly
-instead of `goBack()`.
+The error branch fires on result code `no_future_occurrence`;
+`GenerateNextButton` renders the ApiError message (`result.error`).
 
 ## Test File Structure
 
@@ -226,7 +227,7 @@ test.describe("WP06: JobDefinition detail page", () => {
 | Add step button | `page.getByRole('button', { name: 'Add', exact: true })` |
 | Remove step button | `page.getByRole('button', { name: 'Remove step template "<desc>"' })` |
 | Generate next button | `page.getByRole('button', { name: 'Generate next' })` |
-| Duplicate error | `page.getByText('The next occurrence is already scheduled.')` |
+| Inline error (exhausted schedule) | `page.getByText('The schedule has no future occurrences.')` |
 
 ## Test Strategy
 
@@ -262,3 +263,8 @@ test.describe("WP06: JobDefinition detail page", () => {
 ```bash
 polaris implement WP01
 ```
+
+## Activity Log
+
+- 2026-07-04T12:51:44Z – unknown – shell_pid=69665 – lane=testing – Playwright suite running
+- 2026-07-04T12:51:46Z – unknown – shell_pid=69665 – lane=for_review – 15/15 e2e tests pass (6 new WP06 tests); WP06-6 amended to exhausted-schedule error; PR #58
