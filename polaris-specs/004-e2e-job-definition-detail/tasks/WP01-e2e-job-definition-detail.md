@@ -1,7 +1,7 @@
 ---
 work_package_id: WP01
 title: 'E2E: JobDefinition detail page test suite'
-lane: "for_review"
+lane: "done"
 dependencies: []
 base_branch: main
 base_commit: 161701eaef4b5fe1de8c9d47a0cb75ab4d919e52
@@ -11,6 +11,8 @@ test_status: required
 test_file: frontend/e2e/wp06-job-definition-detail.spec.ts
 domain: testing-specialist
 shell_pid: "69665"
+reviewed_by: "Artur Żurek"
+review_status: "approved"
 ---
 
 # WP01 - E2E: JobDefinition detail page test suite
@@ -268,3 +270,4 @@ polaris implement WP01
 
 - 2026-07-04T12:51:44Z – unknown – shell_pid=69665 – lane=testing – Playwright suite running
 - 2026-07-04T12:51:46Z – unknown – shell_pid=69665 – lane=for_review – 15/15 e2e tests pass (6 new WP06 tests); WP06-6 amended to exhausted-schedule error; PR #58
+- 2026-07-04T14:12:47Z – unknown – shell_pid=69665 – lane=done – PR #58 (implementation) and PR #59 (kanban/spec amendment) merged
