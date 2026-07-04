@@ -1,108 +1,76 @@
-# Implementation Plan: [FEATURE]
-*Path: [templates/plan-template.md](templates/plan-template.md)*
+---
+feature: 004-e2e-job-definition-detail
+title: "E2E: JobDefinition detail page -- Implementation Plan"
+created_at: "2026-06-10"
+---
 
+# Implementation Plan: E2E -- JobDefinition detail page
 
-**Branch**: `[###-feature-name]` | **Date**: [DATE] | **Spec**: [link]
-**Input**: Feature specification from `/polaris-specs/[###-feature-name]/spec.md`
-
-**Note**: This template is filled in by the `/polaris.plan` command. See `src/specify_cli/missions/software-dev/command-templates/plan.md` for the execution workflow.
-
-The planner will not begin until all planning questions have been answered-capture those answers in this document before progressing to later phases.
+**Branch**: `004-e2e-job-definition-detail-WP01` | **Spec**: [spec.md](spec.md)
 
 ## Summary
 
-[Extract from feature spec: primary requirement + technical approach from research]
+Add `createJobDefinitionViaApi` to the shared helpers, then write 6
+Playwright tests for the JobDefinition detail page. No production code changes.
 
 ## Technical Context
 
-<!--
-  ACTION REQUIRED: Replace the content in this section with the technical details
-  for the project. The structure here is presented in advisory capacity to guide
-  the iteration process.
--->
-
-**Language/Version**: [e.g., Python 3.14+, Swift 6.0+, Rust 1.90+ or NEEDS CLARIFICATION]  
-**Primary Dependencies**: [e.g., FastAPI, UIKit, LLVM or NEEDS CLARIFICATION]  
-**Storage**: [if applicable, e.g., PostgreSQL, CoreData, files or N/A]  
-**Testing**: [e.g., pytest, XCTest, cargo test or NEEDS CLARIFICATION]  
-**Target Platform**: [e.g., Linux server, iOS 15+, WASM or NEEDS CLARIFICATION]
-**Project Type**: [single/web/mobile - determines source structure]  
-**Performance Goals**: [domain-specific, e.g., command completes in <3s, <15% overhead on existing commands, full suite <30 min or NEEDS CLARIFICATION]  
-**Constraints**: [domain-specific, e.g., <200ms p95, <100MB memory, offline-capable or NEEDS CLARIFICATION]  
-**Scale/Scope**: [domain-specific, e.g., 10k users, 1M LOC, 50 screens or NEEDS CLARIFICATION]
+**Language/Version**: TypeScript 5.8+
+**Primary Dependencies**: `@playwright/test` 1.60+ (installed)
+**Testing**: Playwright / Chromium, baseURL http://localhost:3000
+**Scale/Scope**: 1 helper addition + 1 new test file, 6 tests
 
 ## Constitution Check
 
-*GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
-
-[Gates determined based on constitution file]
+No violations. Additive only.
 
 ## Project Structure
 
-### Documentation (this feature)
-
 ```
-polaris-specs/[###-feature]/
-├── plan.md              # This file (/polaris.plan command output)
-├── research.md          # Phase 0 output (/polaris.plan command)
-├── data-model.md        # Phase 1 output (/polaris.plan command)
-├── quickstart.md        # Phase 1 output (/polaris.plan command)
-├── contracts/           # Phase 1 output (/polaris.plan command)
-└── tasks.md             # Phase 2 output (/polaris.tasks command - NOT created by /polaris.plan)
-```
-
-### Source Code (repository root)
-<!--
-  ACTION REQUIRED: Replace the placeholder tree below with the concrete layout
-  for this feature. Delete unused options and expand the chosen structure with
-  real paths (e.g., apps/admin, packages/something). The delivered plan must
-  not include Option labels.
--->
-
-```
-# [REMOVE IF UNUSED] Option 1: Single project (DEFAULT)
-src/
-├── models/
-├── services/
-├── cli/
-└── lib/
-
-tests/
-├── contract/
-├── integration/
-└── unit/
-
-# [REMOVE IF UNUSED] Option 2: Web application (when "frontend" + "backend" detected)
-backend/
-├── src/
-│   ├── models/
-│   ├── services/
-│   └── api/
-└── tests/
-
 frontend/
-├── src/
-│   ├── components/
-│   ├── pages/
-│   └── services/
-└── tests/
-
-# [REMOVE IF UNUSED] Option 3: Mobile + API (when "iOS/Android" detected)
-api/
-└── [same as backend above]
-
-ios/ or android/
-└── [platform-specific structure: feature modules, UI flows, platform tests]
+└── e2e/
+    ├── helpers/
+    │   └── setup.ts                          <- add createJobDefinitionViaApi
+    └── wp06-job-definition-detail.spec.ts    <- NEW
 ```
 
-**Structure Decision**: [Document the selected structure and reference the real
-directories captured above]
+## Work Packages
 
-## Complexity Tracking
+### WP01 -- Helper + 6 e2e tests
 
-*Fill ONLY if Constitution Check has violations that must be justified*
+New helper (add to e2e/helpers/setup.ts):
+  createJobDefinitionViaApi(token, propertyId, body) => Promise<string>
+  POST /api/job-definitions, returns definition id
+  body: { name, schedule: { unit, multiplier, startDate }, stepTemplates[] }
 
-| Violation | Why Needed | Simpler Alternative Rejected Because |
-|-----------|------------|-------------------------------------|
-| [e.g., 4th project] | [current need] | [why 3 projects insufficient] |
-| [e.g., Repository pattern] | [specific problem] | [why direct DB access insufficient] |
+Tests:
+
+| ID | Name | Key assertions |
+|----|------|----------------|
+| WP06-1 | Detail page shows definition | name heading button, schedule label, step description visible |
+| WP06-2 | Inline name rename | click "Edit definition name", fill, Enter, heading shows new name |
+| WP06-3 | Add step template | fill placeholder "Add a step template", click "Add", step visible |
+| WP06-4 | Remove step template | click Remove button, step no longer visible |
+| WP06-5 | Generate next navigates to job | click "Generate next", URL matches /jobs/.+ |
+| WP06-6 | Duplicate generate-next shows error | generate-next twice, "already scheduled" error appears |
+
+Key locators:
+- Name heading: page.getByRole('button', { name: 'Edit definition name' })
+- Name input: page.getByRole('textbox', { name: 'Edit definition name' })
+- Add step input: page.getByPlaceholder('Add a step template')
+- Add step button: page.getByRole('button', { name: 'Add' })
+- Remove step: page.getByRole('button', { name: /Remove step template/ })
+- Generate next: page.getByRole('button', { name: 'Generate next' })
+- Duplicate error: page.getByText('The next occurrence is already scheduled.')
+
+WP06-6 approach: create definition with startDate far in the future so
+inline generation produces no jobs, then click Generate next once
+(creates first occurrence), then click again (duplicate error).
+
+## Definition of Done
+
+- [ ] npx playwright test e2e/wp06-job-definition-detail.spec.ts -> 6/6 pass
+- [ ] Helper added to e2e/helpers/setup.ts
+- [ ] Each test isolated (unique user + property + definition)
+- [ ] No production code changes
+- [ ] PR merged to main
