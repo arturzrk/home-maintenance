@@ -1,13 +1,16 @@
 ---
 work_package_id: WP01
-title: "E2E: Properties page test suite"
-lane: "planned"
+title: 'E2E: Properties page test suite'
+lane: "doing"
 dependencies: []
 base_branch: main
+base_commit: d6149152ce9b69a41b1cedaf582322f99848bfc0
+created_at: '2026-07-04T10:56:58.619121+00:00'
 subtasks: [T001, T002, T003, T004, T005, T006]
-domain: testing-specialist
 test_status: required
 test_file: frontend/e2e/wp04-properties.spec.ts
+domain: testing-specialist
+shell_pid: "29672"
 ---
 
 # WP01 - E2E: Properties page test suite
