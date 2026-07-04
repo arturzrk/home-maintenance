@@ -45,3 +45,4 @@ Thumbs.db
 
 # Audit log local sink (FileAuditLog default path; managed sink in production)
 audit-trail/
+frontend/test-results/.last-run.json
