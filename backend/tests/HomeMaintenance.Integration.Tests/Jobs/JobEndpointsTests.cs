@@ -28,7 +28,7 @@ public sealed class JobEndpointsTests : IClassFixture<ApiFactory>
     {
         var resp = await client.PostAsJsonAsync("/api/properties", new { name });
         resp.EnsureSuccessStatusCode();
-        return (await resp.Content.ReadFromJsonAsync<PropertyDto>())!;
+        return (await resp.Content.ReadFromJsonAsync<PropertyDto>(TestJson.Options))!;
     }
 
     private async Task<JobDetailDto> CreateJob(HttpClient client, string propertyId, params string[] stepDescriptions)
@@ -42,7 +42,7 @@ public sealed class JobEndpointsTests : IClassFixture<ApiFactory>
         };
         var resp = await client.PostAsJsonAsync("/api/jobs", body);
         resp.EnsureSuccessStatusCode();
-        return (await resp.Content.ReadFromJsonAsync<JobDetailDto>())!;
+        return (await resp.Content.ReadFromJsonAsync<JobDetailDto>(TestJson.Options))!;
     }
 
     // ---- Anonymous ----
@@ -73,7 +73,7 @@ public sealed class JobEndpointsTests : IClassFixture<ApiFactory>
 
         resp.StatusCode.ShouldBe(HttpStatusCode.Created);
         resp.Headers.Location.ShouldNotBeNull();
-        var detail = await resp.Content.ReadFromJsonAsync<JobDetailDto>();
+        var detail = await resp.Content.ReadFromJsonAsync<JobDetailDto>(TestJson.Options);
         detail!.Status.ShouldBe(JobStatus.Active);
         detail.Steps.Count.ShouldBe(2);
         detail.Steps.Select(s => s.Order).ShouldBe(new[] { 0, 1 });
@@ -132,7 +132,7 @@ public sealed class JobEndpointsTests : IClassFixture<ApiFactory>
 
         var resp = await alice.GetAsync($"/api/jobs/{job.Id}");
         resp.StatusCode.ShouldBe(HttpStatusCode.OK);
-        var detail = await resp.Content.ReadFromJsonAsync<JobDetailDto>();
+        var detail = await resp.Content.ReadFromJsonAsync<JobDetailDto>(TestJson.Options);
         detail!.Steps.Count.ShouldBe(2);
     }
 
@@ -158,7 +158,7 @@ public sealed class JobEndpointsTests : IClassFixture<ApiFactory>
         await CreateJob(alice, prop1.Id, "y");
         await CreateJob(alice, prop2.Id, "z");
 
-        var list = await alice.GetFromJsonAsync<JobListDto>($"/api/jobs?propertyId={prop1.Id}");
+        var list = await alice.GetFromJsonAsync<JobListDto>($"/api/jobs?propertyId={prop1.Id}", TestJson.Options);
 
         list!.Jobs.Count.ShouldBe(2);
         list.Jobs.All(j => j.PropertyId == prop1.Id).ShouldBeTrue();
@@ -174,8 +174,8 @@ public sealed class JobEndpointsTests : IClassFixture<ApiFactory>
         await CreateJob(alice, aliceProp.Id, "alice-job");
         await CreateJob(bob, bobProp.Id, "bob-job");
 
-        var aliceJobs = await alice.GetFromJsonAsync<JobListDto>("/api/jobs");
-        var bobJobs = await bob.GetFromJsonAsync<JobListDto>("/api/jobs");
+        var aliceJobs = await alice.GetFromJsonAsync<JobListDto>("/api/jobs", TestJson.Options);
+        var bobJobs = await bob.GetFromJsonAsync<JobListDto>("/api/jobs", TestJson.Options);
 
         aliceJobs!.Jobs.Count.ShouldBe(1);
         bobJobs!.Jobs.Count.ShouldBe(1);
@@ -196,7 +196,7 @@ public sealed class JobEndpointsTests : IClassFixture<ApiFactory>
         var resp = await alice.PostAsync($"/api/jobs/{job.Id}/steps/{stepId}/tick", content: null);
 
         resp.StatusCode.ShouldBe(HttpStatusCode.OK);
-        var detail = await resp.Content.ReadFromJsonAsync<JobDetailDto>();
+        var detail = await resp.Content.ReadFromJsonAsync<JobDetailDto>(TestJson.Options);
         detail!.Steps[0].IsCompleted.ShouldBeTrue();
         detail.Steps[0].CompletedAt.ShouldNotBeNull();
     }
@@ -213,7 +213,7 @@ public sealed class JobEndpointsTests : IClassFixture<ApiFactory>
         var resp = await alice.PostAsync($"/api/jobs/{job.Id}/steps/{stepId}/untick", content: null);
 
         resp.StatusCode.ShouldBe(HttpStatusCode.OK);
-        var detail = await resp.Content.ReadFromJsonAsync<JobDetailDto>();
+        var detail = await resp.Content.ReadFromJsonAsync<JobDetailDto>(TestJson.Options);
         detail!.Steps[0].IsCompleted.ShouldBeFalse();
         detail.Steps[0].CompletedAt.ShouldBeNull();
     }
@@ -243,7 +243,7 @@ public sealed class JobEndpointsTests : IClassFixture<ApiFactory>
         var resp = await alice.PostAsync($"/api/jobs/{job.Id}/complete", content: null);
 
         resp.StatusCode.ShouldBe(HttpStatusCode.OK);
-        var detail = await resp.Content.ReadFromJsonAsync<JobDetailDto>();
+        var detail = await resp.Content.ReadFromJsonAsync<JobDetailDto>(TestJson.Options);
         detail!.Status.ShouldBe(JobStatus.Completed);
         detail.CompletedAt.ShouldNotBeNull();
     }
@@ -258,7 +258,7 @@ public sealed class JobEndpointsTests : IClassFixture<ApiFactory>
         var resp = await alice.PostAsync($"/api/jobs/{job.Id}/complete", content: null);
 
         resp.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
-        var body = await resp.Content.ReadFromJsonAsync<JsonElement>();
+        var body = await resp.Content.ReadFromJsonAsync<JsonElement>(TestJson.Options);
         body.GetProperty("code").GetString().ShouldBe("steps_incomplete");
     }
 
@@ -272,7 +272,7 @@ public sealed class JobEndpointsTests : IClassFixture<ApiFactory>
         var resp = await alice.PostAsync($"/api/jobs/{job.Id}/complete", content: null);
 
         resp.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
-        var body = await resp.Content.ReadFromJsonAsync<JsonElement>();
+        var body = await resp.Content.ReadFromJsonAsync<JsonElement>(TestJson.Options);
         body.GetProperty("code").GetString().ShouldBe("job_has_no_steps");
     }
 
@@ -288,7 +288,7 @@ public sealed class JobEndpointsTests : IClassFixture<ApiFactory>
         var resp = await alice.PostAsync($"/api/jobs/{job.Id}/complete", content: null);
 
         resp.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
-        var body = await resp.Content.ReadFromJsonAsync<JsonElement>();
+        var body = await resp.Content.ReadFromJsonAsync<JsonElement>(TestJson.Options);
         body.GetProperty("code").GetString().ShouldBe("job_already_completed");
     }
 
@@ -304,7 +304,7 @@ public sealed class JobEndpointsTests : IClassFixture<ApiFactory>
         var resp = await alice.PostAsync($"/api/jobs/{job.Id}/steps/{job.Steps[0].Id}/tick", content: null);
 
         resp.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
-        var body = await resp.Content.ReadFromJsonAsync<JsonElement>();
+        var body = await resp.Content.ReadFromJsonAsync<JsonElement>(TestJson.Options);
         body.GetProperty("code").GetString().ShouldBe("job_completed");
     }
 }

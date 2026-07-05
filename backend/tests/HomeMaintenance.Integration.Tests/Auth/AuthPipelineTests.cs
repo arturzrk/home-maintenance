@@ -52,7 +52,7 @@ public sealed class AuthPipelineTests : IClassFixture<ApiFactory>
         var response = await client.GetAsync("/api/_authping");
 
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
-        var body = await response.Content.ReadFromJsonAsync<AuthPingBody>();
+        var body = await response.Content.ReadFromJsonAsync<AuthPingBody>(TestJson.Options);
         body.ShouldNotBeNull();
         body!.OwnerId.ShouldBe("alice");
     }

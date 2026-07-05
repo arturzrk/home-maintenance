@@ -63,7 +63,7 @@ public sealed class AnonymousMatrixTests : IClassFixture<ApiFactory>
 
         resp.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
         resp.Content.Headers.ContentType?.MediaType.ShouldBe("application/problem+json");
-        var bodyJson = await resp.Content.ReadFromJsonAsync<JsonElement>();
+        var bodyJson = await resp.Content.ReadFromJsonAsync<JsonElement>(TestJson.Options);
         bodyJson.GetProperty("code").GetString().ShouldBe("unauthorized");
         bodyJson.GetProperty("correlationId").GetString().ShouldNotBeNullOrEmpty();
     }
@@ -82,7 +82,7 @@ public sealed class AnonymousMatrixTests : IClassFixture<ApiFactory>
         var resp = await client.SendAsync(request);
 
         resp.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
-        var bodyJson = await resp.Content.ReadFromJsonAsync<JsonElement>();
+        var bodyJson = await resp.Content.ReadFromJsonAsync<JsonElement>(TestJson.Options);
         bodyJson.GetProperty("code").GetString().ShouldBe("unauthorized");
     }
 

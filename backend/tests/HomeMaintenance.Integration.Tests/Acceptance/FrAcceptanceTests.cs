@@ -51,7 +51,7 @@ public sealed class FrAcceptanceTests : IClassFixture<ApiFactory>
         resp.StatusCode.ShouldBe(HttpStatusCode.Created);
 
         var ok = await alice.PostAsJsonAsync("/api/properties", new { name = "  Main House  " });
-        var dto = await ok.Content.ReadFromJsonAsync<PropertyDto>();
+        var dto = await ok.Content.ReadFromJsonAsync<PropertyDto>(TestJson.Options);
         dto!.Name.ShouldBe("Main House"); // trimmed
     }
 
@@ -62,7 +62,7 @@ public sealed class FrAcceptanceTests : IClassFixture<ApiFactory>
         var alice = ClientAs($"alice-{Guid.NewGuid():N}");
         var bob = ClientAs($"bob-{Guid.NewGuid():N}");
         var prop = (await (await alice.PostAsJsonAsync("/api/properties",
-            new { name = "Alice Place" })).Content.ReadFromJsonAsync<PropertyDto>())!;
+            new { name = "Alice Place" })).Content.ReadFromJsonAsync<PropertyDto>(TestJson.Options))!;
 
         var resp = await bob.PostAsJsonAsync("/api/jobs", new
         {
@@ -73,7 +73,7 @@ public sealed class FrAcceptanceTests : IClassFixture<ApiFactory>
         });
 
         resp.StatusCode.ShouldBe(HttpStatusCode.NotFound);
-        (await resp.Content.ReadFromJsonAsync<JsonElement>())
+        (await resp.Content.ReadFromJsonAsync<JsonElement>(TestJson.Options))
             .GetProperty("code").GetString().ShouldBe("not_found");
     }
 
@@ -84,7 +84,7 @@ public sealed class FrAcceptanceTests : IClassFixture<ApiFactory>
         var (client, job) = await CreateJobWithSteps("a", "b");
         var resp = await client.PostAsync($"/api/jobs/{job.Id}/complete", null);
         resp.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
-        (await resp.Content.ReadFromJsonAsync<JsonElement>())
+        (await resp.Content.ReadFromJsonAsync<JsonElement>(TestJson.Options))
             .GetProperty("code").GetString().ShouldBe("steps_incomplete");
     }
 
@@ -95,7 +95,7 @@ public sealed class FrAcceptanceTests : IClassFixture<ApiFactory>
         var (client, job) = await CreateJobWithSteps();
         var resp = await client.PostAsync($"/api/jobs/{job.Id}/complete", null);
         resp.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
-        (await resp.Content.ReadFromJsonAsync<JsonElement>())
+        (await resp.Content.ReadFromJsonAsync<JsonElement>(TestJson.Options))
             .GetProperty("code").GetString().ShouldBe("job_has_no_steps");
     }
 
@@ -106,7 +106,7 @@ public sealed class FrAcceptanceTests : IClassFixture<ApiFactory>
         var (client, job) = await CreateJobWithSteps("a", "b", "c");
         var resp = await client.DeleteAsync($"/api/jobs/{job.Id}/steps/{job.Steps[1].Id}");
         resp.StatusCode.ShouldBe(HttpStatusCode.OK);
-        var updated = await resp.Content.ReadFromJsonAsync<JobDetailDto>();
+        var updated = await resp.Content.ReadFromJsonAsync<JobDetailDto>(TestJson.Options);
         updated!.Steps.Select(s => s.Order).ShouldBe(new[] { 0, 1 });
     }
 
@@ -145,13 +145,13 @@ public sealed class FrAcceptanceTests : IClassFixture<ApiFactory>
         var (client, job) = await CreateJobWithSteps("a");
         var stepId = job.Steps[0].Id;
         var tickResp = await client.PostAsync($"/api/jobs/{job.Id}/steps/{stepId}/tick", null);
-        var ticked = (await tickResp.Content.ReadFromJsonAsync<JobDetailDto>())!;
+        var ticked = (await tickResp.Content.ReadFromJsonAsync<JobDetailDto>(TestJson.Options))!;
         var completedAt = ticked.Steps[0].CompletedAt;
         completedAt.ShouldNotBeNull();
         completedAt!.Value.Kind.ShouldBe(DateTimeKind.Utc);
 
         var completeResp = await client.PostAsync($"/api/jobs/{job.Id}/complete", null);
-        var completed = (await completeResp.Content.ReadFromJsonAsync<JobDetailDto>())!;
+        var completed = (await completeResp.Content.ReadFromJsonAsync<JobDetailDto>(TestJson.Options))!;
         completed.CompletedAt!.Value.Kind.ShouldBe(DateTimeKind.Utc);
     }
 
@@ -167,7 +167,7 @@ public sealed class FrAcceptanceTests : IClassFixture<ApiFactory>
 
         var resp = await client.PatchAsJsonAsync($"/api/jobs/{job.Id}", new { name = "Renamed" });
         resp.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
-        (await resp.Content.ReadFromJsonAsync<JsonElement>())
+        (await resp.Content.ReadFromJsonAsync<JsonElement>(TestJson.Options))
             .GetProperty("code").GetString().ShouldBe("job_completed");
     }
 
@@ -176,7 +176,7 @@ public sealed class FrAcceptanceTests : IClassFixture<ApiFactory>
     {
         var client = ClientAs($"alice-{Guid.NewGuid():N}");
         var prop = (await (await client.PostAsJsonAsync("/api/properties",
-            new { name = "House" })).Content.ReadFromJsonAsync<PropertyDto>())!;
+            new { name = "House" })).Content.ReadFromJsonAsync<PropertyDto>(TestJson.Options))!;
         var jobResp = await client.PostAsJsonAsync("/api/jobs", new
         {
             propertyId = prop.Id,
@@ -185,7 +185,7 @@ public sealed class FrAcceptanceTests : IClassFixture<ApiFactory>
             steps = stepDescriptions.Select(d => new { description = d }).ToArray(),
         });
         jobResp.EnsureSuccessStatusCode();
-        var job = (await jobResp.Content.ReadFromJsonAsync<JobDetailDto>())!;
+        var job = (await jobResp.Content.ReadFromJsonAsync<JobDetailDto>(TestJson.Options))!;
         return (client, job);
     }
 
@@ -200,7 +200,7 @@ public sealed class FrAcceptanceTests : IClassFixture<ApiFactory>
     {
         var client = ClientAs($"alice-{Guid.NewGuid():N}");
         var prop = (await (await client.PostAsJsonAsync("/api/properties", new { name = "House" }))
-            .Content.ReadFromJsonAsync<PropertyDto>())!;
+            .Content.ReadFromJsonAsync<PropertyDto>(TestJson.Options))!;
 
         // 1. Create definition with 2 step templates (startDate = today triggers inline generation)
         var defResp = await client.PostAsJsonAsync("/api/job-definitions", new
@@ -211,13 +211,13 @@ public sealed class FrAcceptanceTests : IClassFixture<ApiFactory>
             stepTemplates = new[] { new { description = "Step A" }, new { description = "Step B" } },
         });
         defResp.EnsureSuccessStatusCode();
-        var definition = (await defResp.Content.ReadFromJsonAsync<JobDefinitionDto>())!;
+        var definition = (await defResp.Content.ReadFromJsonAsync<JobDefinitionDto>(TestJson.Options))!;
 
         // 2-3. Find a generated job; assert it has 2 steps
-        var jobList = (await client.GetFromJsonAsync<JobListDto>($"/api/jobs?propertyId={prop.Id}"))!;
+        var jobList = (await client.GetFromJsonAsync<JobListDto>($"/api/jobs?propertyId={prop.Id}", TestJson.Options))!;
         var generated = jobList.Jobs.First(j => j.JobDefinitionId == definition.Id);
         var detail = (await (await client.GetAsync($"/api/jobs/{generated.Id}"))
-            .Content.ReadFromJsonAsync<JobDetailDto>())!;
+            .Content.ReadFromJsonAsync<JobDetailDto>(TestJson.Options))!;
         detail.Steps.Count.ShouldBe(2);
 
         // 4. Add a 3rd step template to the definition
@@ -228,13 +228,13 @@ public sealed class FrAcceptanceTests : IClassFixture<ApiFactory>
 
         // 5-6. Original job still has exactly 2 steps (snapshot unchanged)
         var reloaded = (await (await client.GetAsync($"/api/jobs/{generated.Id}"))
-            .Content.ReadFromJsonAsync<JobDetailDto>())!;
+            .Content.ReadFromJsonAsync<JobDetailDto>(TestJson.Options))!;
         reloaded.Steps.Count.ShouldBe(2);
 
         // 7-9. generate-next creates a NEW job from the updated template (3 steps)
         var genResp = await client.PostAsync($"/api/job-definitions/{definition.Id}/generate-next", null);
         genResp.StatusCode.ShouldBe(HttpStatusCode.Created);
-        var newJob = (await genResp.Content.ReadFromJsonAsync<JobDetailDto>())!;
+        var newJob = (await genResp.Content.ReadFromJsonAsync<JobDetailDto>(TestJson.Options))!;
         newJob.Steps.Count.ShouldBe(3);
     }
 
@@ -262,7 +262,7 @@ public sealed class FrAcceptanceTests : IClassFixture<ApiFactory>
     {
         var client = ClientAs($"alice-{Guid.NewGuid():N}");
         var prop = (await (await client.PostAsJsonAsync("/api/properties", new { name = "House" }))
-            .Content.ReadFromJsonAsync<PropertyDto>())!;
+            .Content.ReadFromJsonAsync<PropertyDto>(TestJson.Options))!;
 
         // Far future start: no inline jobs generated, so all 20 concurrent calls target the same first occurrence.
         var farFuture = Today.AddMonths(6);
@@ -274,7 +274,7 @@ public sealed class FrAcceptanceTests : IClassFixture<ApiFactory>
             stepTemplates = new[] { new { description = "Check" } },
         });
         defResp.EnsureSuccessStatusCode();
-        var definition = (await defResp.Content.ReadFromJsonAsync<JobDefinitionDto>())!;
+        var definition = (await defResp.Content.ReadFromJsonAsync<JobDefinitionDto>(TestJson.Options))!;
 
         var calls = Enumerable.Range(0, 20)
             .Select(_ => client.PostAsync($"/api/job-definitions/{definition.Id}/generate-next", null))
@@ -284,7 +284,7 @@ public sealed class FrAcceptanceTests : IClassFixture<ApiFactory>
         responses.ShouldContain(r => r.StatusCode == HttpStatusCode.Created);
         var failed = responses.FirstOrDefault(r => r.StatusCode == HttpStatusCode.BadRequest);
         failed.ShouldNotBeNull();
-        var problem = await failed!.Content.ReadFromJsonAsync<JsonElement>();
+        var problem = await failed!.Content.ReadFromJsonAsync<JsonElement>(TestJson.Options);
         problem.GetProperty("code").GetString().ShouldBe("next_occurrence_already_exists");
     }
 
@@ -294,7 +294,7 @@ public sealed class FrAcceptanceTests : IClassFixture<ApiFactory>
     {
         var client = ClientAs($"alice-{Guid.NewGuid():N}");
         var prop = (await (await client.PostAsJsonAsync("/api/properties", new { name = "House" }))
-            .Content.ReadFromJsonAsync<PropertyDto>())!;
+            .Content.ReadFromJsonAsync<PropertyDto>(TestJson.Options))!;
 
         var defResp = await client.PostAsJsonAsync("/api/job-definitions", new
         {
@@ -304,9 +304,9 @@ public sealed class FrAcceptanceTests : IClassFixture<ApiFactory>
             stepTemplates = new[] { new { description = "Check" } },
         });
         defResp.EnsureSuccessStatusCode();
-        var definition = (await defResp.Content.ReadFromJsonAsync<JobDefinitionDto>())!;
+        var definition = (await defResp.Content.ReadFromJsonAsync<JobDefinitionDto>(TestJson.Options))!;
 
-        var jobList = (await client.GetFromJsonAsync<JobListDto>($"/api/jobs?propertyId={prop.Id}"))!;
+        var jobList = (await client.GetFromJsonAsync<JobListDto>($"/api/jobs?propertyId={prop.Id}", TestJson.Options))!;
         var generated = jobList.Jobs.Where(j => j.JobDefinitionId == definition.Id).ToList();
 
         // Occurrences within horizon must exist
@@ -324,7 +324,7 @@ public sealed class FrAcceptanceTests : IClassFixture<ApiFactory>
     {
         var client = ClientAs($"alice-{Guid.NewGuid():N}");
         var prop = (await (await client.PostAsJsonAsync("/api/properties", new { name = "House" }))
-            .Content.ReadFromJsonAsync<PropertyDto>())!;
+            .Content.ReadFromJsonAsync<PropertyDto>(TestJson.Options))!;
 
         // Inline generation creates: Today, Today+1m, Today+2m, Today+3m
         var defResp = await client.PostAsJsonAsync("/api/job-definitions", new
@@ -335,12 +335,12 @@ public sealed class FrAcceptanceTests : IClassFixture<ApiFactory>
             stepTemplates = new[] { new { description = "Check" } },
         });
         defResp.EnsureSuccessStatusCode();
-        var definition = (await defResp.Content.ReadFromJsonAsync<JobDefinitionDto>())!;
+        var definition = (await defResp.Content.ReadFromJsonAsync<JobDefinitionDto>(TestJson.Options))!;
 
         // generate-next must return Today+4m (first occurrence after Today+3m)
         var genResp = await client.PostAsync($"/api/job-definitions/{definition.Id}/generate-next", null);
         genResp.StatusCode.ShouldBe(HttpStatusCode.Created);
-        var newJob = (await genResp.Content.ReadFromJsonAsync<JobDetailDto>())!;
+        var newJob = (await genResp.Content.ReadFromJsonAsync<JobDetailDto>(TestJson.Options))!;
         newJob.DueDate.ShouldBe(Today.AddMonths(4));
     }
 

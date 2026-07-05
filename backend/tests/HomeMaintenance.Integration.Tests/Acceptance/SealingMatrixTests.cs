@@ -39,11 +39,11 @@ public sealed class SealingMatrixTests : IClassFixture<ApiFactory>
         var resp = await Attempt(client, completed, mutation);
 
         resp.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
-        var body = await resp.Content.ReadFromJsonAsync<JsonElement>();
+        var body = await resp.Content.ReadFromJsonAsync<JsonElement>(TestJson.Options);
         body.GetProperty("code").GetString().ShouldBe(expectedCode);
 
         // Re-fetch and assert state is unchanged.
-        var refetch = await client.GetFromJsonAsync<JobDetailDto>($"/api/jobs/{completed.Id}");
+        var refetch = await client.GetFromJsonAsync<JobDetailDto>($"/api/jobs/{completed.Id}", TestJson.Options);
         refetch!.Status.ShouldBe(completed.Status);
         refetch.Name.ShouldBe(completed.Name);
         refetch.Steps.Count.ShouldBe(completed.Steps.Count);
@@ -68,7 +68,7 @@ public sealed class SealingMatrixTests : IClassFixture<ApiFactory>
     {
         var propResp = await client.PostAsJsonAsync("/api/properties", new { name = "House" });
         propResp.EnsureSuccessStatusCode();
-        var prop = (await propResp.Content.ReadFromJsonAsync<PropertyDto>())!;
+        var prop = (await propResp.Content.ReadFromJsonAsync<PropertyDto>(TestJson.Options))!;
 
         var jobResp = await client.PostAsJsonAsync("/api/jobs", new
         {
@@ -82,13 +82,13 @@ public sealed class SealingMatrixTests : IClassFixture<ApiFactory>
             },
         });
         jobResp.EnsureSuccessStatusCode();
-        var job = (await jobResp.Content.ReadFromJsonAsync<JobDetailDto>())!;
+        var job = (await jobResp.Content.ReadFromJsonAsync<JobDetailDto>(TestJson.Options))!;
         foreach (var s in job.Steps)
             (await client.PostAsync($"/api/jobs/{job.Id}/steps/{s.Id}/tick", null))
                 .EnsureSuccessStatusCode();
         var completeResp = await client.PostAsync($"/api/jobs/{job.Id}/complete", null);
         completeResp.EnsureSuccessStatusCode();
-        return (await completeResp.Content.ReadFromJsonAsync<JobDetailDto>())!;
+        return (await completeResp.Content.ReadFromJsonAsync<JobDetailDto>(TestJson.Options))!;
     }
 
     private static Task<HttpResponseMessage> Attempt(

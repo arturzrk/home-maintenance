@@ -31,7 +31,7 @@ public sealed class JobDefinitionEndpointsTests : IClassFixture<ApiFactory>
     {
         var resp = await client.PostAsJsonAsync("/api/properties", new { name });
         resp.EnsureSuccessStatusCode();
-        return (await resp.Content.ReadFromJsonAsync<PropertyDto>())!;
+        return (await resp.Content.ReadFromJsonAsync<PropertyDto>(TestJson.Options))!;
     }
 
     private static object Schedule(string unit, int multiplier, DateOnly startDate, DateOnly? endDate = null)
@@ -59,7 +59,7 @@ public sealed class JobDefinitionEndpointsTests : IClassFixture<ApiFactory>
         };
         var resp = await client.PostAsJsonAsync("/api/job-definitions", body);
         resp.EnsureSuccessStatusCode();
-        return (await resp.Content.ReadFromJsonAsync<JobDefinitionDto>())!;
+        return (await resp.Content.ReadFromJsonAsync<JobDefinitionDto>(TestJson.Options))!;
     }
 
     // ---- Anonymous ----
@@ -106,12 +106,12 @@ public sealed class JobDefinitionEndpointsTests : IClassFixture<ApiFactory>
 
         resp.StatusCode.ShouldBe(HttpStatusCode.Created);
         resp.Headers.Location.ShouldNotBeNull();
-        var dto = await resp.Content.ReadFromJsonAsync<JobDefinitionDto>();
+        var dto = await resp.Content.ReadFromJsonAsync<JobDefinitionDto>(TestJson.Options);
         dto!.Name.ShouldBe("Service boiler");
         dto.StepTemplates.Count.ShouldBe(1);
         dto.Schedule.Unit.ShouldBe("Month");
 
-        var jobs = await alice.GetFromJsonAsync<JobListDto>($"/api/jobs?propertyId={property.Id}");
+        var jobs = await alice.GetFromJsonAsync<JobListDto>($"/api/jobs?propertyId={property.Id}", TestJson.Options);
         jobs!.Jobs.ShouldNotBeEmpty();
         jobs.Jobs.ShouldContain(j => j.JobDefinitionId == dto.Id);
     }
@@ -177,7 +177,7 @@ public sealed class JobDefinitionEndpointsTests : IClassFixture<ApiFactory>
         await CreateDefinition(alice, aliceProp.Id, Schedule("Month", 1, Today));
         await CreateDefinition(bob, bobProp.Id, Schedule("Month", 1, Today));
 
-        var aliceList = await alice.GetFromJsonAsync<List<JobDefinitionDto>>("/api/job-definitions");
+        var aliceList = await alice.GetFromJsonAsync<List<JobDefinitionDto>>("/api/job-definitions", TestJson.Options);
         aliceList!.Count.ShouldBe(1);
         aliceList[0].PropertyId.ShouldBe(aliceProp.Id);
     }
@@ -192,7 +192,7 @@ public sealed class JobDefinitionEndpointsTests : IClassFixture<ApiFactory>
         await CreateDefinition(alice, prop1.Id, Schedule("Month", 1, Today), "Def 2");
         await CreateDefinition(alice, prop2.Id, Schedule("Month", 1, Today), "Def 3");
 
-        var filtered = await alice.GetFromJsonAsync<List<JobDefinitionDto>>($"/api/job-definitions?propertyId={prop1.Id}");
+        var filtered = await alice.GetFromJsonAsync<List<JobDefinitionDto>>($"/api/job-definitions?propertyId={prop1.Id}", TestJson.Options);
         filtered!.Count.ShouldBe(2);
         filtered.All(d => d.PropertyId == prop1.Id).ShouldBeTrue();
     }
@@ -206,7 +206,7 @@ public sealed class JobDefinitionEndpointsTests : IClassFixture<ApiFactory>
 
         var resp = await alice.GetAsync($"/api/job-definitions/{created.Id}");
         resp.StatusCode.ShouldBe(HttpStatusCode.OK);
-        var dto = await resp.Content.ReadFromJsonAsync<JobDefinitionDto>();
+        var dto = await resp.Content.ReadFromJsonAsync<JobDefinitionDto>(TestJson.Options);
         dto!.Id.ShouldBe(created.Id);
     }
 
@@ -232,7 +232,7 @@ public sealed class JobDefinitionEndpointsTests : IClassFixture<ApiFactory>
 
         var resp = await alice.PatchAsJsonAsync($"/api/job-definitions/{created.Id}", new { name = "Renamed boiler service" });
         resp.StatusCode.ShouldBe(HttpStatusCode.OK);
-        var dto = await resp.Content.ReadFromJsonAsync<JobDefinitionDto>();
+        var dto = await resp.Content.ReadFromJsonAsync<JobDefinitionDto>(TestJson.Options);
         dto!.Name.ShouldBe("Renamed boiler service");
     }
 
@@ -249,7 +249,7 @@ public sealed class JobDefinitionEndpointsTests : IClassFixture<ApiFactory>
             new { schedule = Schedule("Week", 2, newStart) });
 
         resp.StatusCode.ShouldBe(HttpStatusCode.OK);
-        var dto = await resp.Content.ReadFromJsonAsync<JobDefinitionDto>();
+        var dto = await resp.Content.ReadFromJsonAsync<JobDefinitionDto>(TestJson.Options);
         dto!.Schedule.Unit.ShouldBe("Week");
         dto.Schedule.Multiplier.ShouldBe(2);
         dto.Schedule.StartDate.ShouldBe(newStart);
@@ -267,7 +267,7 @@ public sealed class JobDefinitionEndpointsTests : IClassFixture<ApiFactory>
             new { addStepTemplates = new[] { new { description = "Check pressure gauge" } } });
 
         resp.StatusCode.ShouldBe(HttpStatusCode.OK);
-        var dto = await resp.Content.ReadFromJsonAsync<JobDefinitionDto>();
+        var dto = await resp.Content.ReadFromJsonAsync<JobDefinitionDto>(TestJson.Options);
         dto!.StepTemplates.ShouldContain(s => s.Description == "Check pressure gauge");
     }
 
@@ -317,7 +317,7 @@ public sealed class JobDefinitionEndpointsTests : IClassFixture<ApiFactory>
         resp.StatusCode.ShouldBe(HttpStatusCode.Created);
         resp.Headers.Location.ShouldNotBeNull();
         resp.Headers.Location!.ToString().ShouldStartWith("/api/jobs/");
-        var dto = await resp.Content.ReadFromJsonAsync<JobDetailDto>();
+        var dto = await resp.Content.ReadFromJsonAsync<JobDetailDto>(TestJson.Options);
         dto!.JobDefinitionId.ShouldBe(created.Id);
         dto.DueDate.ShouldBe(farFuture);
     }
@@ -351,7 +351,7 @@ public sealed class JobDefinitionEndpointsTests : IClassFixture<ApiFactory>
         responses.ShouldContain(r => r.StatusCode == HttpStatusCode.Created);
         var failed = responses.FirstOrDefault(r => r.StatusCode == HttpStatusCode.BadRequest);
         failed.ShouldNotBeNull();
-        var problem = await failed!.Content.ReadFromJsonAsync<JsonElement>();
+        var problem = await failed!.Content.ReadFromJsonAsync<JsonElement>(TestJson.Options);
         problem.GetProperty("code").GetString().ShouldBe("next_occurrence_already_exists");
     }
 
