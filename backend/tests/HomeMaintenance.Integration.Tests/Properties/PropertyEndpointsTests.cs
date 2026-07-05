@@ -41,7 +41,7 @@ public sealed class PropertyEndpointsTests : IClassFixture<ApiFactory>
         response.Headers.Location.ShouldNotBeNull();
         response.Headers.Location!.ToString().ShouldStartWith("/api/properties/");
 
-        var dto = await response.Content.ReadFromJsonAsync<PropertyDto>();
+        var dto = await response.Content.ReadFromJsonAsync<PropertyDto>(TestJson.Options);
         dto.ShouldNotBeNull();
         dto!.Name.ShouldBe("Main House");
         dto.Id.ShouldNotBeNullOrEmpty();
@@ -76,11 +76,11 @@ public sealed class PropertyEndpointsTests : IClassFixture<ApiFactory>
         await ClientAs(aliceSub).PostAsJsonAsync("/api/properties", new { name = "Alice Place" });
         await ClientAs(bobSub).PostAsJsonAsync("/api/properties", new { name = "Bob Place" });
 
-        var aliceList = await ClientAs(aliceSub).GetFromJsonAsync<PropertyListDto>("/api/properties");
+        var aliceList = await ClientAs(aliceSub).GetFromJsonAsync<PropertyListDto>("/api/properties", TestJson.Options);
         aliceList!.Properties.Select(p => p.Name).ShouldContain("Alice Place");
         aliceList.Properties.Select(p => p.Name).ShouldNotContain("Bob Place");
 
-        var bobList = await ClientAs(bobSub).GetFromJsonAsync<PropertyListDto>("/api/properties");
+        var bobList = await ClientAs(bobSub).GetFromJsonAsync<PropertyListDto>("/api/properties", TestJson.Options);
         bobList!.Properties.Select(p => p.Name).ShouldContain("Bob Place");
         bobList.Properties.Select(p => p.Name).ShouldNotContain("Alice Place");
     }
@@ -93,7 +93,7 @@ public sealed class PropertyEndpointsTests : IClassFixture<ApiFactory>
         await ClientAs(sub).PostAsJsonAsync("/api/properties", new { name = "Apple" });
         await ClientAs(sub).PostAsJsonAsync("/api/properties", new { name = "Mango" });
 
-        var list = await ClientAs(sub).GetFromJsonAsync<PropertyListDto>("/api/properties");
+        var list = await ClientAs(sub).GetFromJsonAsync<PropertyListDto>("/api/properties", TestJson.Options);
 
         var names = list!.Properties.Select(p => p.Name).ToList();
         names.ShouldBe(new[] { "Apple", "Mango", "Zebra" });
@@ -104,12 +104,12 @@ public sealed class PropertyEndpointsTests : IClassFixture<ApiFactory>
     {
         var sub = $"alice-{Guid.NewGuid():N}";
         var created = await ClientAs(sub).PostAsJsonAsync("/api/properties", new { name = "Main House" });
-        var dto = (await created.Content.ReadFromJsonAsync<PropertyDto>())!;
+        var dto = (await created.Content.ReadFromJsonAsync<PropertyDto>(TestJson.Options))!;
 
         var response = await ClientAs(sub).GetAsync($"/api/properties/{dto.Id}");
 
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
-        var fetched = await response.Content.ReadFromJsonAsync<PropertyDto>();
+        var fetched = await response.Content.ReadFromJsonAsync<PropertyDto>(TestJson.Options);
         fetched!.Name.ShouldBe("Main House");
     }
 
@@ -119,13 +119,13 @@ public sealed class PropertyEndpointsTests : IClassFixture<ApiFactory>
         var aliceSub = $"alice-{Guid.NewGuid():N}";
         var bobSub = $"bob-{Guid.NewGuid():N}";
         var created = await ClientAs(aliceSub).PostAsJsonAsync("/api/properties", new { name = "Alice Place" });
-        var dto = (await created.Content.ReadFromJsonAsync<PropertyDto>())!;
+        var dto = (await created.Content.ReadFromJsonAsync<PropertyDto>(TestJson.Options))!;
 
         var response = await ClientAs(bobSub).GetAsync($"/api/properties/{dto.Id}");
 
         response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
         // Body should be problem+json with code=not_found and a correlationId.
-        var body = await response.Content.ReadFromJsonAsync<JsonElement>();
+        var body = await response.Content.ReadFromJsonAsync<JsonElement>(TestJson.Options);
         body.GetProperty("code").GetString().ShouldBe("not_found");
         body.GetProperty("correlationId").GetString().ShouldNotBeNullOrEmpty();
     }
@@ -143,16 +143,16 @@ public sealed class PropertyEndpointsTests : IClassFixture<ApiFactory>
     {
         var sub = $"alice-{Guid.NewGuid():N}";
         var created = await ClientAs(sub).PostAsJsonAsync("/api/properties", new { name = "Old Name" });
-        var dto = (await created.Content.ReadFromJsonAsync<PropertyDto>())!;
+        var dto = (await created.Content.ReadFromJsonAsync<PropertyDto>(TestJson.Options))!;
 
         var response = await ClientAs(sub).PatchAsJsonAsync($"/api/properties/{dto.Id}", new { name = "New Name" });
 
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
-        var updated = await response.Content.ReadFromJsonAsync<PropertyDto>();
+        var updated = await response.Content.ReadFromJsonAsync<PropertyDto>(TestJson.Options);
         updated!.Name.ShouldBe("New Name");
 
         // Confirm persistence
-        var refetch = await ClientAs(sub).GetFromJsonAsync<PropertyDto>($"/api/properties/{dto.Id}");
+        var refetch = await ClientAs(sub).GetFromJsonAsync<PropertyDto>($"/api/properties/{dto.Id}", TestJson.Options);
         refetch!.Name.ShouldBe("New Name");
     }
 
@@ -162,7 +162,7 @@ public sealed class PropertyEndpointsTests : IClassFixture<ApiFactory>
         var aliceSub = $"alice-{Guid.NewGuid():N}";
         var bobSub = $"bob-{Guid.NewGuid():N}";
         var created = await ClientAs(aliceSub).PostAsJsonAsync("/api/properties", new { name = "Alice Place" });
-        var dto = (await created.Content.ReadFromJsonAsync<PropertyDto>())!;
+        var dto = (await created.Content.ReadFromJsonAsync<PropertyDto>(TestJson.Options))!;
 
         var response = await ClientAs(bobSub).PatchAsJsonAsync($"/api/properties/{dto.Id}", new { name = "Hijacked" });
 
@@ -174,7 +174,7 @@ public sealed class PropertyEndpointsTests : IClassFixture<ApiFactory>
     {
         var sub = $"alice-{Guid.NewGuid():N}";
         var created = await ClientAs(sub).PostAsJsonAsync("/api/properties", new { name = "Main House" });
-        var dto = (await created.Content.ReadFromJsonAsync<PropertyDto>())!;
+        var dto = (await created.Content.ReadFromJsonAsync<PropertyDto>(TestJson.Options))!;
 
         var response = await ClientAs(sub).PatchAsJsonAsync($"/api/properties/{dto.Id}", new { name = "" });
 

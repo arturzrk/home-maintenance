@@ -35,7 +35,7 @@ public sealed class CrossOwnerMatrixTests : IClassFixture<ApiFactory>
         var alice = ClientAs($"alice-{Guid.NewGuid():N}");
         var propResp = await alice.PostAsJsonAsync("/api/properties", new { name = "Alice Place" });
         propResp.EnsureSuccessStatusCode();
-        var property = (await propResp.Content.ReadFromJsonAsync<PropertyDto>())!;
+        var property = (await propResp.Content.ReadFromJsonAsync<PropertyDto>(TestJson.Options))!;
 
         var jobResp = await alice.PostAsJsonAsync("/api/jobs", new
         {
@@ -45,7 +45,7 @@ public sealed class CrossOwnerMatrixTests : IClassFixture<ApiFactory>
             steps = new[] { new { description = "Shut off gas" } },
         });
         jobResp.EnsureSuccessStatusCode();
-        var job = (await jobResp.Content.ReadFromJsonAsync<JobDetailDto>())!;
+        var job = (await jobResp.Content.ReadFromJsonAsync<JobDetailDto>(TestJson.Options))!;
         return (property, job);
     }
 
@@ -54,7 +54,7 @@ public sealed class CrossOwnerMatrixTests : IClassFixture<ApiFactory>
         resp.StatusCode.ShouldBe(HttpStatusCode.NotFound);
         resp.Headers.TryGetValues("X-Correlation-Id", out var hdr).ShouldBeTrue();
         var headerCid = hdr!.Single();
-        var body = await resp.Content.ReadFromJsonAsync<JsonElement>();
+        var body = await resp.Content.ReadFromJsonAsync<JsonElement>(TestJson.Options);
         body.GetProperty("code").GetString().ShouldBe("not_found");
         body.GetProperty("correlationId").GetString().ShouldBe(headerCid);
     }
@@ -187,7 +187,7 @@ public sealed class CrossOwnerMatrixTests : IClassFixture<ApiFactory>
         var alice = ClientAs($"alice-{Guid.NewGuid():N}");
         var propResp = await alice.PostAsJsonAsync("/api/properties", new { name = "Alice Place" });
         propResp.EnsureSuccessStatusCode();
-        var property = (await propResp.Content.ReadFromJsonAsync<PropertyDto>())!;
+        var property = (await propResp.Content.ReadFromJsonAsync<PropertyDto>(TestJson.Options))!;
 
         var defResp = await alice.PostAsJsonAsync("/api/job-definitions", new
         {
@@ -197,7 +197,7 @@ public sealed class CrossOwnerMatrixTests : IClassFixture<ApiFactory>
             stepTemplates = new[] { new { description = "Shut off gas" } },
         });
         defResp.EnsureSuccessStatusCode();
-        var definition = (await defResp.Content.ReadFromJsonAsync<JobDefinitionDto>())!;
+        var definition = (await defResp.Content.ReadFromJsonAsync<JobDefinitionDto>(TestJson.Options))!;
         return (property, definition);
     }
 
@@ -247,7 +247,7 @@ public sealed class CrossOwnerMatrixTests : IClassFixture<ApiFactory>
     {
         await SetupAlicesDefinitionResources();
         var bob = ClientAs($"bob-{Guid.NewGuid():N}");
-        var list = await bob.GetFromJsonAsync<List<JobDefinitionDto>>("/api/job-definitions");
+        var list = await bob.GetFromJsonAsync<List<JobDefinitionDto>>("/api/job-definitions", TestJson.Options);
         list!.ShouldBeEmpty();
     }
 }

@@ -33,28 +33,28 @@ public sealed class StepTickPerformanceTests : IClassFixture<ApiFactory>
 
         // ---- warm up: prime Mongo connection, JIT, app startup ----
         var warmProp = (await (await client.PostAsJsonAsync("/api/properties",
-            new { name = "Warm" })).Content.ReadFromJsonAsync<PropertyDto>())!;
+            new { name = "Warm" })).Content.ReadFromJsonAsync<PropertyDto>(TestJson.Options))!;
         var warmJob = (await (await client.PostAsJsonAsync("/api/jobs", new
         {
             propertyId = warmProp.Id,
             name = "Warm",
             dueDate = (string?)null,
             steps = new[] { new { description = "warm" } },
-        })).Content.ReadFromJsonAsync<JobDetailDto>())!;
+        })).Content.ReadFromJsonAsync<JobDetailDto>(TestJson.Options))!;
         var warmStep = warmJob.Steps[0].Id;
         await client.PostAsync($"/api/jobs/{warmJob.Id}/steps/{warmStep}/tick", null);
         await client.PostAsync($"/api/jobs/{warmJob.Id}/steps/{warmStep}/untick", null);
 
         // ---- create a fresh job with one step, time 100 toggle cycles ----
         var prop = (await (await client.PostAsJsonAsync("/api/properties",
-            new { name = "Perf" })).Content.ReadFromJsonAsync<PropertyDto>())!;
+            new { name = "Perf" })).Content.ReadFromJsonAsync<PropertyDto>(TestJson.Options))!;
         var job = (await (await client.PostAsJsonAsync("/api/jobs", new
         {
             propertyId = prop.Id,
             name = "Perf",
             dueDate = (string?)null,
             steps = new[] { new { description = "perf step" } },
-        })).Content.ReadFromJsonAsync<JobDetailDto>())!;
+        })).Content.ReadFromJsonAsync<JobDetailDto>(TestJson.Options))!;
         var stepId = job.Steps[0].Id;
 
         const int iterations = 100;
