@@ -5,6 +5,7 @@ using HomeMaintenance.Application;
 using HomeMaintenance.Application.Common.Interfaces;
 using HomeMaintenance.Infrastructure;
 using HomeMaintenance.Infrastructure.Auth;
+using System.Text.Json.Serialization;
 using MongoDB.Driver;
 using OpenTelemetry;
 
@@ -47,6 +48,12 @@ builder.Services.AddCors(options =>
             .AllowAnyMethod();
     });
 });
+
+// ── JSON ───────────────────────────────────────────────────────────────────
+// Serialize enums as strings (e.g. JobStatus "Active"/"Completed") to match
+// the frontend contract in api-client.ts.
+builder.Services.ConfigureHttpJsonOptions(o =>
+    o.SerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
 // ── Swagger / OpenAPI ──────────────────────────────────────────────────────
 builder.Services.AddEndpointsApiExplorer();

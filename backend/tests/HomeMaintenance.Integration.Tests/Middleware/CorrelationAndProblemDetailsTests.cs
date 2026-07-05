@@ -50,7 +50,7 @@ public sealed class CorrelationAndProblemDetailsTests : IClassFixture<ApiFactory
         response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
         response.Content.Headers.ContentType?.MediaType.ShouldBe("application/problem+json");
 
-        var body = await response.Content.ReadFromJsonAsync<JsonElement>();
+        var body = await response.Content.ReadFromJsonAsync<JsonElement>(TestJson.Options);
         body.GetProperty("code").GetString().ShouldBe("unauthorized");
         body.GetProperty("status").GetInt32().ShouldBe(401);
 

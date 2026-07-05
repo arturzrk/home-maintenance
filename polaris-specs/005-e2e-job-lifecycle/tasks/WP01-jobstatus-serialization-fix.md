@@ -4,10 +4,13 @@ title: "JobStatus enum serialization fix"
 lane: "for_review"
 dependencies: []
 base_branch: main
+base_commit: 5673f9656a447a1108f2b23003feacec70be7cc2
+created_at: '2026-07-05T09:14:21.752563+00:00'
 subtasks: [T001, T002, T003]
-domain: api-design
 test_status: required
 test_file: backend/tests/HomeMaintenance.Integration.Tests/Jobs/JobEndpointsTests.cs
+domain: api-design
+shell_pid: "18825"
 ---
 
 # WP01 - JobStatus enum serialization fix

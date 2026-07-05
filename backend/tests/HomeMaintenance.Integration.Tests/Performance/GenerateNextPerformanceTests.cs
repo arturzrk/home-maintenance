@@ -33,7 +33,7 @@ public sealed class GenerateNextPerformanceTests : IClassFixture<ApiFactory>
         // Start date beyond 3-month creation horizon: no inline jobs, so each
         // sequential generate-next call produces a unique next monthly occurrence.
         var prop = (await (await client.PostAsJsonAsync("/api/properties", new { name = "Perf" }))
-            .Content.ReadFromJsonAsync<PropertyDto>())!;
+            .Content.ReadFromJsonAsync<PropertyDto>(TestJson.Options))!;
 
         var startDate = DateOnly.FromDateTime(DateTime.UtcNow).AddMonths(6);
         var def = (await (await client.PostAsJsonAsync("/api/job-definitions", new
@@ -42,7 +42,7 @@ public sealed class GenerateNextPerformanceTests : IClassFixture<ApiFactory>
             name = "Perf boiler",
             schedule = new { unit = "Month", multiplier = 1, startDate = startDate.ToString("yyyy-MM-dd") },
             stepTemplates = new[] { new { description = "Check pressure" } },
-        })).Content.ReadFromJsonAsync<JobDefinitionDto>())!;
+        })).Content.ReadFromJsonAsync<JobDefinitionDto>(TestJson.Options))!;
 
         // Warm-up: prime Mongo connection, JIT, and app startup.
         (await client.PostAsync($"/api/job-definitions/{def.Id}/generate-next", null))

@@ -28,7 +28,7 @@ public sealed class StepMutationTests : IClassFixture<ApiFactory>
     {
         var resp = await client.PostAsJsonAsync("/api/properties", new { name = "Main House" });
         resp.EnsureSuccessStatusCode();
-        return (await resp.Content.ReadFromJsonAsync<PropertyDto>())!;
+        return (await resp.Content.ReadFromJsonAsync<PropertyDto>(TestJson.Options))!;
     }
 
     private async Task<JobDetailDto> CreateJob(HttpClient client, string propertyId, params string[] steps)
@@ -41,7 +41,7 @@ public sealed class StepMutationTests : IClassFixture<ApiFactory>
             steps = steps.Select(d => new { description = d }).ToArray(),
         });
         resp.EnsureSuccessStatusCode();
-        return (await resp.Content.ReadFromJsonAsync<JobDetailDto>())!;
+        return (await resp.Content.ReadFromJsonAsync<JobDetailDto>(TestJson.Options))!;
     }
 
     private async Task<JobDetailDto> Complete(HttpClient client, JobDetailDto job)
@@ -50,7 +50,7 @@ public sealed class StepMutationTests : IClassFixture<ApiFactory>
             (await client.PostAsync($"/api/jobs/{job.Id}/steps/{s.Id}/tick", null)).EnsureSuccessStatusCode();
         var resp = await client.PostAsync($"/api/jobs/{job.Id}/complete", null);
         resp.EnsureSuccessStatusCode();
-        return (await resp.Content.ReadFromJsonAsync<JobDetailDto>())!;
+        return (await resp.Content.ReadFromJsonAsync<JobDetailDto>(TestJson.Options))!;
     }
 
     // ---- AddStep ----
@@ -65,7 +65,7 @@ public sealed class StepMutationTests : IClassFixture<ApiFactory>
         var resp = await alice.PostAsJsonAsync($"/api/jobs/{job.Id}/steps", new { description = "c" });
 
         resp.StatusCode.ShouldBe(HttpStatusCode.OK);
-        var detail = await resp.Content.ReadFromJsonAsync<JobDetailDto>();
+        var detail = await resp.Content.ReadFromJsonAsync<JobDetailDto>(TestJson.Options);
         detail!.Steps.Count.ShouldBe(3);
         detail.Steps[2].Description.ShouldBe("c");
         detail.Steps[2].Order.ShouldBe(2);
@@ -93,7 +93,7 @@ public sealed class StepMutationTests : IClassFixture<ApiFactory>
         var resp = await alice.PostAsJsonAsync($"/api/jobs/{job.Id}/steps", new { description = "c" });
 
         resp.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
-        var body = await resp.Content.ReadFromJsonAsync<JsonElement>();
+        var body = await resp.Content.ReadFromJsonAsync<JsonElement>(TestJson.Options);
         body.GetProperty("code").GetString().ShouldBe("job_completed");
     }
 
@@ -109,7 +109,7 @@ public sealed class StepMutationTests : IClassFixture<ApiFactory>
         var resp = await alice.DeleteAsync($"/api/jobs/{job.Id}/steps/{job.Steps[1].Id}");
 
         resp.StatusCode.ShouldBe(HttpStatusCode.OK);
-        var detail = await resp.Content.ReadFromJsonAsync<JobDetailDto>();
+        var detail = await resp.Content.ReadFromJsonAsync<JobDetailDto>(TestJson.Options);
         detail!.Steps.Count.ShouldBe(2);
         detail.Steps.Select(s => s.Order).ShouldBe(new[] { 0, 1 });
         detail.Steps.Select(s => s.Description).ShouldBe(new[] { "a", "c" });
@@ -141,7 +141,7 @@ public sealed class StepMutationTests : IClassFixture<ApiFactory>
             new { description = "Updated description" });
 
         resp.StatusCode.ShouldBe(HttpStatusCode.OK);
-        var detail = await resp.Content.ReadFromJsonAsync<JobDetailDto>();
+        var detail = await resp.Content.ReadFromJsonAsync<JobDetailDto>(TestJson.Options);
         detail!.Steps[0].Description.ShouldBe("Updated description");
     }
 
@@ -174,7 +174,7 @@ public sealed class StepMutationTests : IClassFixture<ApiFactory>
             new { orderedStepIds = reversed });
 
         resp.StatusCode.ShouldBe(HttpStatusCode.OK);
-        var detail = await resp.Content.ReadFromJsonAsync<JobDetailDto>();
+        var detail = await resp.Content.ReadFromJsonAsync<JobDetailDto>(TestJson.Options);
         detail!.Steps.Select(s => s.Id).ShouldBe(reversed);
         detail.Steps.Select(s => s.Order).ShouldBe(new[] { 0, 1, 2 });
     }
@@ -221,7 +221,7 @@ public sealed class StepMutationTests : IClassFixture<ApiFactory>
         var resp = await alice.PatchAsJsonAsync($"/api/jobs/{job.Id}", new { name = "Renamed" });
 
         resp.StatusCode.ShouldBe(HttpStatusCode.OK);
-        var detail = await resp.Content.ReadFromJsonAsync<JobDetailDto>();
+        var detail = await resp.Content.ReadFromJsonAsync<JobDetailDto>(TestJson.Options);
         detail!.Name.ShouldBe("Renamed");
     }
 
@@ -237,7 +237,7 @@ public sealed class StepMutationTests : IClassFixture<ApiFactory>
             new { dueDate = "2026-12-31" });
 
         resp.StatusCode.ShouldBe(HttpStatusCode.OK);
-        var detail = await resp.Content.ReadFromJsonAsync<JobDetailDto>();
+        var detail = await resp.Content.ReadFromJsonAsync<JobDetailDto>(TestJson.Options);
         detail!.DueDate.ShouldBe(new DateOnly(2026, 12, 31));
     }
 
@@ -255,7 +255,7 @@ public sealed class StepMutationTests : IClassFixture<ApiFactory>
             new StringContent(json, global::System.Text.Encoding.UTF8, "application/json"));
 
         resp.StatusCode.ShouldBe(HttpStatusCode.OK);
-        var detail = await resp.Content.ReadFromJsonAsync<JobDetailDto>();
+        var detail = await resp.Content.ReadFromJsonAsync<JobDetailDto>(TestJson.Options);
         detail!.DueDate.ShouldBeNull();
     }
 
@@ -281,7 +281,7 @@ public sealed class StepMutationTests : IClassFixture<ApiFactory>
         var resp = await alice.PatchAsJsonAsync($"/api/jobs/{job.Id}", new { name = "Renamed" });
 
         resp.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
-        var body = await resp.Content.ReadFromJsonAsync<JsonElement>();
+        var body = await resp.Content.ReadFromJsonAsync<JsonElement>(TestJson.Options);
         body.GetProperty("code").GetString().ShouldBe("job_completed");
     }
 
@@ -314,7 +314,7 @@ public sealed class StepMutationTests : IClassFixture<ApiFactory>
         };
 
         resp.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
-        var body = await resp.Content.ReadFromJsonAsync<JsonElement>();
+        var body = await resp.Content.ReadFromJsonAsync<JsonElement>(TestJson.Options);
         body.GetProperty("code").GetString().ShouldBe("job_completed");
     }
 
