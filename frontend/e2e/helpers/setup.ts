@@ -90,6 +90,11 @@ export async function createAndCompleteJobViaApi(
   name: string,
   steps: string[],
 ): Promise<string> {
+  if (steps.length === 0) {
+    throw new Error(
+      "createAndCompleteJobViaApi requires at least one step (a job cannot be completed until every step is ticked)",
+    );
+  }
   const headers = {
     "Content-Type": "application/json",
     Authorization: `Bearer ${token}`,
