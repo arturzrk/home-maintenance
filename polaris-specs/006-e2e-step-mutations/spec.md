@@ -79,6 +79,11 @@ types "New Job Name", presses Enter. The heading shows the new name.
   steps visible as a record (settled during PR #66 review). US5/FR-05
   follow the implemented behavior.
 - Estimation skipped (consistent with features 003-005).
+- Amended during implementation: WP07-2/WP07-3 exposed a UI bug --
+  `JobChecklist` never resynced its local step state after server
+  revalidation, so removed steps stayed visible and edited descriptions
+  reverted until a hard reload. A one-line resync effect was added to
+  `JobChecklist` as part of WP01 (PR #70).
 
 ## Out of Scope
 

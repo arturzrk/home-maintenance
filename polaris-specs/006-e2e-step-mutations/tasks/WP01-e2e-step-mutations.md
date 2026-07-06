@@ -1,7 +1,7 @@
 ---
 work_package_id: WP01
 title: "E2E: Step mutations & job rename test suite"
-lane: "planned"
+lane: "testing"
 dependencies: []
 base_branch: main
 subtasks: [T001, T002, T003, T004, T005, T006, T007]
@@ -207,3 +207,8 @@ disabled-but-visible (spec assumption documents this).
 ```bash
 polaris implement WP01
 ```
+
+## Activity Log
+
+- 2026-07-06T18:00:34Z -- unknown -- lane=doing -- Implementing step mutation tests
+- 2026-07-06T18:00:37Z -- unknown -- lane=testing -- Playwright suite running
