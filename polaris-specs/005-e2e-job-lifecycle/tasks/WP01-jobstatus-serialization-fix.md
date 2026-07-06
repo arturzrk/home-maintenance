@@ -1,7 +1,7 @@
 ---
 work_package_id: WP01
 title: "JobStatus enum serialization fix"
-lane: "for_review"
+lane: "done"
 dependencies: []
 base_branch: main
 base_commit: 5673f9656a447a1108f2b23003feacec70be7cc2
@@ -11,6 +11,8 @@ test_status: required
 test_file: backend/tests/HomeMaintenance.Integration.Tests/Jobs/JobEndpointsTests.cs
 domain: api-design
 shell_pid: "18825"
+reviewed_by: "Artur Żurek"
+review_status: "approved"
 ---
 
 # WP01 - JobStatus enum serialization fix
@@ -108,3 +110,4 @@ polaris implement WP01
 - 2026-07-05T12:47:03Z – unknown – lane=doing – Implementing serialization fix
 - 2026-07-05T12:47:05Z – unknown – lane=testing – dotnet test + e2e suites running
 - 2026-07-05T12:47:08Z – unknown – lane=for_review – 326 backend tests pass; status Active verified live; 15/15 e2e pass; PR #63
+- 2026-07-06T10:55:12Z – unknown – shell_pid=18825 – lane=done – PRs #63 and #64 merged
