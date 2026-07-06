@@ -58,6 +58,30 @@ export async function createJobDefinitionViaApi(
   return data.id;
 }
 
+/** Create a job directly via the backend API and return its id. */
+export async function createJobViaApi(
+  token: string,
+  propertyId: string,
+  name: string,
+  steps: string[] = [],
+): Promise<string> {
+  const resp = await fetch(`${API_BASE}/api/jobs`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      propertyId,
+      name,
+      steps: steps.map((description) => ({ description })),
+    }),
+  });
+  if (!resp.ok) throw new Error(`createJob failed: ${resp.status}`);
+  const data = (await resp.json()) as { id: string };
+  return data.id;
+}
+
 /** Return a unique user sub + matching bearer token for a fully isolated test. */
 export function uniqueUser(): { sub: string; token: string } {
   const sub = `e2e-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
