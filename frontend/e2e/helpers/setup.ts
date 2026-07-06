@@ -83,6 +83,54 @@ export async function createJobViaApi(
   return data.id;
 }
 
+/** Create a job, tick all its steps, and complete it. Returns the job id. */
+export async function createAndCompleteJobViaApi(
+  token: string,
+  propertyId: string,
+  name: string,
+  steps: string[],
+): Promise<string> {
+  if (steps.length === 0) {
+    throw new Error(
+      "createAndCompleteJobViaApi requires at least one step (a job cannot be completed until every step is ticked)",
+    );
+  }
+  const headers = {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${token}`,
+  };
+  const createResp = await fetch(`${API_BASE}/api/jobs`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({
+      propertyId,
+      name,
+      dueDate: null,
+      steps: steps.map((description) => ({ description })),
+    }),
+  });
+  if (!createResp.ok) {
+    throw new Error(`createJob failed: ${createResp.status}`);
+  }
+  const job = (await createResp.json()) as {
+    id: string;
+    steps: { id: string }[];
+  };
+  for (const step of job.steps) {
+    const tick = await fetch(
+      `${API_BASE}/api/jobs/${job.id}/steps/${step.id}/tick`,
+      { method: "POST", headers },
+    );
+    if (!tick.ok) throw new Error(`tickStep failed: ${tick.status}`);
+  }
+  const complete = await fetch(`${API_BASE}/api/jobs/${job.id}/complete`, {
+    method: "POST",
+    headers,
+  });
+  if (!complete.ok) throw new Error(`completeJob failed: ${complete.status}`);
+  return job.id;
+}
+
 /** Return a unique user sub + matching bearer token for a fully isolated test. */
 export function uniqueUser(): { sub: string; token: string } {
   const sub = `e2e-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;

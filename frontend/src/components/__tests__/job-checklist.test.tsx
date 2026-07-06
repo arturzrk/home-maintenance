@@ -95,6 +95,30 @@ describe("JobChecklist", () => {
     await waitFor(() => expect(removeStep).toHaveBeenCalledWith("job-1", "s1"));
   });
 
+  it("resyncs the rendered list when initialSteps changes", () => {
+    const { rerender } = render(
+      <JobChecklist jobId="job-1" initialSteps={initialSteps} jobLocked={false} />,
+    );
+    expect(screen.getByText("Shut off gas")).toBeInTheDocument();
+
+    // Simulate a server revalidation after a StepRow action (remove s1,
+    // edit s2's description).
+    rerender(
+      <JobChecklist
+        jobId="job-1"
+        initialSteps={[
+          step("s2", "Drain system fully", 0),
+          step("s3", "Replace filter", 1),
+        ]}
+        jobLocked={false}
+      />,
+    );
+
+    expect(screen.queryByText("Shut off gas")).toBeNull();
+    expect(screen.getByText("Drain system fully")).toBeInTheDocument();
+    expect(screen.getByText("Replace filter")).toBeInTheDocument();
+  });
+
   it("hides the add form when job is locked", () => {
     render(
       <JobChecklist jobId="job-1" initialSteps={initialSteps} jobLocked={true} />,

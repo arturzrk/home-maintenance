@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { addStep, reorderSteps } from "@/app/jobs/actions";
 import type { JobDetail, StepDto } from "@/lib/api-client";
 import { StepRow } from "@/components/step-row";
@@ -20,6 +20,11 @@ export function JobChecklist({
 }) {
   const [steps, setSteps] = useState(initialSteps);
   const [draftDescription, setDraftDescription] = useState("");
+
+  // Server actions in StepRow (remove, edit description) revalidate the
+  // page, which re-renders the parent with fresh initialSteps. Resync the
+  // local list so those mutations show without a hard reload.
+  useEffect(() => setSteps(initialSteps), [initialSteps]);
   const [addError, setAddError] = useState<string | null>(null);
   const [reorderError, setReorderError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
