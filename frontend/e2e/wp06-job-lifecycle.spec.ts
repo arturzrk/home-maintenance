@@ -100,6 +100,9 @@ test.describe("WP06: Job lifecycle", () => {
     await completeButton.click();
 
     await expect(page.getByText(/Completed on/)).toBeVisible();
+    // On a completed job the add-step form unmounts, while StepRow keeps
+    // its Remove button rendered but disabled (steps stay visible as a
+    // record of what was done).
     await expect(page.getByPlaceholder("Add a step")).toBeHidden();
     await expect(
       page.getByRole("button", { name: 'Remove step "Buy paint"' }),

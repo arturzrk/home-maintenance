@@ -74,6 +74,7 @@ export async function createJobViaApi(
     body: JSON.stringify({
       propertyId,
       name,
+      dueDate: null,
       steps: steps.map((description) => ({ description })),
     }),
   });
