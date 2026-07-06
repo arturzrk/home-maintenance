@@ -8,6 +8,7 @@ subtasks: [T004, T005, T006, T007, T008, T009, T010]
 test_status: required
 test_file: frontend/e2e/wp06-job-lifecycle.spec.ts
 domain: testing-specialist
+shell_pid: "70707"
 ---
 
 # WP02 - E2E: Job lifecycle test suite
