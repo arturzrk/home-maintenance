@@ -1,7 +1,7 @@
 ---
 work_package_id: WP02
 title: 'E2E: Job lifecycle test suite'
-lane: planned
+lane: "for_review"
 dependencies: ["WP01"]
 base_branch: main
 subtasks: [T004, T005, T006, T007, T008, T009, T010]
@@ -198,3 +198,9 @@ use a substring name match and `toContainText` for the details.
 ```bash
 polaris implement WP02 --base WP01
 ```
+
+## Activity Log
+
+- 2026-07-06T11:09:03Z – unknown – lane=doing – Implementing lifecycle tests
+- 2026-07-06T11:09:05Z – unknown – lane=testing – Playwright suite running
+- 2026-07-06T11:09:06Z – unknown – lane=for_review – 21/21 Playwright tests pass (6 new lifecycle tests); PR #66
