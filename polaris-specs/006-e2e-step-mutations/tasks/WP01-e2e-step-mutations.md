@@ -1,7 +1,7 @@
 ---
 work_package_id: WP01
 title: "E2E: Step mutations & job rename test suite"
-lane: "for_review"
+lane: "done"
 dependencies: []
 base_branch: main
 base_commit: ac92478738abdcb589161b5e956ff9d523313e25
@@ -11,6 +11,8 @@ test_status: required
 test_file: frontend/e2e/wp07-step-mutations.spec.ts
 domain: testing-specialist
 shell_pid: "85964"
+reviewed_by: "Artur Żurek"
+review_status: "approved"
 ---
 
 # WP01 - E2E: Step mutations & job rename test suite
@@ -216,3 +218,4 @@ polaris implement WP01
 - 2026-07-06T18:00:34Z -- unknown -- lane=doing -- Implementing step mutation tests
 - 2026-07-06T18:00:37Z -- unknown -- lane=testing -- Playwright suite running
 - 2026-07-06T18:01:22Z – unknown – lane=for_review – 27/27 e2e + 48/48 unit pass; WP07-2/3 exposed JobChecklist resync bug, fixed in WP01; PR #70
+- 2026-07-06T18:14:25Z – unknown – shell_pid=85964 – lane=done – PRs #70 and #71 merged; issue #48 closed
