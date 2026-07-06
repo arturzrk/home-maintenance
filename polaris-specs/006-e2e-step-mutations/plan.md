@@ -11,8 +11,9 @@ created_at: "2026-07-06"
 ## Summary
 
 Add `createAndCompleteJobViaApi` to the shared helpers, then write 6
-Playwright tests for step mutations and job rename. No production code
-changes.
+Playwright tests for step mutations and job rename. Amended during
+implementation: includes a one-line JobChecklist state-resync fix for a
+bug the tests exposed.
 
 ## Technical Context
 
@@ -99,5 +100,6 @@ server; the first-listitem assertion auto-waits through both.
 - [ ] Full Playwright suite passes (21 existing + 6 new = 27)
 - [ ] Helper added to e2e/helpers/setup.ts
 - [ ] Each test isolated (unique user + property + job)
-- [ ] No production code changes
+- [ ] No production code changes beyond the JobChecklist resync fix
+      (amendment: bug exposed by WP07-2/WP07-3, see spec assumptions)
 - [ ] PR merged to main

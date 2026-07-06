@@ -1,7 +1,7 @@
 ---
 work_package_id: WP01
-title: 'E2E: Step mutations & job rename test suite'
-lane: "doing"
+title: "E2E: Step mutations & job rename test suite"
+lane: "for_review"
 dependencies: []
 base_branch: main
 base_commit: ac92478738abdcb589161b5e956ff9d523313e25
@@ -210,3 +210,9 @@ disabled-but-visible (spec assumption documents this).
 ```bash
 polaris implement WP01
 ```
+
+## Activity Log
+
+- 2026-07-06T18:00:34Z -- unknown -- lane=doing -- Implementing step mutation tests
+- 2026-07-06T18:00:37Z -- unknown -- lane=testing -- Playwright suite running
+- 2026-07-06T18:01:22Z – unknown – lane=for_review – 27/27 e2e + 48/48 unit pass; WP07-2/3 exposed JobChecklist resync bug, fixed in WP01; PR #70
