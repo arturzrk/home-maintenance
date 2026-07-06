@@ -13,5 +13,23 @@
     "baseline_hours": null,
     "source": "developer",
     "captured_at": "2026-07-04T00:00:00Z"
-  }
+  },
+  "amendments": [
+    {
+      "amendment_id": "amd-001",
+      "text": "Files changed outside declared WP scope: backend/src/HomeMaintenance.API/Endpoints/JobDefinitionEndpoints.cs, backend/src/HomeMaintenance.API/Program.cs, backend/src/HomeMaintenance.Application/DependencyInjection.cs (and 44 more)",
+      "timestamp": "2026-07-06T11:09:06.822395+00:00",
+      "affected_sections": [],
+      "artifacts_updated": {
+        "spec_sections": [],
+        "plan_files": [],
+        "wps_regenerated": [],
+        "wps_locked": [],
+        "wps_created": []
+      },
+      "agent": "unknown",
+      "source": "implement",
+      "drift_type": "expansion"
+    }
+  ]
 }
