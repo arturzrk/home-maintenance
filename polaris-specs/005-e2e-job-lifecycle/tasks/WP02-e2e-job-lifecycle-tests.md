@@ -204,7 +204,7 @@ polaris implement WP02 --base WP01
 
 ## Activity Log
 
-- 2026-07-06T11:09:03Z – unknown – lane=doing – Implementing lifecycle tests
-- 2026-07-06T11:09:05Z – unknown – lane=testing – Playwright suite running
-- 2026-07-06T11:09:06Z – unknown – lane=for_review – 21/21 Playwright tests pass (6 new lifecycle tests); PR #66
-- 2026-07-06T15:26:58Z – unknown – shell_pid=70707 – lane=done – PRs #65 and #66 merged; issue #47 closed
+- 2026-07-06T11:09:03Z -- unknown -- lane=doing -- Implementing lifecycle tests
+- 2026-07-06T11:09:05Z -- unknown -- lane=testing -- Playwright suite running
+- 2026-07-06T11:09:06Z -- unknown -- lane=for_review -- 21/21 Playwright tests pass (6 new lifecycle tests); PR #66
+- 2026-07-06T15:26:58Z -- unknown -- shell_pid=70707 -- lane=done -- PRs #65 and #66 merged; issue #47 closed
