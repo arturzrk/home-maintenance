@@ -1,13 +1,16 @@
 ---
 work_package_id: WP02
 title: 'E2E: Job lifecycle test suite'
-lane: planned
-dependencies: ["WP01"]
-base_branch: main
+lane: "doing"
+dependencies: [WP01]
+base_branch: 005-e2e-job-lifecycle-WP01
+base_commit: 15c466948911634a0f47e8dc5659b9fe2175e7e1
+created_at: '2026-07-06T10:57:11.887447+00:00'
 subtasks: [T004, T005, T006, T007, T008, T009, T010]
 test_status: required
 test_file: frontend/e2e/wp06-job-lifecycle.spec.ts
 domain: testing-specialist
+shell_pid: "70707"
 ---
 
 # WP02 - E2E: Job lifecycle test suite
