@@ -1,13 +1,16 @@
 ---
 work_package_id: WP01
-title: "E2E: Step mutations & job rename test suite"
-lane: "planned"
+title: 'E2E: Step mutations & job rename test suite'
+lane: "doing"
 dependencies: []
 base_branch: main
+base_commit: ac92478738abdcb589161b5e956ff9d523313e25
+created_at: '2026-07-06T17:53:16.823060+00:00'
 subtasks: [T001, T002, T003, T004, T005, T006, T007]
-domain: testing-specialist
 test_status: required
 test_file: frontend/e2e/wp07-step-mutations.spec.ts
+domain: testing-specialist
+shell_pid: "85964"
 ---
 
 # WP01 - E2E: Step mutations & job rename test suite
