@@ -1,7 +1,7 @@
 ---
 work_package_id: WP01
 title: "CI e2e job in ci.yml"
-lane: "for_review"
+lane: "done"
 dependencies: []
 base_branch: main
 base_commit: 39fe224b873ca62916d75904025cb8de1b013ead
@@ -11,6 +11,8 @@ test_status: required
 test_file: .github/workflows/ci.yml
 domain: devops-infra
 shell_pid: "78557"
+reviewed_by: "Artur Żurek"
+review_status: "approved"
 ---
 
 # WP01 - CI e2e job in ci.yml
@@ -146,3 +148,4 @@ polaris implement WP01
 - 2026-07-11T09:52:56Z – unknown – lane=doing – Implementing e2e CI job
 - 2026-07-11T09:52:59Z – unknown – lane=testing – Self-verifying via PR checks
 - 2026-07-11T09:53:00Z – unknown – lane=for_review – e2e check green on PR #75: 27/27 in 2m27s; 2 CI-env fixes (content root, AUTH_TRUST_HOST) + mongo health check
+- 2026-07-11T12:57:10Z – unknown – shell_pid=78557 – lane=done – PRs #75 and #76 merged; e2e suite now gates every PR
