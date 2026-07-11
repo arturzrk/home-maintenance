@@ -140,6 +140,7 @@ jobs:
           NEXTAUTH_DEV_STUB: "true"
           NEXTAUTH_SECRET: ci-e2e-secret
           NEXTAUTH_URL: http://localhost:3000
+          AUTH_TRUST_HOST: "true"
           API_BASE_URL: http://localhost:5000
           NEXT_PUBLIC_API_URL: http://localhost:5000
         run: npm run build
@@ -150,6 +151,7 @@ jobs:
           NEXTAUTH_DEV_STUB: "true"
           NEXTAUTH_SECRET: ci-e2e-secret
           NEXTAUTH_URL: http://localhost:3000
+          AUTH_TRUST_HOST: "true"
           API_BASE_URL: http://localhost:5000
           NEXT_PUBLIC_API_URL: http://localhost:5000
         run: nohup npm start > ../web.log 2>&1 &
