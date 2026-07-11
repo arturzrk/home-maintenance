@@ -81,6 +81,125 @@ jobs:
       - name: Build
         run: npm run build
 
+  e2e:
+    name: e2e
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      mongodb:
+        image: mongo:7.0
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --quiet --eval 'db.adminCommand({ping: 1})'"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up .NET 9
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('backend/**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Set up Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Publish API
+        run: dotnet publish backend/src/HomeMaintenance.API -c Release -o api-publish
+
+      - name: Start API
+        # Run from inside the publish dir: the content root defaults to the
+        # working directory, and appsettings*.json must be on it.
+        working-directory: api-publish
+        env:
+          ASPNETCORE_ENVIRONMENT: Development
+          ASPNETCORE_URLS: http://localhost:5000
+          Auth__UseStub: "true"
+        run: nohup dotnet HomeMaintenance.API.dll > ../api.log 2>&1 &
+
+      - name: Install frontend deps
+        working-directory: frontend
+        run: npm ci
+
+      - name: Install Playwright browsers
+        working-directory: frontend
+        run: npx playwright install --with-deps chromium
+
+      - name: Build frontend
+        working-directory: frontend
+        env:
+          NEXTAUTH_DEV_STUB: "true"
+          NEXTAUTH_SECRET: ci-e2e-secret
+          NEXTAUTH_URL: http://localhost:3000
+          AUTH_TRUST_HOST: "true"
+          API_BASE_URL: http://localhost:5000
+          NEXT_PUBLIC_API_URL: http://localhost:5000
+        run: npm run build
+
+      - name: Start frontend
+        working-directory: frontend
+        env:
+          NEXTAUTH_DEV_STUB: "true"
+          NEXTAUTH_SECRET: ci-e2e-secret
+          NEXTAUTH_URL: http://localhost:3000
+          AUTH_TRUST_HOST: "true"
+          API_BASE_URL: http://localhost:5000
+          NEXT_PUBLIC_API_URL: http://localhost:5000
+        run: nohup npm start > ../web.log 2>&1 &
+
+      - name: Wait for stack
+        run: |
+          for url in http://localhost:5000/health http://localhost:3000/signin; do
+            for i in $(seq 1 60); do
+              if curl -sf -o /dev/null "$url"; then
+                echo "$url ready"
+                break
+              fi
+              if [ "$i" = "60" ]; then
+                echo "$url never became ready"
+                echo "--- api.log ---"; tail -50 api.log || true
+                echo "--- web.log ---"; tail -50 web.log || true
+                exit 1
+              fi
+              sleep 1
+            done
+          done
+
+      - name: Playwright e2e
+        working-directory: frontend
+        run: npx playwright test
+
+      - name: Show service logs on failure
+        if: failure()
+        run: |
+          echo "--- api.log ---"; tail -100 api.log || true
+          echo "--- web.log ---"; tail -100 web.log || true
+
+      - name: Upload test results
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-results
+          path: |
+            frontend/test-results/
+            api.log
+            web.log
+          retention-days: 7
+
   validators:
     name: validators
     runs-on: ubuntu-latest
