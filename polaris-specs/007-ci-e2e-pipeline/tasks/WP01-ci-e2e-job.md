@@ -1,13 +1,16 @@
 ---
 work_package_id: WP01
-title: "CI e2e job in ci.yml"
-lane: "planned"
+title: CI e2e job in ci.yml
+lane: "doing"
 dependencies: []
 base_branch: main
+base_commit: 39fe224b873ca62916d75904025cb8de1b013ead
+created_at: '2026-07-11T09:22:37.312623+00:00'
 subtasks: [T001, T002, T003, T004, T005, T006]
-domain: devops-infra
 test_status: required
 test_file: .github/workflows/ci.yml
+domain: devops-infra
+shell_pid: "78557"
 ---
 
 # WP01 - CI e2e job in ci.yml
