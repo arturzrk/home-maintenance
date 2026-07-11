@@ -1,0 +1,16 @@
+{
+  "feature_number": "007",
+  "slug": "007-ci-e2e-pipeline",
+  "friendly_name": "CI: E2E pipeline",
+  "mission": "software-dev",
+  "source_description": "GitHub Actions e2e job: MongoDB + .NET API (dev-stub) + Next.js, full Playwright suite on PRs",
+  "created_at": "2026-07-11T00:00:00Z",
+  "target_branch": "main",
+  "vcs": "git",
+  "estimation": {
+    "baseline_raw": "skip",
+    "baseline_hours": null,
+    "source": "developer",
+    "captured_at": "2026-07-11T00:00:00Z"
+  }
+}
