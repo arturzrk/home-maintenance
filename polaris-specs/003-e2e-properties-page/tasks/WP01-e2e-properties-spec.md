@@ -1,13 +1,15 @@
 ---
 work_package_id: WP01
 title: "E2E: Properties page test suite"
-lane: "for_review"
+lane: "done"
 dependencies: []
 base_branch: main
 subtasks: [T001, T002, T003, T004, T005, T006]
 domain: testing-specialist
 test_status: required
 test_file: frontend/e2e/wp04-properties.spec.ts
+reviewed_by: "Artur Żurek"
+review_status: "approved"
 ---
 
 # WP01 - E2E: Properties page test suite
@@ -182,3 +184,4 @@ polaris implement WP01
 - 2026-07-04T11:00:06Z -- unknown -- lane=doing -- Moved to doing
 - 2026-07-04T11:00:07Z -- unknown -- lane=testing -- Moved to testing
 - 2026-07-04T11:00:09Z -- unknown -- lane=for_review -- 6/6 Playwright e2e tests pass
+- 2026-07-11T13:12:47Z – unknown – lane=done – Implementation merged 2026-07-04 (PR #54); closing stale lane

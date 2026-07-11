@@ -30,6 +30,22 @@
       "agent": "unknown",
       "source": "implement",
       "drift_type": "expansion"
+    },
+    {
+      "amendment_id": "amd-002",
+      "text": "Files changed outside declared WP scope: backend/src/HomeMaintenance.Domain/JobDefinitions/CadenceUnit.cs, backend/src/HomeMaintenance.Domain/JobDefinitions/JobDefinition.cs, backend/src/HomeMaintenance.Domain/JobDefinitions/ScheduleDefinition.cs (and 12 more)",
+      "timestamp": "2026-07-11T13:12:48.627862+00:00",
+      "affected_sections": [],
+      "artifacts_updated": {
+        "spec_sections": [],
+        "plan_files": [],
+        "wps_regenerated": [],
+        "wps_locked": [],
+        "wps_created": []
+      },
+      "agent": "unknown",
+      "source": "implement",
+      "drift_type": "expansion"
     }
   ]
 }
