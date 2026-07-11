@@ -217,5 +217,5 @@ polaris implement WP01
 
 - 2026-07-06T18:00:34Z -- unknown -- lane=doing -- Implementing step mutation tests
 - 2026-07-06T18:00:37Z -- unknown -- lane=testing -- Playwright suite running
-- 2026-07-06T18:01:22Z – unknown – lane=for_review – 27/27 e2e + 48/48 unit pass; WP07-2/3 exposed JobChecklist resync bug, fixed in WP01; PR #70
-- 2026-07-06T18:14:25Z – unknown – shell_pid=85964 – lane=done – PRs #70 and #71 merged; issue #48 closed
+- 2026-07-06T18:01:22Z -- unknown -- lane=for_review -- 27/27 e2e + 48/48 unit pass; WP07-2/3 exposed JobChecklist resync bug, fixed in WP01; PR #70
+- 2026-07-06T18:14:25Z -- unknown -- shell_pid=85964 -- lane=done -- PRs #70 and #71 merged; issue #48 closed
