@@ -117,10 +117,14 @@ jobs:
         run: dotnet publish backend/src/HomeMaintenance.API -c Release -o api-publish
 
       - name: Start API
+        # Run from inside the publish dir: the content root defaults to the
+        # working directory, and appsettings*.json must be on it.
+        working-directory: api-publish
         env:
           ASPNETCORE_ENVIRONMENT: Development
           ASPNETCORE_URLS: http://localhost:5000
-        run: nohup dotnet api-publish/HomeMaintenance.API.dll > api.log 2>&1 &
+          Auth__UseStub: "true"
+        run: nohup dotnet HomeMaintenance.API.dll > ../api.log 2>&1 &
 
       - name: Install frontend deps
         working-directory: frontend
