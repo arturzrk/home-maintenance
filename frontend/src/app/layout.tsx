@@ -21,7 +21,8 @@ export default function RootLayout({
               <a
                 href="/user-manual/index.html"
                 target="_blank"
-                rel="noopener"
+                rel="noopener noreferrer"
+                aria-label="User guide (opens in a new tab)"
                 className="text-sm text-gray-600 hover:text-gray-900 hover:underline"
               >
                 User guide
