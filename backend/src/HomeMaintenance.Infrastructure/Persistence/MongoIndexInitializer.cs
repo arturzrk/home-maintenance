@@ -62,8 +62,9 @@ internal sealed class MongoIndexInitializer : IHostedService
                 new CreateIndexModel<AssetDocument>(
                     Builders<AssetDocument>.IndexKeys
                         .Ascending(d => d.OwnerId)
-                        .Ascending(d => d.PropertyId),
-                    new CreateIndexOptions { Name = "owner_property_idx" }),
+                        .Ascending(d => d.PropertyId)
+                        .Ascending(d => d.Name),
+                    new CreateIndexOptions { Name = "owner_property_name_idx" }),
             },
             ct);
     }
