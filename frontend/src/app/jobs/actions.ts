@@ -21,6 +21,7 @@ export async function createJob(formData: FormData): Promise<ActionResult<{ id: 
   const propertyId = String(formData.get("propertyId") ?? "").trim();
   const name = String(formData.get("name") ?? "").trim();
   const dueDateRaw = String(formData.get("dueDate") ?? "").trim();
+  const assetId = String(formData.get("assetId") ?? "").trim();
   const stepLines = String(formData.get("steps") ?? "")
     .split("\n")
     .map((s) => s.trim())
@@ -40,6 +41,7 @@ export async function createJob(formData: FormData): Promise<ActionResult<{ id: 
     name,
     dueDate: dueDateRaw || null,
     steps: stepLines.map((description) => ({ description })),
+    assetId: assetId || null,
   };
 
   const session = await requireSession();

@@ -3,13 +3,14 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { createJobDefinition } from "@/app/properties/actions";
-import type { ScheduleDefinitionDto } from "@/lib/api-client";
+import type { AssetDto, ScheduleDefinitionDto } from "@/lib/api-client";
 
 interface Props {
   propertyId: string;
+  assets?: AssetDto[];
 }
 
-export function CreateJobDefinitionForm({ propertyId }: Props) {
+export function CreateJobDefinitionForm({ propertyId, assets = [] }: Props) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -20,6 +21,7 @@ export function CreateJobDefinitionForm({ propertyId }: Props) {
   const [multiplier, setMultiplier] = useState(1);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const [assetId, setAssetId] = useState("");
   const [steps, setSteps] = useState<string[]>([]);
 
   function addStep() {
@@ -40,6 +42,7 @@ export function CreateJobDefinitionForm({ propertyId }: Props) {
     setMultiplier(1);
     setStartDate("");
     setEndDate("");
+    setAssetId("");
     setSteps([]);
     setError(null);
   }
@@ -58,6 +61,7 @@ export function CreateJobDefinitionForm({ propertyId }: Props) {
         stepTemplates: steps
           .map((d) => ({ description: d.trim() }))
           .filter((s) => s.description.length > 0),
+        assetId: assetId || null,
       });
       if (!result.ok) {
         setError(result.error);
@@ -167,6 +171,28 @@ export function CreateJobDefinitionForm({ propertyId }: Props) {
           className="mt-1 rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-500"
         />
       </div>
+
+      {assets.length > 0 && (
+        <div>
+          <label className="block text-xs text-gray-600" htmlFor="jd-asset">
+            Asset (optional)
+          </label>
+          <select
+            id="jd-asset"
+            value={assetId}
+            onChange={(e) => setAssetId(e.target.value)}
+            disabled={pending}
+            className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-500"
+          >
+            <option value="">No asset</option>
+            {assets.map((a) => (
+              <option key={a.id} value={a.id}>
+                {a.name}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
 
       <div>
         <p className="text-xs text-gray-600">Steps (optional)</p>

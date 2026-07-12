@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ApiError, jobDefinitions as jobDefinitionsApi, jobs as jobsApi } from "@/lib/api-client";
+import { ApiError, assets as assetsApi, jobDefinitions as jobDefinitionsApi, jobs as jobsApi } from "@/lib/api-client";
 import { requireSession } from "@/lib/session";
 import { DefinitionHeader } from "./components/DefinitionHeader";
 import { StepTemplateList } from "./components/StepTemplateList";
@@ -32,6 +32,10 @@ export default async function JobDefinitionDetailPage({
   const { jobs: allJobs } = await jobsApi.list(session.idToken, { definitionId: id });
   const generatedJobs = allJobs.filter((j) => j.jobDefinitionId === id);
 
+  const asset = definition.assetId
+    ? await assetsApi.get(definition.assetId, session.idToken).catch(() => null)
+    : null;
+
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <p className="text-xs text-gray-500">
@@ -41,6 +45,15 @@ export default async function JobDefinitionDetailPage({
       </p>
 
       <DefinitionHeader definition={definition} />
+
+      {asset && (
+        <p className="text-sm text-gray-500">
+          Asset:{" "}
+          <Link href={`/assets/${asset.id}`} className="font-medium text-gray-900 hover:underline">
+            {asset.name}
+          </Link>
+        </p>
+      )}
 
       <section className="rounded-md border border-gray-200 bg-white p-4 shadow-sm space-y-2">
         <h2 className="text-sm font-semibold text-gray-700">Generated jobs</h2>
