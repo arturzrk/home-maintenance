@@ -18,6 +18,14 @@ export default function RootLayout({
               <span className="text-lg font-semibold tracking-tight">
                 Home Maintenance
               </span>
+              <a
+                href="/user-manual/index.html"
+                target="_blank"
+                rel="noopener"
+                className="text-sm text-gray-600 hover:text-gray-900 hover:underline"
+              >
+                User guide
+              </a>
             </div>
           </div>
         </header>
