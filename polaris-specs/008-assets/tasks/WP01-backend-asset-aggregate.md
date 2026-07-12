@@ -1,7 +1,7 @@
 ---
 work_package_id: WP01
 title: "Backend: Asset aggregate end-to-end"
-lane: "planned"
+lane: "for_review"
 dependencies: []
 base_branch: main
 subtasks: [T001, T002, T003, T004, T005]
@@ -109,3 +109,9 @@ unauthenticated -> 401. Use `TestJson.Options` for deserialization.
 ```bash
 polaris implement WP01
 ```
+
+## Activity Log
+
+- 2026-07-12T12:33:33Z – unknown – lane=doing – Implementing Asset aggregate
+- 2026-07-12T12:33:35Z – unknown – lane=testing – dotnet test running
+- 2026-07-12T12:33:36Z – unknown – lane=for_review – 165 unit + 186 integration green (25 new); PR #84
