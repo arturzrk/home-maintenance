@@ -1,7 +1,7 @@
 ---
 work_package_id: WP01
 title: "Backend: Asset aggregate end-to-end"
-lane: "for_review"
+lane: "done"
 dependencies: []
 base_branch: main
 base_commit: 5433ab9991cabdc6c0931212f75ec7cfba6aa605
@@ -11,6 +11,8 @@ test_status: required
 test_file: backend/tests/HomeMaintenance.Integration.Tests/Assets/AssetEndpointsTests.cs
 domain: backend-logic
 shell_pid: "28599"
+reviewed_by: "Artur Żurek"
+review_status: "approved"
 ---
 
 # WP01 - Backend: Asset aggregate end-to-end
@@ -118,3 +120,4 @@ polaris implement WP01
 - 2026-07-12T12:33:33Z – unknown – lane=doing – Implementing Asset aggregate
 - 2026-07-12T12:33:35Z – unknown – lane=testing – dotnet test running
 - 2026-07-12T12:33:36Z – unknown – lane=for_review – 165 unit + 186 integration green (25 new); PR #84
+- 2026-07-12T16:32:58Z – unknown – shell_pid=28599 – lane=done – PRs #84 and #85 merged
