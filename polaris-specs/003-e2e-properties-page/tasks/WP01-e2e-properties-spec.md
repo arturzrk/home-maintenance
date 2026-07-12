@@ -184,4 +184,4 @@ polaris implement WP01
 - 2026-07-04T11:00:06Z -- unknown -- lane=doing -- Moved to doing
 - 2026-07-04T11:00:07Z -- unknown -- lane=testing -- Moved to testing
 - 2026-07-04T11:00:09Z -- unknown -- lane=for_review -- 6/6 Playwright e2e tests pass
-- 2026-07-11T13:12:47Z – unknown – lane=done – Implementation merged 2026-07-04 (PR #54); closing stale lane
+- 2026-07-11T13:12:47Z -- unknown -- lane=done -- Implementation merged 2026-07-04 (PR #54); closing stale lane

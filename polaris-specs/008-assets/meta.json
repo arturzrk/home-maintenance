@@ -1,0 +1,17 @@
+{
+  "feature_number": "008",
+  "slug": "008-assets",
+  "friendly_name": "Assets (Slice 1b)",
+  "mission": "software-dev",
+  "source_description": "Slice 1b: Asset aggregate + asset-scoped jobs and definitions, obsolete-flag convention",
+  "github_issue": 79,
+  "created_at": "2026-07-12T00:00:00Z",
+  "target_branch": "main",
+  "vcs": "git",
+  "estimation": {
+    "baseline_raw": "skip",
+    "baseline_hours": null,
+    "source": "developer",
+    "captured_at": "2026-07-12T00:00:00Z"
+  }
+}

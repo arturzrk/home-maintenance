@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Home Maintenance — User Guide</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --bg-alt: #f7f8fa;
+    --text: #1c2128;
+    --text-muted: #57606a;
+    --border: #e2e5e9;
+    --accent: #2f5fd0;
+    --accent-dark: #1e42a3;
+    --warn-bg: #fff8e6;
+    --warn-border: #e8c765;
+    --tip-bg: #eef6ff;
+    --tip-border: #bcd6f7;
+    --code-bg: #f0f2f5;
+    --sidebar-w: 260px;
+    --header-h: 56px;
+  }
+
+  * { box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; scroll-padding-top: calc(var(--header-h) + 12px); }
+
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--text);
+    background: var(--bg);
+    line-height: 1.6;
+  }
+
+  /* ---------- Header ---------- */
+  .site-header {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: var(--header-h);
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    z-index: 100;
+  }
+  .site-header .brand {
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--text);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .site-header .brand .dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--accent);
+    display: inline-block;
+  }
+  .site-header .tagline {
+    margin-left: 10px;
+    color: var(--text-muted);
+    font-size: 13px;
+    display: none;
+  }
+  @media (min-width: 700px) {
+    .site-header .tagline { display: inline; }
+  }
+  .menu-toggle {
+    margin-left: auto;
+    display: none;
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  @media (max-width: 900px) {
+    .menu-toggle { display: inline-block; }
+  }
+
+  /* ---------- Layout ---------- */
+  .layout {
+    display: flex;
+    padding-top: var(--header-h);
+    min-height: 100vh;
+  }
+
+  nav.sidebar {
+    width: var(--sidebar-w);
+    flex-shrink: 0;
+    position: fixed;
+    top: var(--header-h);
+    bottom: 0;
+    left: 0;
+    overflow-y: auto;
+    background: var(--bg-alt);
+    border-right: 1px solid var(--border);
+    padding: 20px 0 40px;
+  }
+  nav.sidebar .nav-group {
+    margin-bottom: 18px;
+  }
+  nav.sidebar .nav-group-title {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    padding: 4px 20px;
+    font-weight: 600;
+  }
+  nav.sidebar a {
+    display: block;
+    padding: 6px 20px;
+    color: var(--text);
+    text-decoration: none;
+    font-size: 14px;
+    border-left: 3px solid transparent;
+  }
+  nav.sidebar a:hover {
+    background: #edf1f8;
+  }
+  nav.sidebar a.active {
+    border-left-color: var(--accent);
+    background: #e8effc;
+    color: var(--accent-dark);
+    font-weight: 600;
+  }
+
+  @media (max-width: 900px) {
+    nav.sidebar {
+      transform: translateX(-100%);
+      transition: transform 0.2s ease;
+      z-index: 90;
+      width: 78vw;
+      max-width: 320px;
+      box-shadow: 2px 0 12px rgba(0,0,0,0.08);
+    }
+    nav.sidebar.open { transform: translateX(0); }
+  }
+
+  main {
+    flex: 1;
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 40px 24px 100px;
+  }
+  @media (min-width: 901px) {
+    main { margin-left: var(--sidebar-w); margin-right: 0; }
+  }
+
+  h1, h2, h3 { line-height: 1.25; }
+  h1 { font-size: 32px; margin: 0 0 8px; }
+  h2 {
+    font-size: 24px;
+    margin: 48px 0 12px;
+    padding-top: 8px;
+    border-top: 1px solid var(--border);
+  }
+  section:first-of-type h2:first-child,
+  h2:first-child { border-top: none; padding-top: 0; }
+  h3 { font-size: 17px; margin: 28px 0 8px; }
+  p { margin: 10px 0; }
+  ul, ol { margin: 10px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+  code {
+    background: var(--code-bg);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 0.9em;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  .lede {
+    color: var(--text-muted);
+    font-size: 17px;
+    margin-top: 6px;
+  }
+  .meta {
+    color: var(--text-muted);
+    font-size: 13px;
+    margin-bottom: 30px;
+  }
+
+  .callout {
+    border: 1px solid var(--border);
+    border-left-width: 4px;
+    border-radius: 6px;
+    padding: 12px 16px;
+    margin: 16px 0;
+    font-size: 14.5px;
+  }
+  .callout.tip { background: var(--tip-bg); border-left-color: var(--accent); }
+  .callout.warn { background: var(--warn-bg); border-left-color: var(--warn-border); }
+  .callout strong { display: block; margin-bottom: 4px; font-size: 13px; text-transform: uppercase; letter-spacing: 0.03em; }
+
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 14px 0;
+    font-size: 14.5px;
+  }
+  th, td {
+    text-align: left;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    vertical-align: top;
+  }
+  th { background: var(--bg-alt); font-weight: 600; }
+
+  .ui-label {
+    display: inline-block;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 1px 8px;
+    font-size: 0.88em;
+    font-weight: 600;
+  }
+
+  .top-link {
+    display: inline-block;
+    margin-top: 6px;
+    font-size: 13px;
+  }
+
+  footer.page-footer {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 24px;
+    color: var(--text-muted);
+    font-size: 13px;
+    border-top: 1px solid var(--border);
+  }
+  @media (min-width: 901px) {
+    footer.page-footer { margin-left: var(--sidebar-w); }
+  }
+
+  .overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.3);
+    z-index: 80;
+  }
+  .overlay.show { display: block; }
+
+  .toc-inline {
+    background: var(--bg-alt);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin: 18px 0 30px;
+  }
+  .toc-inline h3 { margin-top: 0; font-size: 14px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); }
+  .toc-inline ul { columns: 2; padding-left: 18px; }
+  @media (max-width: 600px) { .toc-inline ul { columns: 1; } }
+  .toc-inline a { text-decoration: none; color: var(--accent-dark); font-size: 14px; }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <a class="brand" href="#top"><span class="dot"></span>Home Maintenance</a>
+  <span class="tagline">User Guide</span>
+  <button class="menu-toggle" id="menuToggle" aria-label="Toggle navigation">☰ Menu</button>
+</header>
+
+<div class="overlay" id="overlay"></div>
+
+<div class="layout">
+  <nav class="sidebar" id="sidebar">
+    <div class="nav-group">
+      <div class="nav-group-title">Start here</div>
+      <a href="#top">Welcome</a>
+      <a href="#getting-started">Getting started</a>
+      <a href="#concepts">Key concepts</a>
+    </div>
+    <div class="nav-group">
+      <div class="nav-group-title">Using the app</div>
+      <a href="#properties">Properties</a>
+      <a href="#recurring-jobs">Recurring maintenance schedules</a>
+      <a href="#one-off-jobs">One-off jobs</a>
+      <a href="#working-a-job">Working a job's checklist</a>
+      <a href="#completing-a-job">Completing a job</a>
+    </div>
+    <div class="nav-group">
+      <div class="nav-group-title">Reference</div>
+      <a href="#limits">Field limits &amp; rules</a>
+      <a href="#good-to-know">Good to know</a>
+      <a href="#faq">Troubleshooting &amp; FAQ</a>
+    </div>
+  </nav>
+
+  <main id="top">
+    <h1>Home Maintenance — User Guide</h1>
+    <p class="lede">Track maintenance for every property you own: one-off jobs and recurring schedules, each with its own step-by-step checklist.</p>
+    <p class="meta">Covers the current web app. Sign-in is by Google account; there is no separate registration step.</p>
+
+    <div class="toc-inline">
+      <h3>On this page</h3>
+      <ul>
+        <li><a href="#getting-started">Getting started</a></li>
+        <li><a href="#concepts">Key concepts</a></li>
+        <li><a href="#properties">Properties</a></li>
+        <li><a href="#recurring-jobs">Recurring schedules</a></li>
+        <li><a href="#one-off-jobs">One-off jobs</a></li>
+        <li><a href="#working-a-job">Job checklists</a></li>
+        <li><a href="#completing-a-job">Completing a job</a></li>
+        <li><a href="#limits">Field limits</a></li>
+        <li><a href="#good-to-know">Good to know</a></li>
+        <li><a href="#faq">FAQ</a></li>
+      </ul>
+    </div>
+
+    <section id="getting-started">
+      <h2>Getting started</h2>
+      <p>Open the app in a browser. If you're not signed in, you'll land on the sign-in page.</p>
+      <ol>
+        <li>Click <span class="ui-label">Sign in with Google</span>.</li>
+        <li>Approve the Google permission prompt.</li>
+        <li>You're dropped onto <strong>My properties</strong> — or, if you followed a direct link to a specific property or job, straight to that page.</li>
+      </ol>
+      <p>There's no username/password option and no separate sign-up — your Google account <em>is</em> your account. Sign in again any time your session expires.</p>
+      <div class="callout tip">
+        <strong>Your data is private to you</strong>
+        Each Google account is its own separate owner. Properties, jobs, and history tied to your account are never visible to anyone else, and there's currently no way to share a property or invite a collaborator.
+      </div>
+      <div class="callout warn">
+        <strong>If you see an amber sign-in box instead</strong>
+        Some development/test copies of the app show an amber "development stub" box with an "OwnerId" field instead of the Google button. That's a developer testing shortcut, not part of the normal app — production instances always use Google sign-in.
+      </div>
+    </section>
+
+    <section id="concepts">
+      <h2>Key concepts</h2>
+      <p>Five ideas cover the whole app:</p>
+      <table>
+        <tr><th>Term</th><th>What it means</th></tr>
+        <tr><td><strong>Property</strong></td><td>A home or building you're tracking. Just a name — create as many as you own.</td></tr>
+        <tr><td><strong>Job</strong></td><td>A single maintenance task on a property, e.g. "Replace furnace filter." Has a name, an optional due date, a status, and a checklist of steps.</td></tr>
+        <tr><td><strong>Recurring schedule</strong> (job definition)</td><td>A template that automatically creates new jobs on a repeating schedule, e.g. "Service boiler, every 6 months."</td></tr>
+        <tr><td><strong>Step</strong></td><td>One checklist item on a job — a description and a checkbox.</td></tr>
+        <tr><td><strong>Schedule</strong></td><td>How often a recurring job repeats: a unit (day/week/month/year), a multiplier ("every <em>3</em> months"), a start date, and an optional end date.</td></tr>
+      </table>
+      <p>A job either stands alone (you created it directly) or traces back to a recurring schedule that generated it — either way, it works the same once created.</p>
+    </section>
+
+    <section id="properties">
+      <h2>Properties</h2>
+
+      <h3>Create a property</h3>
+      <p>On <strong>My properties</strong>, type a name into the <span class="ui-label">Property name</span> field and click <span class="ui-label">Create</span> (it briefly reads <span class="ui-label">Creating…</span>). The name is required and capped at 100 characters.</p>
+      <p>If you have no properties yet, the page simply reads: <em>"No properties yet. Create one above to get started."</em></p>
+
+      <h3>Open a property</h3>
+      <p>Click any property card to open its detail page. This is where you manage that property's recurring schedules and jobs.</p>
+
+      <h3>Rename a property</h3>
+      <p>Click directly on the property name to edit it in place: type the new name, then press <strong>Enter</strong> or click elsewhere to save, or <strong>Esc</strong> to cancel. If saving fails, the field reverts and shows an inline error.</p>
+
+      <div class="callout warn">
+        <strong>No delete</strong>
+        Properties can't be deleted once created. Pick names you'll be happy to keep.
+      </div>
+    </section>
+
+    <section id="recurring-jobs">
+      <h2>Recurring maintenance schedules</h2>
+      <p>Use a recurring schedule for anything that repeats — filter changes, boiler servicing, gutter cleaning.</p>
+
+      <h3>Create a recurring schedule</h3>
+      <p>On a property page, click <span class="ui-label">+ Add recurring job</span> to open the <strong>Add recurring job</strong> form:</p>
+      <ul>
+        <li><strong>Name</strong> — e.g. "Service boiler"</li>
+        <li><strong>Every [ number ] [ Day / Week / Month / Year ]</strong> — how often it repeats</li>
+        <li><strong>Start date</strong> — required</li>
+        <li><strong>End date</strong> — optional; if set, must be after the start date</li>
+        <li><strong>Steps (optional)</strong> — add rows with <span class="ui-label">+ Add step</span>, remove a row with its <span class="ui-label">Remove</span> button</li>
+      </ul>
+      <p>Click <span class="ui-label">Save recurring job</span> (<span class="ui-label">Saving…</span> while it saves), or <span class="ui-label">Cancel</span> to back out. Once saved, the schedule is shown in plain English, e.g. <em>"Every month from Jun 2026"</em> or <em>"Every 3 months from Jun 2026."</em></p>
+
+      <h3>Edit a schedule</h3>
+      <p>The name is inline-editable, same as a property name. Click <span class="ui-label">Edit schedule</span> to reopen the cadence/date fields and adjust them, then <span class="ui-label">Save</span> or <span class="ui-label">Cancel</span>.</p>
+
+      <h3>Edit the step list (step templates)</h3>
+      <p>Reorder rows with the up/down buttons (there's no drag-and-drop), edit a description inline, or remove a row with <span class="ui-label">Remove</span>. Add a new one via the <span class="ui-label">Add a step template</span> field and its <span class="ui-label">Add</span> button.</p>
+      <div class="callout warn">
+        <strong>Step template edits are forward-only</strong>
+        Changing the step templates only affects jobs generated <em>after</em> the change. Jobs already created keep whatever steps they were given when they were generated — editing the template won't retroactively update them.
+      </div>
+
+      <h3>Generating jobs</h3>
+      <p>The app automatically generates upcoming jobs from each schedule in the background (typically a few months ahead), so you don't need to do anything for jobs to keep appearing on time. If you want to pull the next occurrence forward yourself, open the schedule and click <span class="ui-label">Generate next</span> (<span class="ui-label">Generating…</span> while it works) — this takes you straight to the new job. If the next occurrence already exists, you'll see: <em>"The next occurrence is already scheduled."</em></p>
+
+      <div class="callout warn">
+        <strong>No pause, archive, or delete</strong>
+        A recurring schedule stays active indefinitely once created (unless you gave it an end date). There's no way to pause or remove one — only its steps can be edited or removed.
+      </div>
+    </section>
+
+    <section id="one-off-jobs">
+      <h2>One-off jobs</h2>
+      <p>For a task that won't repeat, skip the schedule and create a job directly. On a property page, use the always-visible <strong>Create job</strong> form:</p>
+      <ul>
+        <li><strong>Name</strong> — e.g. "Service boiler"</li>
+        <li><strong>Due date (optional)</strong></li>
+        <li><strong>Steps (one per line, optional)</strong> — a text box; each line becomes its own checklist step, e.g.:
+          <pre style="background:var(--code-bg); border-radius:6px; padding:10px 14px; font-size:13.5px; margin:8px 0;">Shut off gas
+Drain system
+Replace filter</pre>
+        </li>
+      </ul>
+      <p>Click <span class="ui-label">Create job</span> (<span class="ui-label">Creating…</span> while it saves) and you'll land on the new job's page.</p>
+    </section>
+
+    <section id="working-a-job">
+      <h2>Working a job's checklist</h2>
+      <p>A job's page shows its inline-editable name, a line reading <code>Due: {date} - Status: {status}</code>, and its checklist. Use <span class="ui-label">Back to property</span> to return to the property page.</p>
+
+      <h3>Tick and untick steps</h3>
+      <p>Click a step's checkbox to mark it done — it saves immediately and shows a strikethrough. Click again to undo. If saving fails, the checkbox reverts and shows an inline error.</p>
+
+      <h3>Add, remove, and reorder steps</h3>
+      <ul>
+        <li><strong>Add</strong> — use the <span class="ui-label">Add a step</span> field at the bottom of the checklist, then <span class="ui-label">Add</span>.</li>
+        <li><strong>Remove</strong> — click a step's <span class="ui-label">Remove</span> button. This happens immediately, with no confirmation prompt.</li>
+        <li><strong>Reorder</strong> — use the up/down buttons on each step; order is for display only and doesn't affect anything else.</li>
+      </ul>
+      <p>If a job has no steps yet, the checklist reads: <em>"No steps on this job."</em></p>
+
+      <h3>Edit a step's text</h3>
+      <p>Click the description to edit it inline, same as a property or job name. This is locked once that step is ticked, or once the whole job is marked complete.</p>
+    </section>
+
+    <section id="completing-a-job">
+      <h2>Completing a job</h2>
+      <p>The <span class="ui-label">Complete job</span> button stays disabled until every step is ticked <em>and</em> the job has at least one step. While disabled, you'll see: <em>"All steps must be ticked before the job can be completed."</em></p>
+      <p>Once every step is checked, click <span class="ui-label">Complete job</span> (<span class="ui-label">Completing…</span> while it saves). The job then shows <em>"Completed on {date and time}."</em></p>
+      <div class="callout warn">
+        <strong>Completion is permanent</strong>
+        There is no way to reopen or undo a completed job, and no confirmation dialog before you complete one — double-check the checklist first.
+      </div>
+    </section>
+
+    <section id="limits">
+      <h2>Field limits &amp; rules</h2>
+      <table>
+        <tr><th>Field</th><th>Rule</th></tr>
+        <tr><td>Property name</td><td>Required, up to 100 characters</td></tr>
+        <tr><td>Job / recurring schedule name</td><td>Required, up to 200 characters</td></tr>
+        <tr><td>Step / step template description</td><td>Up to 500 characters</td></tr>
+        <tr><td>Schedule multiplier ("every N …")</td><td>Whole number, 1 or greater</td></tr>
+        <tr><td>Schedule start date</td><td>Required</td></tr>
+        <tr><td>Schedule end date</td><td>Optional; if set, must be after the start date</td></tr>
+        <tr><td>Completing a job</td><td>Every existing step must be ticked, and there must be at least one step</td></tr>
+      </table>
+      <p>Monthly and yearly schedules that land on a day that doesn't exist in a given month (e.g. the 31st) are clamped to that month's last valid day.</p>
+    </section>
+
+    <section id="good-to-know">
+      <h2>Good to know</h2>
+      <ul>
+        <li><strong>Nothing big can be deleted.</strong> Properties, recurring schedules, and jobs are all permanent once created — only individual checklist steps or step templates can be removed, and only while their parent is still active.</li>
+        <li><strong>No sharing.</strong> Each Google account's properties and jobs are private to that account; there's no invite or collaborator feature.</li>
+        <li><strong>No reminders or calendar view.</strong> The app doesn't send notifications — check back to see what's due.</li>
+        <li><strong>Dates have no time component</strong> (except the timestamp recorded when you complete a job).</li>
+        <li><strong>Everything saves as you go.</strong> There's no separate "save changes" step for the app as a whole, and — outside of what's listed above — no general undo.</li>
+      </ul>
+    </section>
+
+    <section id="faq">
+      <h2>Troubleshooting &amp; FAQ</h2>
+
+      <h3>I can't find a delete button for a property or job — is that a bug?</h3>
+      <p>No — it's by design. Properties, recurring schedules, and jobs are permanent once created. Only individual steps can be removed.</p>
+
+      <h3>I edited a recurring schedule's steps, but a job I already generated didn't change.</h3>
+      <p>Expected. Step template edits only apply to jobs generated after the edit; existing jobs keep their original steps.</p>
+
+      <h3>The "Complete job" button is greyed out.</h3>
+      <p>Tick every step first — the job also needs at least one step to ever be completable.</p>
+
+      <h3>I got signed out or redirected to the sign-in page unexpectedly.</h3>
+      <p>Your session expired. Sign in again with Google to pick up where you left off.</p>
+
+      <h3>Can someone else help me manage the same property?</h3>
+      <p>Not currently. Each property belongs to a single Google account, with no sharing or collaborator support.</p>
+
+      <h3>Can I get a reminder before something is due?</h3>
+      <p>Not yet — the app doesn't send notifications. Check the property page for what's due.</p>
+
+      <a class="top-link" href="#top">↑ Back to top</a>
+    </section>
+
+  </main>
+</div>
+
+<footer class="page-footer">
+  Home Maintenance — User Guide
+</footer>
+
+<script>
+  (function() {
+    var toggle = document.getElementById('menuToggle');
+    var sidebar = document.getElementById('sidebar');
+    var overlay = document.getElementById('overlay');
+
+    function closeMenu() {
+      sidebar.classList.remove('open');
+      overlay.classList.remove('show');
+    }
+    toggle.addEventListener('click', function() {
+      sidebar.classList.toggle('open');
+      overlay.classList.toggle('show');
+    });
+    overlay.addEventListener('click', closeMenu);
+    sidebar.querySelectorAll('a').forEach(function(a) {
+      a.addEventListener('click', closeMenu);
+    });
+
+    // Active-link highlighting on scroll
+    var links = Array.prototype.slice.call(sidebar.querySelectorAll('a[href^="#"]'));
+    var sections = links
+      .map(function(a) { return document.querySelector(a.getAttribute('href')); })
+      .filter(Boolean);
+
+    function onScroll() {
+      var scrollPos = window.scrollY + 90;
+      var currentId = sections.length ? sections[0].id : null;
+      sections.forEach(function(sec) {
+        if (sec.offsetTop <= scrollPos) currentId = sec.id;
+      });
+      links.forEach(function(a) {
+        a.classList.toggle('active', a.getAttribute('href') === '#' + currentId);
+      });
+    }
+    document.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+  })();
+</script>
+
+</body>
+</html>
