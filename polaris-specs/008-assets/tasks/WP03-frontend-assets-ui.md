@@ -1,7 +1,7 @@
 ---
 work_package_id: WP03
 title: 'Frontend: assets UI'
-lane: planned
+lane: "for_review"
 dependencies: ["WP02"]
 base_branch: main
 subtasks: [T011, T012, T013, T014, T015, T016]
@@ -106,3 +106,7 @@ based on assets prop and includes assetId in submission.
 ```bash
 polaris implement WP03 --base WP02
 ```
+
+## Activity Log
+
+- 2026-07-12T18:36:38Z – unknown – lane=for_review – Implemented on branch 008-assets-WP03; PR #89
