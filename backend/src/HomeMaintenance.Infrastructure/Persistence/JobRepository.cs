@@ -35,6 +35,7 @@ internal sealed class JobRepository : IJobRepository
         OwnerId owner,
         string? propertyId,
         JobStatus? status,
+        string? assetId = null,
         CancellationToken ct = default)
     {
         var builder = Builders<JobDocument>.Filter;
@@ -43,6 +44,8 @@ internal sealed class JobRepository : IJobRepository
             filter &= builder.Eq(d => d.PropertyId, propertyId);
         if (status.HasValue)
             filter &= builder.Eq(d => d.Status, status.Value);
+        if (!string.IsNullOrEmpty(assetId))
+            filter &= builder.Eq(d => d.AssetId, assetId);
 
         var docs = await _collection
             .Find(filter)
@@ -116,7 +119,8 @@ internal sealed class JobRepository : IJobRepository
             doc.Status,
             doc.CompletedAt,
             steps,
-            doc.JobDefinitionId);
+            doc.JobDefinitionId,
+            doc.AssetId);
     }
 
     private static JobDocument ToDocument(Job job)
@@ -128,6 +132,7 @@ internal sealed class JobRepository : IJobRepository
             Name = job.Name,
             DueDate = job.DueDate,
             JobDefinitionId = job.JobDefinitionId,
+            AssetId = job.AssetId,
             Status = job.Status,
             CompletedAt = job.CompletedAt,
             Steps = job.Steps.Select(s => new StepDocument

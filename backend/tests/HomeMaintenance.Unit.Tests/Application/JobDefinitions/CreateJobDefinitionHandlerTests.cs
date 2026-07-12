@@ -40,7 +40,7 @@ public sealed class CreateJobDefinitionHandlerTests
         correlation.CurrentId.Returns("corr-1");
 
         var generationService = new JobGenerationService(jobs, audit, correlation);
-        var handler = new CreateJobDefinitionHandler(defs, properties, identity, clock, generationService, audit, correlation);
+        var handler = new CreateJobDefinitionHandler(defs, properties, Substitute.For<IAssetRepository>(), identity, clock, generationService, audit, correlation);
         return (defs, properties, clock, jobs, audit, correlation, handler);
     }
 

@@ -4,7 +4,7 @@ using HomeMaintenance.Application.JobDefinitions.Dto;
 
 namespace HomeMaintenance.Application.JobDefinitions.Queries;
 
-public sealed record ListJobDefinitionsQuery(string? PropertyId = null);
+public sealed record ListJobDefinitionsQuery(string? PropertyId = null, string? AssetId = null);
 
 public sealed class ListJobDefinitionsHandler
 {
@@ -21,7 +21,7 @@ public sealed class ListJobDefinitionsHandler
         ListJobDefinitionsQuery query,
         CancellationToken ct = default)
     {
-        var definitions = await _definitions.ListAsync(_identity.CurrentOwner, query.PropertyId, ct);
+        var definitions = await _definitions.ListAsync(_identity.CurrentOwner, query.PropertyId, query.AssetId, ct);
         return Result<IReadOnlyList<JobDefinitionDto>>.Success(
             definitions.Select(d => d.ToDto()).ToList());
     }

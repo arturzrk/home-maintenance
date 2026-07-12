@@ -19,7 +19,8 @@ public sealed record JobSummaryDto(
     DateTime? CompletedAt,
     int StepCount,
     int CompletedStepCount,
-    string? JobDefinitionId = null);
+    string? JobDefinitionId = null,
+    string? AssetId = null);
 
 public sealed record JobDetailDto(
     string Id,
@@ -29,7 +30,8 @@ public sealed record JobDetailDto(
     JobStatus Status,
     DateTime? CompletedAt,
     IReadOnlyList<StepDto> Steps,
-    string? JobDefinitionId = null);
+    string? JobDefinitionId = null,
+    string? AssetId = null);
 
 public sealed record JobListDto(IReadOnlyList<JobSummaryDto> Jobs);
 
@@ -46,7 +48,8 @@ public sealed record CreateJobRequest(
     string Name,
     DateOnly? DueDate,
     [property: Required]
-    IReadOnlyList<CreateJobStepRequest> Steps);
+    IReadOnlyList<CreateJobStepRequest> Steps,
+    string? AssetId = null);
 
 public sealed record AddStepRequest(
     [property: Required]

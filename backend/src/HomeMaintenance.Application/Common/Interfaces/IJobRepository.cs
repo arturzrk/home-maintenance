@@ -16,6 +16,7 @@ public interface IJobRepository
         OwnerId owner,
         string? propertyId,
         JobStatus? status,
+        string? assetId = null,
         CancellationToken ct = default);
 
     Task AddAsync(Job job, CancellationToken ct = default);

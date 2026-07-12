@@ -32,6 +32,10 @@ internal sealed class JobDocument
     [BsonIgnoreIfNull]
     public string? JobDefinitionId { get; set; }
 
+    [BsonElement("assetId")]
+    [BsonIgnoreIfNull]
+    public string? AssetId { get; set; }
+
     [BsonElement("status")]
     [BsonRepresentation(BsonType.String)]
     public JobStatus Status { get; set; } = JobStatus.Active;

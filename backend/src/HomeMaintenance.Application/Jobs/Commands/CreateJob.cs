@@ -9,12 +9,14 @@ public sealed record CreateJobCommand(
     string PropertyId,
     string Name,
     DateOnly? DueDate,
-    IReadOnlyList<string> StepDescriptions);
+    IReadOnlyList<string> StepDescriptions,
+    string? AssetId = null);
 
 public sealed class CreateJobHandler
 {
     private readonly IJobRepository _jobs;
     private readonly IPropertyRepository _properties;
+    private readonly IAssetRepository _assets;
     private readonly IIdentityProvider _identity;
     private readonly IAuditLog _audit;
     private readonly ICorrelationContext _correlation;
@@ -22,12 +24,14 @@ public sealed class CreateJobHandler
     public CreateJobHandler(
         IJobRepository jobs,
         IPropertyRepository properties,
+        IAssetRepository assets,
         IIdentityProvider identity,
         IAuditLog audit,
         ICorrelationContext correlation)
     {
         _jobs = jobs;
         _properties = properties;
+        _assets = assets;
         _identity = identity;
         _audit = audit;
         _correlation = correlation;
@@ -46,6 +50,14 @@ public sealed class CreateJobHandler
         if (property is null)
             return Result<JobDetailDto>.Failure(new NotFoundError("Property", cmd.PropertyId));
 
+        if (cmd.AssetId is not null)
+        {
+            var scopeError = await Assets.AssetScopeValidation.CheckAsync(
+                _assets, owner, cmd.PropertyId, cmd.AssetId, ct);
+            if (scopeError is not null)
+                return Result<JobDetailDto>.Failure(scopeError);
+        }
+
         Job job;
         try
         {
@@ -55,7 +67,8 @@ public sealed class CreateJobHandler
                 cmd.PropertyId,
                 cmd.Name,
                 cmd.DueDate,
-                cmd.StepDescriptions);
+                cmd.StepDescriptions,
+                assetId: cmd.AssetId);
         }
         catch (ArgumentException ex)
         {

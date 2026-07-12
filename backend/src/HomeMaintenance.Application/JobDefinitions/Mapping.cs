@@ -11,7 +11,8 @@ internal static class JobDefinitionMappings
             def.PropertyId,
             def.Name,
             def.Schedule.ToDto(),
-            def.StepTemplates.Select(st => st.ToDto()).ToList());
+            def.StepTemplates.Select(st => st.ToDto()).ToList(),
+            def.AssetId);
 
     public static ScheduleDefinitionDto ToDto(this ScheduleDefinition sched)
         => new(sched.Unit.ToString(), sched.Multiplier, sched.StartDate, sched.EndDate);

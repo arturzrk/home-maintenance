@@ -8,6 +8,7 @@ subtasks: [T006, T007, T008, T009, T010]
 test_status: required
 test_file: backend/tests/HomeMaintenance.Integration.Tests/Assets/AssetScopedWorkTests.cs
 domain: backend-logic
+shell_pid: "8313"
 ---
 
 # WP02 - Backend: assetId on Jobs and JobDefinitions

@@ -73,7 +73,7 @@ public sealed class JobDefinitionRepositoryTests : IClassFixture<ApiFactory>
         await repo.AddAsync(mine, CancellationToken.None);
         await repo.AddAsync(theirs, CancellationToken.None);
 
-        var list = await repo.ListAsync(owner, null, CancellationToken.None);
+        var list = await repo.ListAsync(owner, null, null, CancellationToken.None);
 
         list.ShouldContain(d => d.Id == mine.Id);
         list.ShouldNotContain(d => d.Id == theirs.Id);
@@ -89,7 +89,7 @@ public sealed class JobDefinitionRepositoryTests : IClassFixture<ApiFactory>
         await repo.AddAsync(matching, CancellationToken.None);
         await repo.AddAsync(other, CancellationToken.None);
 
-        var list = await repo.ListAsync(owner, "prop-match", CancellationToken.None);
+        var list = await repo.ListAsync(owner, "prop-match", null, CancellationToken.None);
 
         list.ShouldContain(d => d.Id == matching.Id);
         list.ShouldNotContain(d => d.Id == other.Id);

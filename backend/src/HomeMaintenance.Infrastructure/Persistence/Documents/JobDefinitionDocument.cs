@@ -19,6 +19,10 @@ internal sealed class JobDefinitionDocument
     [BsonElement("propertyId")]
     public string PropertyId { get; set; } = string.Empty;
 
+    [BsonElement("assetId")]
+    [BsonIgnoreIfNull]
+    public string? AssetId { get; set; }
+
     [BsonElement("name")]
     public string Name { get; set; } = string.Empty;
 
