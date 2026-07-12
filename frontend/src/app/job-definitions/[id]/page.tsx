@@ -32,9 +32,16 @@ export default async function JobDefinitionDetailPage({
   const { jobs: allJobs } = await jobsApi.list(session.idToken, { definitionId: id });
   const generatedJobs = allJobs.filter((j) => j.jobDefinitionId === id);
 
-  const asset = definition.assetId
-    ? await assetsApi.get(definition.assetId, session.idToken).catch(() => null)
-    : null;
+  // Swallow only a 404 (asset gone); NEXT_REDIRECT and other API
+  // failures must propagate.
+  let asset = null;
+  if (definition.assetId) {
+    try {
+      asset = await assetsApi.get(definition.assetId, session.idToken);
+    } catch (err) {
+      if (!(err instanceof ApiError && err.status === 404)) throw err;
+    }
+  }
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">

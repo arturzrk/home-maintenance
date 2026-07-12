@@ -28,9 +28,16 @@ export default async function JobDetailPage({
 
   const completed = job.status === "Completed";
 
-  const asset = job.assetId
-    ? await assetsApi.get(job.assetId, session.idToken).catch(() => null)
-    : null;
+  // Swallow only a 404 (asset gone); NEXT_REDIRECT and other API
+  // failures must propagate.
+  let asset = null;
+  if (job.assetId) {
+    try {
+      asset = await assetsApi.get(job.assetId, session.idToken);
+    } catch (err) {
+      if (!(err instanceof ApiError && err.status === 404)) throw err;
+    }
+  }
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
