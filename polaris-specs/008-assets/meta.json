@@ -46,6 +46,22 @@
       "agent": "unknown",
       "source": "implement",
       "drift_type": "expansion"
+    },
+    {
+      "amendment_id": "amd-003",
+      "text": "Files changed outside declared WP scope: frontend/e2e/helpers/setup.ts, frontend/e2e/wp06-job-lifecycle.spec.ts, backend/src/HomeMaintenance.API/Endpoints/JobDefinitionEndpoints.cs (and 53 more)",
+      "timestamp": "2026-07-12T17:12:52.229440+00:00",
+      "affected_sections": [],
+      "artifacts_updated": {
+        "spec_sections": [],
+        "plan_files": [],
+        "wps_regenerated": [],
+        "wps_locked": [],
+        "wps_created": []
+      },
+      "agent": "unknown",
+      "source": "implement",
+      "drift_type": "expansion"
     }
   ]
 }
