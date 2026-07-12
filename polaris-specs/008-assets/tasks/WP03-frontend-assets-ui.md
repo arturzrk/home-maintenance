@@ -1,13 +1,16 @@
 ---
 work_package_id: WP03
 title: 'Frontend: assets UI'
-lane: planned
-dependencies: ["WP02"]
-base_branch: main
+lane: "doing"
+dependencies: [WP02]
+base_branch: 008-assets-WP02
+base_commit: 03ac6aed20f6953e0366cc0acc1ef69d3eb620bd
+created_at: '2026-07-12T17:35:01.049317+00:00'
 subtasks: [T011, T012, T013, T014, T015, T016]
 test_status: required
 test_file: frontend/src/components/__tests__/asset-list.test.tsx
 domain: frontend-craft
+shell_pid: "26194"
 ---
 
 # WP03 - Frontend: assets UI
