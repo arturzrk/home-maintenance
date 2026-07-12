@@ -54,6 +54,9 @@ public sealed class Job : Entity
     public IReadOnlyList<Step> Steps => _steps.AsReadOnly();
     public string? JobDefinitionId { get; private set; }
 
+    /// <summary>Optional asset this job is scoped to. Set at creation only.</summary>
+    public string? AssetId { get; private set; }
+
     private Job(string id, OwnerId owner, string propertyId, string name, DateOnly? dueDate)
         : base(id)
     {
@@ -72,7 +75,8 @@ public sealed class Job : Entity
         string name,
         DateOnly? dueDate,
         IEnumerable<string> initialStepDescriptions,
-        string? jobDefinitionId = null)
+        string? jobDefinitionId = null,
+        string? assetId = null)
     {
         ArgumentNullException.ThrowIfNull(owner);
         if (string.IsNullOrWhiteSpace(propertyId))
@@ -82,6 +86,7 @@ public sealed class Job : Entity
         var job = new Job(NormaliseId(id), owner, propertyId, name.Trim(), dueDate)
         {
             JobDefinitionId = jobDefinitionId,
+            AssetId = assetId,
         };
         var order = 0;
         foreach (var description in initialStepDescriptions)
@@ -106,13 +111,15 @@ public sealed class Job : Entity
         JobStatus status,
         DateTime? completedAt,
         IEnumerable<Step> steps,
-        string? jobDefinitionId = null)
+        string? jobDefinitionId = null,
+        string? assetId = null)
     {
         var job = new Job(id, owner, propertyId, name, dueDate)
         {
             Status = status,
             CompletedAt = completedAt,
             JobDefinitionId = jobDefinitionId,
+            AssetId = assetId,
         };
         job._steps.AddRange(steps);
         return job;

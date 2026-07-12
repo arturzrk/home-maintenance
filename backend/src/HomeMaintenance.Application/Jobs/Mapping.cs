@@ -15,7 +15,8 @@ internal static class JobMappings
             job.CompletedAt,
             job.Steps.Select(s => new StepDto(
                 s.Id, s.Order, s.Description, s.IsCompleted, s.CompletedAt)).ToList(),
-            job.JobDefinitionId);
+            job.JobDefinitionId,
+            job.AssetId);
 
     public static JobSummaryDto ToSummaryDto(this Job job)
         => new(
@@ -27,5 +28,6 @@ internal static class JobMappings
             job.CompletedAt,
             job.Steps.Count,
             job.Steps.Count(s => s.IsCompleted),
-            job.JobDefinitionId);
+            job.JobDefinitionId,
+            job.AssetId);
 }

@@ -9,12 +9,14 @@ public sealed record CreateJobDefinitionCommand(
     string PropertyId,
     string Name,
     ScheduleDefinitionDto Schedule,
-    IReadOnlyList<string> StepDescriptions);
+    IReadOnlyList<string> StepDescriptions,
+    string? AssetId = null);
 
 public sealed class CreateJobDefinitionHandler
 {
     private readonly IJobDefinitionRepository _definitions;
     private readonly IPropertyRepository _properties;
+    private readonly IAssetRepository _assets;
     private readonly IIdentityProvider _identity;
     private readonly IDateTimeProvider _clock;
     private readonly JobGenerationService _generationService;
@@ -24,6 +26,7 @@ public sealed class CreateJobDefinitionHandler
     public CreateJobDefinitionHandler(
         IJobDefinitionRepository definitions,
         IPropertyRepository properties,
+        IAssetRepository assets,
         IIdentityProvider identity,
         IDateTimeProvider clock,
         JobGenerationService generationService,
@@ -32,6 +35,7 @@ public sealed class CreateJobDefinitionHandler
     {
         _definitions = definitions;
         _properties = properties;
+        _assets = assets;
         _identity = identity;
         _clock = clock;
         _generationService = generationService;
@@ -48,6 +52,14 @@ public sealed class CreateJobDefinitionHandler
         var property = await _properties.GetAsync(cmd.PropertyId, owner, ct);
         if (property is null)
             return Result<JobDefinitionDto>.Failure(new NotFoundError("Property", cmd.PropertyId));
+
+        if (cmd.AssetId is not null)
+        {
+            var scopeError = await Assets.AssetScopeValidation.CheckAsync(
+                _assets, owner, cmd.PropertyId, cmd.AssetId, ct);
+            if (scopeError is not null)
+                return Result<JobDefinitionDto>.Failure(scopeError);
+        }
 
         ScheduleDefinition schedule;
         try
@@ -68,7 +80,8 @@ public sealed class CreateJobDefinitionHandler
                 cmd.PropertyId,
                 cmd.Name,
                 schedule,
-                cmd.StepDescriptions);
+                cmd.StepDescriptions,
+                assetId: cmd.AssetId);
         }
         catch (ArgumentException ex)
         {

@@ -38,7 +38,8 @@ public sealed class JobGenerationService
                 definition.Name,
                 occurrence,
                 definition.StepTemplates.Select(st => st.Description),
-                definition.Id);
+                definition.Id,
+                assetId: definition.AssetId);
 
             await _jobs.AddAsync(job, ct);
 

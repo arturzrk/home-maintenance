@@ -30,12 +30,14 @@ internal sealed class JobDefinitionRepository : IJobDefinitionRepository
         return doc is null ? null : ToDomain(doc);
     }
 
-    public async Task<IReadOnlyList<JobDefinition>> ListAsync(OwnerId owner, string? propertyId, CancellationToken ct = default)
+    public async Task<IReadOnlyList<JobDefinition>> ListAsync(OwnerId owner, string? propertyId, string? assetId = null, CancellationToken ct = default)
     {
         var builder = Builders<JobDefinitionDocument>.Filter;
         var filter = builder.Eq(d => d.OwnerId, owner.Value);
         if (!string.IsNullOrEmpty(propertyId))
             filter &= builder.Eq(d => d.PropertyId, propertyId);
+        if (!string.IsNullOrEmpty(assetId))
+            filter &= builder.Eq(d => d.AssetId, assetId);
 
         var docs = await _collection
             .Find(filter)
@@ -90,7 +92,7 @@ internal sealed class JobDefinitionRepository : IJobDefinitionRepository
             doc.Schedule.Multiplier,
             doc.Schedule.StartDate,
             doc.Schedule.EndDate);
-        return JobDefinition.Hydrate(doc.Id, new OwnerId(doc.OwnerId), doc.PropertyId, doc.Name, schedule, stepTemplates);
+        return JobDefinition.Hydrate(doc.Id, new OwnerId(doc.OwnerId), doc.PropertyId, doc.Name, schedule, stepTemplates, doc.AssetId);
     }
 
     private static JobDefinitionDocument ToDocument(JobDefinition definition)
@@ -99,6 +101,7 @@ internal sealed class JobDefinitionRepository : IJobDefinitionRepository
             Id = definition.Id,
             OwnerId = definition.Owner.Value,
             PropertyId = definition.PropertyId,
+            AssetId = definition.AssetId,
             Name = definition.Name,
             Schedule = new ScheduleDefinitionDocument
             {

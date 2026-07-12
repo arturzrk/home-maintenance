@@ -30,7 +30,7 @@ public static class JobEndpoints
                 .ToList();
 
             var result = await handler.Handle(
-                new CreateJobCommand(body.PropertyId, body.Name, body.DueDate, stepDescriptions),
+                new CreateJobCommand(body.PropertyId, body.Name, body.DueDate, stepDescriptions, body.AssetId),
                 ct);
 
             return result.IsSuccess
@@ -42,6 +42,7 @@ public static class JobEndpoints
         group.MapGet("/", async (
             string? propertyId,
             string? status,
+            string? assetId,
             ListJobsHandler handler,
             HttpContext ctx,
             CancellationToken ct) =>
@@ -58,7 +59,7 @@ public static class JobEndpoints
                 parsedStatus = s;
             }
 
-            var result = await handler.Handle(new ListJobsQuery(propertyId, parsedStatus), ct);
+            var result = await handler.Handle(new ListJobsQuery(propertyId, parsedStatus, assetId), ct);
             return result.ToHttp(ctx);
         })
         .WithName("ListJobs");

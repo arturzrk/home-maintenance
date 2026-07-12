@@ -49,7 +49,7 @@ public sealed class CreateJobHandlerTests
         properties.GetAsync("prop-1", TestFixtures.Alice, Arg.Any<CancellationToken>())
             .Returns(Property.Create("prop-1", TestFixtures.Alice, "Main House"));
 
-        var handler = new CreateJobHandler(jobs, properties, identity, audit, correlation);
+        var handler = new CreateJobHandler(jobs, properties, Substitute.For<IAssetRepository>(), identity, audit, correlation);
         var result = await handler.Handle(new CreateJobCommand(
             "prop-1", "Service boiler", null, new[] { "Shut off gas" }));
 
@@ -70,7 +70,7 @@ public sealed class CreateJobHandlerTests
         properties.GetAsync("prop-1", TestFixtures.Alice, Arg.Any<CancellationToken>())
             .Returns((Property?)null);
 
-        var handler = new CreateJobHandler(jobs, properties, identity, audit, correlation);
+        var handler = new CreateJobHandler(jobs, properties, Substitute.For<IAssetRepository>(), identity, audit, correlation);
         var result = await handler.Handle(new CreateJobCommand(
             "prop-1", "Service boiler", null, new[] { "X" }));
 
@@ -86,7 +86,7 @@ public sealed class CreateJobHandlerTests
         properties.GetAsync("prop-1", TestFixtures.Alice, Arg.Any<CancellationToken>())
             .Returns(Property.Create("prop-1", TestFixtures.Alice, "Main House"));
 
-        var handler = new CreateJobHandler(jobs, properties, identity, audit, correlation);
+        var handler = new CreateJobHandler(jobs, properties, Substitute.For<IAssetRepository>(), identity, audit, correlation);
         var result = await handler.Handle(new CreateJobCommand("prop-1", "", null, Array.Empty<string>()));
 
         result.IsFailure.ShouldBeTrue();
