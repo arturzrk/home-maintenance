@@ -13,5 +13,23 @@
     "baseline_hours": null,
     "source": "developer",
     "captured_at": "2026-07-12T00:00:00Z"
-  }
+  },
+  "amendments": [
+    {
+      "amendment_id": "amd-001",
+      "text": "Files changed outside declared WP scope: frontend/e2e/helpers/setup.ts, frontend/e2e/wp07-step-mutations.spec.ts, frontend/src/components/job-checklist.tsx (and 2 more)",
+      "timestamp": "2026-07-12T12:33:37.983652+00:00",
+      "affected_sections": [],
+      "artifacts_updated": {
+        "spec_sections": [],
+        "plan_files": [],
+        "wps_regenerated": [],
+        "wps_locked": [],
+        "wps_created": []
+      },
+      "agent": "unknown",
+      "source": "implement",
+      "drift_type": "expansion"
+    }
+  ]
 }
