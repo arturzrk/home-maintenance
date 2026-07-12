@@ -50,6 +50,9 @@ public static class AuditEventTypes
 
     public const string JobGenerated = "job.generated";
 
+    public const string AssetCreated = "asset.created";
+    public const string AssetUpdated = "asset.updated";
+
     public const string JobDefinitionCreated = "job_definition.created";
     public const string JobDefinitionRenamed = "job_definition.renamed";
     public const string JobDefinitionScheduleChanged = "job_definition.schedule_changed";
