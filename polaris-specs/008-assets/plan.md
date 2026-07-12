@@ -1,108 +1,118 @@
-# Implementation Plan: [FEATURE]
-*Path: [templates/plan-template.md](templates/plan-template.md)*
+---
+feature: 008-assets
+title: "Assets (Slice 1b) -- Implementation Plan"
+created_at: "2026-07-12"
+---
 
+# Implementation Plan: Assets (Slice 1b)
 
-**Branch**: `[###-feature-name]` | **Date**: [DATE] | **Spec**: [link]
-**Input**: Feature specification from `/polaris-specs/[###-feature-name]/spec.md`
-
-**Note**: This template is filled in by the `/polaris.plan` command. See `src/specify_cli/missions/software-dev/command-templates/plan.md` for the execution workflow.
-
-The planner will not begin until all planning questions have been answered-capture those answers in this document before progressing to later phases.
+**Branch**: `008-assets-WP##` | **Spec**: [spec.md](spec.md) | **Issue**: #79
 
 ## Summary
 
-[Extract from feature spec: primary requirement + technical approach from research]
+New Asset aggregate mirroring the Property/JobDefinition patterns through
+all layers, an optional `assetId` threaded through Job and JobDefinition
+(inherited on generation), and frontend surfaces: Assets section on the
+property page, asset detail page, asset dropdowns on the two create
+forms. Obsolete-flag convention throughout -- no deletion.
 
 ## Technical Context
 
-<!--
-  ACTION REQUIRED: Replace the content in this section with the technical details
-  for the project. The structure here is presented in advisory capacity to guide
-  the iteration process.
--->
-
-**Language/Version**: [e.g., Python 3.14+, Swift 6.0+, Rust 1.90+ or NEEDS CLARIFICATION]  
-**Primary Dependencies**: [e.g., FastAPI, UIKit, LLVM or NEEDS CLARIFICATION]  
-**Storage**: [if applicable, e.g., PostgreSQL, CoreData, files or N/A]  
-**Testing**: [e.g., pytest, XCTest, cargo test or NEEDS CLARIFICATION]  
-**Target Platform**: [e.g., Linux server, iOS 15+, WASM or NEEDS CLARIFICATION]
-**Project Type**: [single/web/mobile - determines source structure]  
-**Performance Goals**: [domain-specific, e.g., command completes in <3s, <15% overhead on existing commands, full suite <30 min or NEEDS CLARIFICATION]  
-**Constraints**: [domain-specific, e.g., <200ms p95, <100MB memory, offline-capable or NEEDS CLARIFICATION]  
-**Scale/Scope**: [domain-specific, e.g., 10k users, 1M LOC, 50 screens or NEEDS CLARIFICATION]
+**Backend**: C# / .NET 9, Clean Architecture (Domain -> Application ->
+Infrastructure -> API), MongoDB, MiniValidation, xUnit + Testcontainers
+**Frontend**: Next.js 15 App Router, Server Components + client islands,
+server actions with `revalidatePath`, Tailwind
+**Testing**: unit + integration (backend), Jest (components), Playwright
+e2e in CI
+**Scale/Scope**: 1 new aggregate, 2 extended aggregates, ~4 new frontend
+components, 1 new page route, new e2e suite
 
 ## Constitution Check
 
-*GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
+No violations. Follows every established pattern; introduces the
+obsolete-flag convention (recorded app-wide decision, 2026-07-12).
 
-[Gates determined based on constitution file]
+## Architecture (mirrors existing aggregates)
 
-## Project Structure
+### Domain (`HomeMaintenance.Domain/Assets/`)
+- `Asset` aggregate: `Id`, `Owner`, `PropertyId`, `Name` (1-200),
+  `Category?` (<=100), `Notes?` (<=2000), `IsObsolete` (default false).
+  Methods: `Create`, `Rename`, `SetCategory`, `SetNotes`,
+  `MarkObsolete`, `ClearObsolete` (or a single `SetObsolete(bool)`).
+- `Job` + `JobDefinition`: add optional `AssetId` (string?, set at
+  creation only). `Job.Create` gains an `assetId` parameter (same pattern
+  as the existing `jobDefinitionId` parameter).
 
-### Documentation (this feature)
+### Application
+- `Assets/Commands`: CreateAsset, UpdateAsset (name/category/notes/
+  isObsolete -- PATCH semantics like UpdateJobDefinition).
+- `Assets/Queries`: GetAsset, ListAssets (by propertyId).
+- `Assets/Dto`: AssetDto `{ id, propertyId, name, category, notes,
+  isObsolete }`.
+- `IAssetRepository` in Common/Interfaces (Get/Add/Update/ListByProperty).
+- CreateJob / CreateJobDefinition commands: accept optional AssetId;
+  validate the asset exists, belongs to the same owner AND property, and
+  is not obsolete (FR-06/FR-08).
+- `JobGenerationService` + `GenerateNextOccurrenceHandler`: pass
+  `definition.AssetId` into `Job.Create` (FR-07).
+- Jobs list query: support `assetId` filter (mirrors the existing
+  `definitionId`/`propertyId` filters); JobDefinitions list query: same.
 
-```
-polaris-specs/[###-feature]/
-├── plan.md              # This file (/polaris.plan command output)
-├── research.md          # Phase 0 output (/polaris.plan command)
-├── data-model.md        # Phase 1 output (/polaris.plan command)
-├── quickstart.md        # Phase 1 output (/polaris.plan command)
-├── contracts/           # Phase 1 output (/polaris.plan command)
-└── tasks.md             # Phase 2 output (/polaris.tasks command - NOT created by /polaris.plan)
-```
+### Infrastructure
+- `AssetRepository` (Mongo, `assets` collection) mirroring
+  PropertyRepository; index on `(ownerId, propertyId)`.
+- Job/JobDefinition Mongo documents: nullable `assetId` field --
+  backward compatible, no migration needed (SC-04).
 
-### Source Code (repository root)
-<!--
-  ACTION REQUIRED: Replace the placeholder tree below with the concrete layout
-  for this feature. Delete unused options and expand the chosen structure with
-  real paths (e.g., apps/admin, packages/something). The delivered plan must
-  not include Option labels.
--->
+### API (`Endpoints/AssetEndpoints.cs`)
+- `POST /api/assets` (CreateAssetApiRequest: propertyId, name,
+  category?, notes?)
+- `GET /api/assets?propertyId=` -> list
+- `GET /api/assets/{id}` -> AssetDto
+- `PATCH /api/assets/{id}` (UpdateAssetApiRequest: name?, category?,
+  notes?, isObsolete?)
+- Extend CreateJobRequest / CreateJobDefinitionApiRequest with
+  `AssetId?`; extend Job/JobDefinition DTOs with `assetId`.
+- Jobs + JobDefinitions GET lists accept `assetId` query param.
+- Ownership: default-deny fallback policy already applies; cross-owner
+  -> NotFoundError -> 404 (FR-10).
 
-```
-# [REMOVE IF UNUSED] Option 1: Single project (DEFAULT)
-src/
-├── models/
-├── services/
-├── cli/
-└── lib/
+### Frontend
+- `src/lib/api-client.ts`: AssetDto type + assets api (create, list,
+  get, update); `assetId` added to job/definition types and create
+  bodies; list functions accept assetId filter.
+- `src/app/assets/actions.ts`: createAsset, updateAsset server actions
+  (revalidatePath property + asset pages).
+- Property page: new `AssetList` section (create form: name + category;
+  cards link to `/assets/{id}`; "Obsolete" badge when flagged).
+- `src/app/assets/[id]/page.tsx`: server component fetching asset +
+  jobs(assetId=) + definitions(assetId=); `AssetHeader` client island
+  (InlineEditableText name -- ariaLabel "Edit asset name"; category/notes
+  edit; obsolete toggle button).
+- `CreateJobForm` + `CreateJobDefinitionForm`: optional `<select>` of
+  the property's non-obsolete assets (server component passes them down;
+  no client fetch needed).
+- Job/definition detail pages: show a small asset link when scoped.
 
-tests/
-├── contract/
-├── integration/
-└── unit/
+## Obsolete Semantics (decision record)
 
-# [REMOVE IF UNUSED] Option 2: Web application (when "frontend" + "backend" detected)
-backend/
-├── src/
-│   ├── models/
-│   ├── services/
-│   └── api/
-└── tests/
+Reversible flag. Excluded from create-form dropdowns; badge in lists;
+detail page fully functional. Zero cascade: existing jobs stay
+actionable, definitions keep generating (documented in spec assumptions).
 
-frontend/
-├── src/
-│   ├── components/
-│   ├── pages/
-│   └── services/
-└── tests/
+## Suggested Work Packages (for /polaris.tasks)
 
-# [REMOVE IF UNUSED] Option 3: Mobile + API (when "iOS/Android" detected)
-api/
-└── [same as backend above]
+| WP | Scope | Domain |
+|----|-------|--------|
+| WP01 | Backend: Asset aggregate end-to-end (domain, application, repo, endpoints) + unit/integration tests | backend-logic |
+| WP02 | Backend: assetId on Job/JobDefinition + generation inheritance + list filters + validation + tests (depends WP01) | backend-logic |
+| WP03 | Frontend: api-client, actions, Assets section, asset detail page, form dropdowns + component tests (depends WP02) | frontend-craft |
+| WP04 | E2E suite `wp08-assets.spec.ts` (create/edit asset, scope job+definition, obsolete lifecycle) + helper `createAssetViaApi` (depends WP03) | testing-specialist |
 
-ios/ or android/
-└── [platform-specific structure: feature modules, UI flows, platform tests]
-```
+## Definition of Done
 
-**Structure Decision**: [Document the selected structure and reference the real
-directories captured above]
-
-## Complexity Tracking
-
-*Fill ONLY if Constitution Check has violations that must be justified*
-
-| Violation | Why Needed | Simpler Alternative Rejected Because |
-|-----------|------------|-------------------------------------|
-| [e.g., 4th project] | [current need] | [why 3 projects insufficient] |
-| [e.g., Repository pattern] | [specific problem] | [why direct DB access insufficient] |
+- [ ] All spec FRs implemented; SC-01..SC-04 demonstrated
+- [ ] dotnet test green (unit + integration incl. new Asset coverage)
+- [ ] Frontend jest green; full Playwright suite green locally and in CI
+- [ ] No hard-delete paths introduced
+- [ ] PRs merged to main; issue #79 closed
