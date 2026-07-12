@@ -30,6 +30,22 @@
       "agent": "unknown",
       "source": "implement",
       "drift_type": "expansion"
+    },
+    {
+      "amendment_id": "amd-002",
+      "text": "Files changed outside declared WP scope: backend/src/HomeMaintenance.API/Program.cs, frontend/e2e/helpers/setup.ts, frontend/e2e/wp07-step-mutations.spec.ts (and 2 more)",
+      "timestamp": "2026-07-12T16:32:59.868550+00:00",
+      "affected_sections": [],
+      "artifacts_updated": {
+        "spec_sections": [],
+        "plan_files": [],
+        "wps_regenerated": [],
+        "wps_locked": [],
+        "wps_created": []
+      },
+      "agent": "unknown",
+      "source": "implement",
+      "drift_type": "expansion"
     }
   ]
 }
