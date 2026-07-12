@@ -5,7 +5,7 @@ using HomeMaintenance.Domain.Jobs;
 
 namespace HomeMaintenance.Application.Jobs.Queries;
 
-public sealed record ListJobsQuery(string? PropertyId, JobStatus? Status);
+public sealed record ListJobsQuery(string? PropertyId, JobStatus? Status, string? AssetId = null);
 
 public sealed class ListJobsHandler
 {
@@ -24,6 +24,7 @@ public sealed class ListJobsHandler
             _identity.CurrentOwner,
             query.PropertyId,
             query.Status,
+            query.AssetId,
             ct);
 
         return Result<JobListDto>.Success(

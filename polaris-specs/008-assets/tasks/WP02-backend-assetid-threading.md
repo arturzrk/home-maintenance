@@ -1,13 +1,16 @@
 ---
 work_package_id: WP02
 title: 'Backend: assetId on Jobs and JobDefinitions'
-lane: planned
-dependencies: ["WP01"]
-base_branch: main
+lane: "doing"
+dependencies: [WP01]
+base_branch: 008-assets-WP01
+base_commit: f9083618a1e106b20fec7bb6a320c2cb35972e0c
+created_at: '2026-07-12T16:33:08.285674+00:00'
 subtasks: [T006, T007, T008, T009, T010]
 test_status: required
 test_file: backend/tests/HomeMaintenance.Integration.Tests/Assets/AssetScopedWorkTests.cs
 domain: backend-logic
+shell_pid: "8313"
 ---
 
 # WP02 - Backend: assetId on Jobs and JobDefinitions

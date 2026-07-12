@@ -18,6 +18,9 @@ public sealed class JobDefinition : Entity
 
     public IReadOnlyList<StepTemplate> StepTemplates => _stepTemplates.AsReadOnly();
 
+    /// <summary>Optional asset this definition is scoped to. Set at creation only.</summary>
+    public string? AssetId { get; private set; }
+
     private JobDefinition(string id, OwnerId owner, string propertyId, string name, ScheduleDefinition schedule)
         : base(id)
     {
@@ -33,7 +36,8 @@ public sealed class JobDefinition : Entity
         string propertyId,
         string name,
         ScheduleDefinition schedule,
-        IEnumerable<string> initialDescriptions)
+        IEnumerable<string> initialDescriptions,
+        string? assetId = null)
     {
         ArgumentNullException.ThrowIfNull(owner);
         if (string.IsNullOrWhiteSpace(propertyId))
@@ -41,7 +45,10 @@ public sealed class JobDefinition : Entity
         ArgumentNullException.ThrowIfNull(schedule);
         ValidateName(name);
 
-        var def = new JobDefinition(NormaliseId(id), owner, propertyId, name.Trim(), schedule);
+        var def = new JobDefinition(NormaliseId(id), owner, propertyId, name.Trim(), schedule)
+        {
+            AssetId = assetId,
+        };
         var order = 0;
         foreach (var description in initialDescriptions)
             def._stepTemplates.Add(StepTemplate.Create(NewStepTemplateId(), order++, description));
@@ -54,9 +61,13 @@ public sealed class JobDefinition : Entity
         string propertyId,
         string name,
         ScheduleDefinition schedule,
-        IEnumerable<StepTemplate> stepTemplates)
+        IEnumerable<StepTemplate> stepTemplates,
+        string? assetId = null)
     {
-        var def = new JobDefinition(id, owner, propertyId, name, schedule);
+        var def = new JobDefinition(id, owner, propertyId, name, schedule)
+        {
+            AssetId = assetId,
+        };
         def._stepTemplates.AddRange(stepTemplates);
         return def;
     }

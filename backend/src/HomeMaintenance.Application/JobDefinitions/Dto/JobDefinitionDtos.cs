@@ -20,4 +20,5 @@ public sealed record JobDefinitionDto(
     string PropertyId,
     string Name,
     ScheduleDefinitionDto Schedule,
-    IReadOnlyList<StepTemplateDto> StepTemplates);
+    IReadOnlyList<StepTemplateDto> StepTemplates,
+    string? AssetId = null);

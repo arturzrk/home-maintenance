@@ -30,7 +30,7 @@ public static class JobDefinitionEndpoints
                 .ToList();
 
             var result = await handler.Handle(
-                new CreateJobDefinitionCommand(body.PropertyId, body.Name, body.Schedule, stepDescriptions),
+                new CreateJobDefinitionCommand(body.PropertyId, body.Name, body.Schedule, stepDescriptions, body.AssetId),
                 ct);
 
             return result.IsSuccess
@@ -41,11 +41,12 @@ public static class JobDefinitionEndpoints
 
         group.MapGet("/", async (
             string? propertyId,
+            string? assetId,
             ListJobDefinitionsHandler handler,
             HttpContext ctx,
             CancellationToken ct) =>
         {
-            var result = await handler.Handle(new ListJobDefinitionsQuery(propertyId), ct);
+            var result = await handler.Handle(new ListJobDefinitionsQuery(propertyId, assetId), ct);
             return result.ToHttp(ctx);
         })
         .WithName("ListJobDefinitions");
@@ -123,7 +124,8 @@ public sealed record CreateJobDefinitionApiRequest(
     string Name,
     [property: Required]
     ScheduleDefinitionDto Schedule,
-    IReadOnlyList<StepTemplateCreateRequest>? StepTemplates);
+    IReadOnlyList<StepTemplateCreateRequest>? StepTemplates,
+    string? AssetId = null);
 
 public sealed record UpdateJobDefinitionApiRequest(
     [property: StringLength(200, MinimumLength = 1)]

@@ -75,7 +75,7 @@ public sealed class GetJobDefinitionHandlerTests
     public async Task List_ByOwner_ReturnsMappedDtos()
     {
         var repo = Substitute.For<IJobDefinitionRepository>();
-        repo.ListAsync(Alice, null, Arg.Any<CancellationToken>())
+        repo.ListAsync(Alice, null, null, Arg.Any<CancellationToken>())
             .Returns(new List<JobDefinition> { MakeDefinition(Alice) });
 
         var handler = new ListJobDefinitionsHandler(repo, IdentityFor(Alice));
@@ -90,13 +90,13 @@ public sealed class GetJobDefinitionHandlerTests
     public async Task List_FilteredByPropertyId_PassesFilterToRepository()
     {
         var repo = Substitute.For<IJobDefinitionRepository>();
-        repo.ListAsync(Alice, "prop-1", Arg.Any<CancellationToken>())
+        repo.ListAsync(Alice, "prop-1", null, Arg.Any<CancellationToken>())
             .Returns(new List<JobDefinition> { MakeDefinition(Alice) });
 
         var handler = new ListJobDefinitionsHandler(repo, IdentityFor(Alice));
         var result = await handler.Handle(new ListJobDefinitionsQuery("prop-1"));
 
         result.IsSuccess.ShouldBeTrue();
-        await repo.Received(1).ListAsync(Alice, "prop-1", Arg.Any<CancellationToken>());
+        await repo.Received(1).ListAsync(Alice, "prop-1", null, Arg.Any<CancellationToken>());
     }
 }
