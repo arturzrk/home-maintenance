@@ -47,6 +47,7 @@ public static class DependencyInjection
         services.AddSingleton<IAuditLog, FileAuditLog>();
 
         services.AddScoped<IPropertyRepository, PropertyRepository>();
+        services.AddScoped<IAssetRepository, AssetRepository>();
         services.AddScoped<IJobRepository, JobRepository>();
         services.AddScoped<IJobDefinitionRepository, JobDefinitionRepository>();
         services.AddScoped<JobGenerationService>();
