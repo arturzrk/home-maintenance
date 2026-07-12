@@ -24,6 +24,7 @@ internal sealed class MongoIndexInitializer : IHostedService
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         await EnsurePropertyIndexes(cancellationToken);
+        await EnsureAssetIndexes(cancellationToken);
         await EnsureJobIndexes(cancellationToken);
         await EnsureJobDefinitionIndexes(cancellationToken);
         _logger.LogInformation("MongoDB indexes ensured.");
@@ -45,6 +46,25 @@ internal sealed class MongoIndexInitializer : IHostedService
                         .Ascending(d => d.OwnerId)
                         .Ascending(d => d.Name),
                     new CreateIndexOptions { Name = "owner_name_idx" }),
+            },
+            ct);
+    }
+
+    private Task EnsureAssetIndexes(CancellationToken ct)
+    {
+        var collection = _db.GetCollection<AssetDocument>(AssetRepository.CollectionName);
+        return collection.Indexes.CreateManyAsync(
+            new[]
+            {
+                new CreateIndexModel<AssetDocument>(
+                    Builders<AssetDocument>.IndexKeys.Ascending(d => d.OwnerId),
+                    new CreateIndexOptions { Name = "owner_idx" }),
+                new CreateIndexModel<AssetDocument>(
+                    Builders<AssetDocument>.IndexKeys
+                        .Ascending(d => d.OwnerId)
+                        .Ascending(d => d.PropertyId)
+                        .Ascending(d => d.Name),
+                    new CreateIndexOptions { Name = "owner_property_name_idx" }),
             },
             ct);
     }

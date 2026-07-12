@@ -1,3 +1,5 @@
+using HomeMaintenance.Application.Assets.Commands;
+using HomeMaintenance.Application.Assets.Queries;
 using HomeMaintenance.Application.JobDefinitions.Commands;
 using HomeMaintenance.Application.JobDefinitions.Queries;
 using HomeMaintenance.Application.Jobs.Commands;
@@ -21,6 +23,12 @@ public static class DependencyInjection
         services.AddScoped<RenamePropertyHandler>();
         services.AddScoped<ListPropertiesHandler>();
         services.AddScoped<GetPropertyHandler>();
+
+        // Assets (008-assets WP01)
+        services.AddScoped<CreateAssetHandler>();
+        services.AddScoped<UpdateAssetHandler>();
+        services.AddScoped<GetAssetHandler>();
+        services.AddScoped<ListAssetsHandler>();
 
         // Jobs (WP05)
         services.AddScoped<CreateJobHandler>();

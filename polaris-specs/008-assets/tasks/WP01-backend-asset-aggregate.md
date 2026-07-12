@@ -4,10 +4,13 @@ title: "Backend: Asset aggregate end-to-end"
 lane: "for_review"
 dependencies: []
 base_branch: main
+base_commit: 5433ab9991cabdc6c0931212f75ec7cfba6aa605
+created_at: '2026-07-12T12:02:19.066067+00:00'
 subtasks: [T001, T002, T003, T004, T005]
-domain: backend-logic
 test_status: required
 test_file: backend/tests/HomeMaintenance.Integration.Tests/Assets/AssetEndpointsTests.cs
+domain: backend-logic
+shell_pid: "28599"
 ---
 
 # WP01 - Backend: Asset aggregate end-to-end

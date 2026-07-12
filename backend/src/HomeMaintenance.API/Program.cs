@@ -111,6 +111,9 @@ if (app.Environment.IsDevelopment())
 // Property aggregate (WP03).
 app.MapPropertyEndpoints();
 
+// Asset aggregate (008-assets).
+app.MapAssetEndpoints();
+
 // Job aggregate (WP05).
 app.MapJobEndpoints();
 
