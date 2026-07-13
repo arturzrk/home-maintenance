@@ -1,7 +1,7 @@
 ---
 work_package_id: WP04
 title: 'E2E: assets suite'
-lane: planned
+lane: "for_review"
 dependencies: ["WP03"]
 base_branch: main
 subtasks: [T017, T018, T019, T020, T021, T022, T023]
@@ -99,3 +99,7 @@ no asset link (SC-04 guard).
 ```bash
 polaris implement WP04 --base WP03
 ```
+
+## Activity Log
+
+- 2026-07-13T06:56:19Z – unknown – lane=for_review – Implemented on branch 008-assets-WP04; PR #91
