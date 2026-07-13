@@ -64,6 +64,7 @@ export async function createJobViaApi(
   propertyId: string,
   name: string,
   steps: string[] = [],
+  assetId?: string,
 ): Promise<string> {
   const resp = await fetch(`${API_BASE}/api/jobs`, {
     method: "POST",
@@ -76,11 +77,48 @@ export async function createJobViaApi(
       name,
       dueDate: null,
       steps: steps.map((description) => ({ description })),
+      assetId: assetId ?? null,
     }),
   });
   if (!resp.ok) throw new Error(`createJob failed: ${resp.status}`);
   const data = (await resp.json()) as { id: string };
   return data.id;
+}
+
+/** Create an asset directly via the backend API and return its id. */
+export async function createAssetViaApi(
+  token: string,
+  propertyId: string,
+  body: { name: string; category?: string; notes?: string },
+): Promise<string> {
+  const resp = await fetch(`${API_BASE}/api/assets`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ ...body, propertyId }),
+  });
+  if (!resp.ok) throw new Error(`createAsset failed: ${resp.status}`);
+  const data = (await resp.json()) as { id: string };
+  return data.id;
+}
+
+/** Flip an asset's obsolete flag directly via the backend API. */
+export async function setAssetObsoleteViaApi(
+  token: string,
+  assetId: string,
+  isObsolete: boolean,
+): Promise<void> {
+  const resp = await fetch(`${API_BASE}/api/assets/${assetId}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ isObsolete }),
+  });
+  if (!resp.ok) throw new Error(`setAssetObsolete failed: ${resp.status}`);
 }
 
 /** Create a job, tick all its steps, and complete it. Returns the job id. */

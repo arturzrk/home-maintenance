@@ -8,6 +8,7 @@ subtasks: [T017, T018, T019, T020, T021, T022, T023]
 test_status: required
 test_file: frontend/e2e/wp08-assets.spec.ts
 domain: testing-specialist
+shell_pid: "68843"
 ---
 
 # WP04 - E2E: assets suite
