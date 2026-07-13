@@ -8,6 +8,7 @@ subtasks: [T011, T012, T013, T014, T015, T016]
 test_status: required
 test_file: frontend/src/components/__tests__/asset-list.test.tsx
 domain: frontend-craft
+shell_pid: "26194"
 ---
 
 # WP03 - Frontend: assets UI

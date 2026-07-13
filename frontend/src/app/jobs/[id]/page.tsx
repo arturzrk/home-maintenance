@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ApiError, jobs as jobsApi } from "@/lib/api-client";
+import { ApiError, assets as assetsApi, jobs as jobsApi } from "@/lib/api-client";
 import { requireSession } from "@/lib/session";
 import { CompleteJobButton } from "@/components/complete-job-button";
 import { JobChecklist } from "@/components/job-checklist";
@@ -28,6 +28,17 @@ export default async function JobDetailPage({
 
   const completed = job.status === "Completed";
 
+  // Swallow only a 404 (asset gone); NEXT_REDIRECT and other API
+  // failures must propagate.
+  let asset = null;
+  if (job.assetId) {
+    try {
+      asset = await assetsApi.get(job.assetId, session.idToken);
+    } catch (err) {
+      if (!(err instanceof ApiError && err.status === 404)) throw err;
+    }
+  }
+
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <p className="text-xs text-gray-500">
@@ -37,6 +48,15 @@ export default async function JobDetailPage({
       </p>
 
       <JobHeader job={job} />
+
+      {asset && (
+        <p className="text-sm text-gray-500">
+          Asset:{" "}
+          <Link href={`/assets/${asset.id}`} className="font-medium text-gray-900 hover:underline">
+            {asset.name}
+          </Link>
+        </p>
+      )}
 
       <section className="rounded-md border border-gray-200 bg-white p-4 shadow-sm">
         <h2 className="text-sm font-semibold text-gray-700">Checklist</h2>

@@ -66,6 +66,39 @@ describe("CreateJobDefinitionForm", () => {
     expect(createJobDefinition).not.toHaveBeenCalled();
   });
 
+  it("assetDropdown_OmittedWhenNoAssets", () => {
+    render(<CreateJobDefinitionForm propertyId="prop-1" />);
+    openForm();
+    expect(screen.queryByLabelText(/Asset \(optional\)/i)).not.toBeInTheDocument();
+  });
+
+  it("assetDropdown_SelectedAssetIdIncludedInPayload", async () => {
+    (createJobDefinition as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      value: { id: "def-1", propertyId: "prop-1", name: "Service boiler", schedule: {}, stepTemplates: [] },
+    });
+
+    render(
+      <CreateJobDefinitionForm
+        propertyId="prop-1"
+        assets={[
+          { id: "a1", propertyId: "prop-1", name: "Boiler", category: null, notes: null, isObsolete: false },
+        ]}
+      />,
+    );
+    openForm();
+
+    await userEvent.type(screen.getByLabelText(/^Name$/i), "Service boiler");
+    fireEvent.change(screen.getByLabelText(/Start date/i), { target: { value: "2026-06-01" } });
+    await userEvent.selectOptions(screen.getByLabelText(/Asset \(optional\)/i), "a1");
+
+    fireEvent.click(screen.getByRole("button", { name: /save recurring job/i }));
+
+    await waitFor(() => expect(createJobDefinition).toHaveBeenCalledTimes(1));
+    const [, body] = (createJobDefinition as jest.Mock).mock.calls[0];
+    expect(body.assetId).toBe("a1");
+  });
+
   it("addStep_AppendsStepRow", async () => {
     render(<CreateJobDefinitionForm propertyId="prop-1" />);
     openForm();
