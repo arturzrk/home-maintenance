@@ -1,7 +1,7 @@
 ---
 work_package_id: WP04
 title: 'E2E: assets suite'
-lane: "for_review"
+lane: "done"
 dependencies: ["WP03"]
 base_branch: main
 subtasks: [T017, T018, T019, T020, T021, T022, T023]
@@ -9,6 +9,8 @@ test_status: required
 test_file: frontend/e2e/wp08-assets.spec.ts
 domain: testing-specialist
 shell_pid: "68843"
+reviewed_by: "Artur Żurek"
+review_status: "approved"
 ---
 
 # WP04 - E2E: assets suite
@@ -104,3 +106,4 @@ polaris implement WP04 --base WP03
 ## Activity Log
 
 - 2026-07-13T06:56:19Z – unknown – lane=for_review – Implemented on branch 008-assets-WP04; PR #91
+- 2026-07-13T09:23:33Z – unknown – shell_pid=68843 – lane=done – Merged via PR #91; feature 008 complete
