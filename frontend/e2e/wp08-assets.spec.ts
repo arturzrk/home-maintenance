@@ -108,7 +108,8 @@ test.describe("WP08: Assets", () => {
       .getByRole("button", { name: "Save recurring job" })
       .click();
 
-    // Definition appears on the property page after refresh.
+    // The form calls router.refresh() on success, so the definition
+    // appears on the property page without a manual reload.
     await expect(
       page.locator('a[href^="/job-definitions/"]', { hasText: "Clean gutters" }),
     ).toBeVisible();
