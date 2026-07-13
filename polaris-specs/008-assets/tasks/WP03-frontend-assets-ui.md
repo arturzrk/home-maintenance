@@ -1,11 +1,9 @@
 ---
 work_package_id: WP03
 title: 'Frontend: assets UI'
-lane: "doing"
-dependencies: [WP02]
-base_branch: 008-assets-WP02
-base_commit: 03ac6aed20f6953e0366cc0acc1ef69d3eb620bd
-created_at: '2026-07-12T17:35:01.049317+00:00'
+lane: "for_review"
+dependencies: ["WP02"]
+base_branch: main
 subtasks: [T011, T012, T013, T014, T015, T016]
 test_status: required
 test_file: frontend/src/components/__tests__/asset-list.test.tsx
@@ -109,3 +107,7 @@ based on assets prop and includes assetId in submission.
 ```bash
 polaris implement WP03 --base WP02
 ```
+
+## Activity Log
+
+- 2026-07-12T18:36:38Z – unknown – lane=for_review – Implemented on branch 008-assets-WP03; PR #89
