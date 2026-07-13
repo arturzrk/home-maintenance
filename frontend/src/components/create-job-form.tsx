@@ -3,8 +3,15 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { createJob, type ActionResult } from "@/app/jobs/actions";
+import type { AssetDto } from "@/lib/api-client";
 
-export function CreateJobForm({ propertyId }: { propertyId: string }) {
+export function CreateJobForm({
+  propertyId,
+  assets = [],
+}: {
+  propertyId: string;
+  assets?: AssetDto[];
+}) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
@@ -61,6 +68,28 @@ export function CreateJobForm({ propertyId }: { propertyId: string }) {
           disabled={pending}
         />
       </div>
+
+      {assets.length > 0 && (
+        <div>
+          <label className="block text-xs text-gray-600" htmlFor="job-asset">
+            Asset (optional)
+          </label>
+          <select
+            id="job-asset"
+            name="assetId"
+            defaultValue=""
+            className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-500"
+            disabled={pending}
+          >
+            <option value="">No asset</option>
+            {assets.map((a) => (
+              <option key={a.id} value={a.id}>
+                {a.name}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
 
       <div>
         <label className="block text-xs text-gray-600" htmlFor="job-steps">

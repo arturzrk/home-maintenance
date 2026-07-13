@@ -38,6 +38,36 @@ describe("CreateJobForm", () => {
     expect(fd.get("steps")).toBe("Shut off gas\nDrain system\nReplace filter");
   });
 
+  it("omits the asset dropdown when no assets are passed", () => {
+    render(<CreateJobForm propertyId="prop-1" />);
+    expect(screen.queryByLabelText(/Asset \(optional\)/i)).not.toBeInTheDocument();
+  });
+
+  it("includes the selected assetId in the submission", async () => {
+    (createJob as jest.Mock).mockResolvedValueOnce({ ok: true, value: { id: "job-1" } });
+
+    render(
+      <CreateJobForm
+        propertyId="prop-1"
+        assets={[
+          { id: "a1", propertyId: "prop-1", name: "Boiler", category: null, notes: null, isObsolete: false },
+        ]}
+      />,
+    );
+
+    fireEvent.change(screen.getByLabelText(/^Name$/i), {
+      target: { value: "Service boiler" },
+    });
+    fireEvent.change(screen.getByLabelText(/Asset \(optional\)/i), {
+      target: { value: "a1" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /create job/i }));
+
+    await waitFor(() => expect(createJob).toHaveBeenCalledTimes(1));
+    const fd = (createJob as jest.Mock).mock.calls[0][0] as FormData;
+    expect(fd.get("assetId")).toBe("a1");
+  });
+
   it("renders the action's error message", async () => {
     (createJob as jest.Mock).mockResolvedValueOnce({
       ok: false,

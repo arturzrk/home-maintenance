@@ -137,6 +137,55 @@ export const properties = {
 };
 
 // ---------------------------------------------------------------------------
+// Assets (008 backend)
+// Server-only.
+// ---------------------------------------------------------------------------
+
+export interface AssetDto {
+  id: string;
+  propertyId: string;
+  name: string;
+  category: string | null;
+  notes: string | null;
+  isObsolete: boolean;
+}
+
+export interface CreateAssetBody {
+  propertyId: string;
+  name: string;
+  category?: string | null;
+  notes?: string | null;
+}
+
+export interface UpdateAssetBody {
+  name?: string;
+  category?: string | null;
+  notes?: string | null;
+  isObsolete?: boolean;
+}
+
+export const assets = {
+  list: (propertyId: string, idToken: string) =>
+    apiFetch<AssetDto[]>(
+      `/api/assets?propertyId=${encodeURIComponent(propertyId)}`,
+      { idToken },
+    ),
+
+  get: (id: string, idToken: string) =>
+    apiFetch<AssetDto>(`/api/assets/${id}`, { idToken }),
+
+  create: (body: CreateAssetBody, idToken: string) =>
+    apiFetch<AssetDto>("/api/assets", { method: "POST", body, idToken }),
+
+  update: (id: string, body: UpdateAssetBody, idToken: string) =>
+    apiFetch<AssetDto>(`/api/assets/${id}`, {
+      method: "PATCH",
+      body,
+      idToken,
+    }),
+};
+
+// ---------------------------------------------------------------------------
 // Jobs (WP05 backend)
 // Server-only.
 // ---------------------------------------------------------------------------
@@ -161,6 +210,7 @@ export interface JobSummary {
   stepCount: number;
   completedStepCount: number;
   jobDefinitionId: string | null;
+  assetId: string | null;
 }
 
 export interface JobDetail {
@@ -172,6 +222,7 @@ export interface JobDetail {
   completedAt: string | null;
   steps: StepDto[];
   jobDefinitionId: string | null;
+  assetId: string | null;
 }
 
 export interface JobList {
@@ -183,14 +234,16 @@ export interface CreateJobInput {
   name: string;
   dueDate: string | null;
   steps: { description: string }[];
+  assetId?: string | null;
 }
 
 export const jobs = {
-  list: (idToken: string, filters?: { propertyId?: string; status?: JobStatus; definitionId?: string }) => {
+  list: (idToken: string, filters?: { propertyId?: string; status?: JobStatus; definitionId?: string; assetId?: string }) => {
     const params = new URLSearchParams();
     if (filters?.propertyId) params.set("propertyId", filters.propertyId);
     if (filters?.status) params.set("status", filters.status);
     if (filters?.definitionId) params.set("definitionId", filters.definitionId);
+    if (filters?.assetId) params.set("assetId", filters.assetId);
     const qs = params.toString();
     return apiFetch<JobList>(`/api/jobs${qs ? "?" + qs : ""}`, { idToken });
   },
@@ -280,6 +333,7 @@ export interface JobDefinitionDto {
   name: string;
   schedule: ScheduleDefinitionDto;
   stepTemplates: StepTemplateDto[];
+  assetId: string | null;
 }
 
 export interface CreateJobDefinitionBody {
@@ -287,6 +341,7 @@ export interface CreateJobDefinitionBody {
   name: string;
   schedule: ScheduleDefinitionDto;
   stepTemplates: { description: string }[];
+  assetId?: string | null;
 }
 
 export interface UpdateJobDefinitionBody {
@@ -299,9 +354,10 @@ export interface UpdateJobDefinitionBody {
 }
 
 export const jobDefinitions = {
-  list: (idToken: string, filters?: { propertyId?: string }) => {
+  list: (idToken: string, filters?: { propertyId?: string; assetId?: string }) => {
     const params = new URLSearchParams();
     if (filters?.propertyId) params.set("propertyId", filters.propertyId);
+    if (filters?.assetId) params.set("assetId", filters.assetId);
     const qs = params.toString();
     return apiFetch<JobDefinitionDto[]>(`/api/job-definitions${qs ? "?" + qs : ""}`, { idToken });
   },
