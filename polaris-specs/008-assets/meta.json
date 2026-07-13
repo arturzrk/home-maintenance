@@ -94,6 +94,38 @@
       "agent": "unknown",
       "source": "implement",
       "drift_type": "expansion"
+    },
+    {
+      "amendment_id": "amd-006",
+      "text": "Files changed outside declared WP scope: frontend/src/lib/api-client.ts, backend/src/HomeMaintenance.Infrastructure/DependencyInjection.cs, backend/src/HomeMaintenance.Infrastructure/Persistence/Documents/JobDefinitionDocument.cs (and 32 more)",
+      "timestamp": "2026-07-13T06:51:46.191490+00:00",
+      "affected_sections": [],
+      "artifacts_updated": {
+        "spec_sections": [],
+        "plan_files": [],
+        "wps_regenerated": [],
+        "wps_locked": [],
+        "wps_created": []
+      },
+      "agent": "unknown",
+      "source": "implement",
+      "drift_type": "expansion"
+    },
+    {
+      "amendment_id": "amd-007",
+      "text": "Files changed outside declared WP scope: backend/src/HomeMaintenance.API/Endpoints/JobDefinitionEndpoints.cs, backend/src/HomeMaintenance.API/Program.cs, backend/src/HomeMaintenance.Application/DependencyInjection.cs (and 18 more)",
+      "timestamp": "2026-07-13T06:56:19.799478+00:00",
+      "affected_sections": [],
+      "artifacts_updated": {
+        "spec_sections": [],
+        "plan_files": [],
+        "wps_regenerated": [],
+        "wps_locked": [],
+        "wps_created": []
+      },
+      "agent": "unknown",
+      "source": "implement",
+      "drift_type": "expansion"
     }
   ]
 }

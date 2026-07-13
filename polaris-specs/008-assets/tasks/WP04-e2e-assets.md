@@ -1,11 +1,9 @@
 ---
 work_package_id: WP04
 title: 'E2E: assets suite'
-lane: "doing"
-dependencies: [WP03]
-base_branch: 008-assets-WP03
-base_commit: 449dbf4a86c9c4bc2a03d9d531b2e7508f6467cd
-created_at: '2026-07-13T06:52:06.385335+00:00'
+lane: "for_review"
+dependencies: ["WP03"]
+base_branch: main
 subtasks: [T017, T018, T019, T020, T021, T022, T023]
 test_status: required
 test_file: frontend/e2e/wp08-assets.spec.ts
@@ -102,3 +100,7 @@ no asset link (SC-04 guard).
 ```bash
 polaris implement WP04 --base WP03
 ```
+
+## Activity Log
+
+- 2026-07-13T06:56:19Z – unknown – lane=for_review – Implemented on branch 008-assets-WP04; PR #91

@@ -1,7 +1,7 @@
 ---
 work_package_id: WP03
 title: 'Frontend: assets UI'
-lane: "for_review"
+lane: "done"
 dependencies: ["WP02"]
 base_branch: main
 subtasks: [T011, T012, T013, T014, T015, T016]
@@ -9,6 +9,8 @@ test_status: required
 test_file: frontend/src/components/__tests__/asset-list.test.tsx
 domain: frontend-craft
 shell_pid: "26194"
+reviewed_by: "Artur Żurek"
+review_status: "approved"
 ---
 
 # WP03 - Frontend: assets UI
@@ -111,3 +113,4 @@ polaris implement WP03 --base WP02
 ## Activity Log
 
 - 2026-07-12T18:36:38Z – unknown – lane=for_review – Implemented on branch 008-assets-WP03; PR #89
+- 2026-07-13T06:51:45Z – unknown – shell_pid=26194 – lane=done – Merged via PR #89
