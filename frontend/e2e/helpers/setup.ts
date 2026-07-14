@@ -7,7 +7,8 @@ export async function signInAs(page: Page, sub: string): Promise<void> {
   await page.goto("/signin");
   await page.getByLabel(/OwnerId/i).fill(sub);
   await page.getByRole("button", { name: /Sign in as dev user/i }).click();
-  await page.waitForURL(/\/properties/);
+  // Default landing is the dashboard "/" (feature 009).
+  await page.waitForURL((url) => url.pathname === "/");
 }
 
 /** Create a property directly via the backend API and return its id. */

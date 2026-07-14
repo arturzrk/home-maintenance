@@ -5,6 +5,7 @@ test.describe("WP04: Properties page", () => {
   test("WP04-1: shows empty state for fresh user", async ({ page }) => {
     const { sub } = uniqueUser();
     await signInAs(page, sub);
+    await page.goto("/properties");
 
     await expect(page.getByRole("heading", { name: "My properties" })).toBeVisible();
     await expect(page.getByText("No properties yet.")).toBeVisible();
@@ -15,6 +16,7 @@ test.describe("WP04: Properties page", () => {
   test("WP04-2: create property → appears in list, input cleared", async ({ page }) => {
     const { sub } = uniqueUser();
     await signInAs(page, sub);
+    await page.goto("/properties");
 
     await page.getByPlaceholder("Property name").fill("My House");
     await page.getByRole("button", { name: "Create" }).click();
@@ -27,6 +29,7 @@ test.describe("WP04: Properties page", () => {
     const { sub, token } = uniqueUser();
     const propertyId = await createPropertyViaApi(token, "My House");
     await signInAs(page, sub);
+    await page.goto("/properties");
 
     await page.getByRole("link", { name: "My House" }).click();
     await page.waitForURL(/\/properties\/.+/);
