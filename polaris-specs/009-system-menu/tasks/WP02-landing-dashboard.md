@@ -1,7 +1,7 @@
 ---
 work_package_id: WP02
 title: Landing switch + dashboard page
-lane: planned
+lane: "for_review"
 dependencies: ["WP01"]
 subtasks: [T005, T006, T007, T008, T009]
 test_status: required
@@ -101,3 +101,7 @@ client-component logic (it should not - pure server component).
 ```bash
 polaris implement WP02 --base WP01
 ```
+
+## Activity Log
+
+- 2026-07-14T16:50:35Z – unknown – lane=for_review – Implemented on branch 009-system-menu-WP02; PR #99
