@@ -1,13 +1,15 @@
 ---
 work_package_id: WP02
 title: Landing switch + dashboard page
-lane: "for_review"
+lane: "done"
 dependencies: ["WP01"]
 subtasks: [T005, T006, T007, T008, T009]
 test_status: required
 test_file: frontend/e2e/helpers/setup.ts
 domain: frontend-craft
 shell_pid: "26698"
+reviewed_by: "Artur Żurek"
+review_status: "approved"
 ---
 
 # WP02 - Landing switch + dashboard page
@@ -106,3 +108,4 @@ polaris implement WP02 --base WP01
 ## Activity Log
 
 - 2026-07-14T16:50:35Z – unknown – lane=for_review – Implemented on branch 009-system-menu-WP02; PR #99
+- 2026-07-14T18:00:41Z – unknown – shell_pid=26698 – lane=done – Merged via PR #99
