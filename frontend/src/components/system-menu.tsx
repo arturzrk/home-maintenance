@@ -39,12 +39,14 @@ export function SystemMenu({ identity, version, healthy, signOutAction }: Props)
 
   return (
     <div ref={rootRef} className="relative">
+      {/* A simple popover of links, not an ARIA menu: menu/menuitem roles
+          would promise roving-tabindex keyboard semantics this does not
+          implement. The visible identity text is the accessible name. */}
       <button
         type="button"
         id="system-menu-trigger"
-        aria-haspopup="menu"
         aria-expanded={open}
-        aria-label="System menu"
+        aria-controls="system-menu-panel"
         onClick={() => setOpen((o) => !o)}
         className="flex items-center gap-1 rounded-md border border-gray-300 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50"
       >
@@ -54,13 +56,11 @@ export function SystemMenu({ identity, version, healthy, signOutAction }: Props)
 
       {open && (
         <div
-          role="menu"
-          aria-label="System menu"
+          id="system-menu-panel"
           className="absolute right-0 z-10 mt-2 w-64 rounded-md border border-gray-200 bg-white py-1 shadow-lg"
         >
           <Link
             href="/properties"
-            role="menuitem"
             onClick={() => setOpen(false)}
             className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
           >
@@ -70,7 +70,6 @@ export function SystemMenu({ identity, version, healthy, signOutAction }: Props)
             href="/user-manual/index.html"
             target="_blank"
             rel="noopener noreferrer"
-            role="menuitem"
             aria-label="User guide (opens in a new tab)"
             onClick={() => setOpen(false)}
             className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
@@ -99,7 +98,6 @@ export function SystemMenu({ identity, version, healthy, signOutAction }: Props)
           <form action={signOutAction}>
             <button
               type="submit"
-              role="menuitem"
               className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
             >
               Sign out
