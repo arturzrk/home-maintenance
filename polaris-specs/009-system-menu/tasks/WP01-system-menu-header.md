@@ -1,7 +1,7 @@
 ---
 work_package_id: WP01
-title: System menu + header rework
-lane: "doing"
+title: 'System menu + header rework'
+lane: "for_review"
 dependencies: []
 base_branch: main
 base_commit: 117d9a6859cecd903818a44de1019a0b3d80ce26
@@ -119,3 +119,7 @@ additive; `signInAs` unaffected until WP02 changes the landing).
 ```bash
 polaris implement WP01
 ```
+
+## Activity Log
+
+- 2026-07-14T15:56:43Z – unknown – lane=for_review – Implemented on branch 009-system-menu-WP01; PR #96
