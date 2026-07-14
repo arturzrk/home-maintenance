@@ -23,7 +23,7 @@ export default function SignInPage({
           "use server";
           const params = await searchParams;
           await signIn("google", {
-            redirectTo: params?.callbackUrl ?? "/properties",
+            redirectTo: params?.callbackUrl ?? "/",
           });
         }}
         className="space-y-2"
@@ -44,7 +44,7 @@ export default function SignInPage({
             const sub = String(formData.get("sub") ?? "").trim() || "alice";
             await signIn("dev-stub", {
               sub,
-              redirectTo: params?.callbackUrl ?? "/properties",
+              redirectTo: params?.callbackUrl ?? "/",
             });
           }}
           className="space-y-2 rounded-md border border-dashed border-amber-300 bg-amber-50 p-4"

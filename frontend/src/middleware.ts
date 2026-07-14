@@ -10,8 +10,15 @@ export default auth((req) => {
   }
 });
 
-// Limit middleware to the routes that actually need auth. Public routes
-// (/, /signin, /api/auth/*) skip the check entirely.
+// Limit middleware to the routes that actually need auth. "/" is the
+// signed-in landing page (exact-path match - /signin, /api/auth/* and
+// /user-manual/* stay public).
 export const config = {
-  matcher: ["/properties/:path*", "/jobs/:path*"],
+  matcher: [
+    "/",
+    "/properties/:path*",
+    "/jobs/:path*",
+    "/job-definitions/:path*",
+    "/assets/:path*",
+  ],
 };

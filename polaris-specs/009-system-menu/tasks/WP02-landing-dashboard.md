@@ -7,6 +7,7 @@ subtasks: [T005, T006, T007, T008, T009]
 test_status: required
 test_file: frontend/e2e/helpers/setup.ts
 domain: frontend-craft
+shell_pid: "26698"
 ---
 
 # WP02 - Landing switch + dashboard page
