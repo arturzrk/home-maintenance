@@ -3,10 +3,14 @@ work_package_id: WP01
 title: 'System menu + header rework'
 lane: "for_review"
 dependencies: []
+base_branch: main
+base_commit: 117d9a6859cecd903818a44de1019a0b3d80ce26
+created_at: '2026-07-14T15:14:05.308673+00:00'
 subtasks: [T001, T002, T003, T004]
 test_status: required
 test_file: frontend/src/components/__tests__/system-menu.test.tsx
 domain: frontend-craft
+shell_pid: "981"
 ---
 
 # WP01 - System menu + header rework
