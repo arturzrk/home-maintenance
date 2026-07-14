@@ -1,7 +1,7 @@
 ---
 work_package_id: WP01
 title: 'System menu + header rework'
-lane: "for_review"
+lane: "done"
 dependencies: []
 base_branch: main
 base_commit: 117d9a6859cecd903818a44de1019a0b3d80ce26
@@ -11,6 +11,8 @@ test_status: required
 test_file: frontend/src/components/__tests__/system-menu.test.tsx
 domain: frontend-craft
 shell_pid: "981"
+reviewed_by: "Artur Żurek"
+review_status: "approved"
 ---
 
 # WP01 - System menu + header rework
@@ -123,3 +125,4 @@ polaris implement WP01
 ## Activity Log
 
 - 2026-07-14T15:56:43Z – unknown – lane=for_review – Implemented on branch 009-system-menu-WP01; PR #96
+- 2026-07-14T16:34:22Z – unknown – shell_pid=981 – lane=done – Merged via PR #96

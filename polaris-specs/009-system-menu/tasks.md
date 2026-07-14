@@ -23,11 +23,11 @@ Dependencies: none. Parallel: T001 [P] with T002.
 
 Make `/` the protected landing page; keep every existing e2e green.
 
-- [ ] T005 `signin/page.tsx`: both `redirectTo` fallbacks `"/properties"` -> `"/"` (callbackUrl deep links untouched)
-- [ ] T006 `middleware.ts` matcher: add `"/"`, `"/job-definitions/:path*"`, `"/assets/:path*"`
-- [ ] T007 Dashboard `app/page.tsx`: `requireSession()`, user-facing copy, prominent My properties link (`#dashboard-properties-link`), keep ConnectionStatus
-- [ ] T008 e2e helper `signInAs`: waitForURL dashboard root instead of `/properties`; sweep existing specs for landing assumptions
-- [ ] T009 Full local gate: lint, jest, build, full Playwright suite (33) green
+- [x] T005 `signin/page.tsx`: both `redirectTo` fallbacks `"/properties"` -> `"/"` (callbackUrl deep links untouched)
+- [x] T006 `middleware.ts` matcher: add `"/"`, `"/job-definitions/:path*"`, `"/assets/:path*"`
+- [x] T007 Dashboard `app/page.tsx`: `requireSession()`, user-facing copy, prominent My properties link (`#dashboard-properties-link`), keep ConnectionStatus
+- [x] T008 e2e helper `signInAs`: waitForURL dashboard root instead of `/properties`; sweep existing specs for landing assumptions
+- [x] T009 Full local gate: lint, jest, build, full Playwright suite (33) green
 
 Sketch: T005 and T008 MUST land together (all existing e2e go through
 signInAs). Matcher `"/"` is exact-path; `/signin` and `/user-manual/*`
