@@ -8,5 +8,23 @@
   "target_branch": "main",
   "vcs": "git",
   "github_issue": 93,
-  "estimation": null
+  "estimation": null,
+  "amendments": [
+    {
+      "amendment_id": "amd-001",
+      "text": "Files changed outside declared WP scope: backend/src/HomeMaintenance.API/Endpoints/AssetEndpoints.cs, backend/src/HomeMaintenance.API/Program.cs, backend/src/HomeMaintenance.Application/Assets/Commands/CreateAsset.cs (and 23 more)",
+      "timestamp": "2026-07-14T15:56:44.128498+00:00",
+      "affected_sections": [],
+      "artifacts_updated": {
+        "spec_sections": [],
+        "plan_files": [],
+        "wps_regenerated": [],
+        "wps_locked": [],
+        "wps_created": []
+      },
+      "agent": "unknown",
+      "source": "implement",
+      "drift_type": "expansion"
+    }
+  ]
 }

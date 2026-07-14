@@ -9,10 +9,10 @@ Frontend-only; no backend changes. Spec: [spec.md](spec.md), plan: [plan.md](pla
 
 Session-aware header with the system menu island.
 
-- [ ] T001 Sign-out server action (`frontend/src/app/actions.ts`): `"use server"`, calls `signOut({ redirectTo: "/signin" })` from `@/lib/auth`
-- [ ] T002 `frontend/src/components/system-menu.tsx` client component: identity trigger (`#system-menu-trigger`, aria-expanded/haspopup), popover `role="menu"` with My properties link, User guide link (new tab), system-info block (version + health), Sign out form; closes on outside click / Escape / item click
-- [ ] T003 `frontend/src/app/layout.tsx`: brand becomes `<Link href="/">`; resolve `auth()` + `getApiInfo()`/`checkHealth()` (failure-tolerant); render SystemMenu when session exists, else plain User guide link (FR-11)
-- [ ] T004 Jest: system-menu.test.tsx (identity, open/close incl. Escape, items, health states, sign-out form present)
+- [x] T001 Sign-out server action (`frontend/src/app/actions.ts`): `"use server"`, calls `signOut({ redirectTo: "/signin" })` from `@/lib/auth`
+- [x] T002 `frontend/src/components/system-menu.tsx` client component: identity trigger (`#system-menu-trigger`, aria-expanded/haspopup), popover `role="menu"` with My properties link, User guide link (new tab), system-info block (version + health), Sign out form; closes on outside click / Escape / item click
+- [x] T003 `frontend/src/app/layout.tsx`: brand becomes `<Link href="/">`; resolve `auth()` + `getApiInfo()`/`checkHealth()` (failure-tolerant); render SystemMenu when session exists, else plain User guide link (FR-11)
+- [x] T004 Jest: system-menu.test.tsx (identity, open/close incl. Escape, items, health states, sign-out form present)
 
 Sketch: layout stays a Server Component; menu receives only plain props
 (identity string, version, healthy) - never the idToken. No new deps.
