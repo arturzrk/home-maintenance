@@ -1,0 +1,12 @@
+{
+  "feature_number": "009",
+  "slug": "009-system-menu",
+  "friendly_name": "System menu & dashboard landing",
+  "mission": "software-dev",
+  "source_description": "System menu in the app header (persistent across pages): navigation to My properties, User guide, system/app info, account identity and sign out; a step toward the dashboard becoming the app's landing page",
+  "created_at": "2026-07-14T08:00:00Z",
+  "target_branch": "main",
+  "vcs": "git",
+  "github_issue": 93,
+  "estimation": null
+}
