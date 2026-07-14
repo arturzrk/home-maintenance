@@ -1,12 +1,16 @@
 ---
 work_package_id: WP02
 title: Landing switch + dashboard page
-lane: planned
-dependencies: ["WP01"]
+lane: "doing"
+dependencies: [WP01]
+base_branch: 009-system-menu-WP01
+base_commit: 39bfa4a03457b1b7da95bbbcb80a7fee5d22a69a
+created_at: '2026-07-14T16:34:37.961121+00:00'
 subtasks: [T005, T006, T007, T008, T009]
 test_status: required
 test_file: frontend/e2e/helpers/setup.ts
 domain: frontend-craft
+shell_pid: "26698"
 ---
 
 # WP02 - Landing switch + dashboard page
