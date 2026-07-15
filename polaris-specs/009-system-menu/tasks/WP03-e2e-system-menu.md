@@ -7,6 +7,7 @@ subtasks: [T010, T011, T012, T013, T014, T015]
 test_status: required
 test_file: frontend/e2e/wp09-system-menu.spec.ts
 domain: testing-specialist
+shell_pid: "54431"
 ---
 
 # WP03 - E2E: system menu suite
