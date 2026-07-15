@@ -89,6 +89,22 @@
       "agent": "unknown",
       "source": "implement",
       "drift_type": "expansion"
+    },
+    {
+      "amendment_id": "amd-006",
+      "text": "Files changed outside declared WP scope: backend/src/HomeMaintenance.Infrastructure/DependencyInjection.cs, backend/src/HomeMaintenance.Infrastructure/Persistence/Documents/JobDefinitionDocument.cs, backend/src/HomeMaintenance.Infrastructure/Persistence/Documents/JobDocument.cs (and 35 more)",
+      "timestamp": "2026-07-15T16:37:51.620398+00:00",
+      "affected_sections": [],
+      "artifacts_updated": {
+        "spec_sections": [],
+        "plan_files": [],
+        "wps_regenerated": [],
+        "wps_locked": [],
+        "wps_created": []
+      },
+      "agent": "unknown",
+      "source": "implement",
+      "drift_type": "expansion"
     }
   ]
 }

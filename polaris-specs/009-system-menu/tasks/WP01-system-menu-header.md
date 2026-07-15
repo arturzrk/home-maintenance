@@ -124,5 +124,5 @@ polaris implement WP01
 
 ## Activity Log
 
-- 2026-07-14T15:56:43Z – unknown – lane=for_review – Implemented on branch 009-system-menu-WP01; PR #96
-- 2026-07-14T16:34:22Z – unknown – shell_pid=981 – lane=done – Merged via PR #96
+- 2026-07-14T15:56:43Z -- unknown -- lane=for_review -- Implemented on branch 009-system-menu-WP01; PR #96
+- 2026-07-14T16:34:22Z -- unknown -- shell_pid=981 -- lane=done -- Merged via PR #96

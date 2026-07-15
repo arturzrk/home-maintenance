@@ -105,5 +105,5 @@ polaris implement WP04 --base WP03
 
 ## Activity Log
 
-- 2026-07-13T06:56:19Z – unknown – lane=for_review – Implemented on branch 008-assets-WP04; PR #91
-- 2026-07-13T09:23:33Z – unknown – shell_pid=68843 – lane=done – Merged via PR #91; feature 008 complete
+- 2026-07-13T06:56:19Z -- unknown -- lane=for_review -- Implemented on branch 008-assets-WP04; PR #91
+- 2026-07-13T09:23:33Z -- unknown -- shell_pid=68843 -- lane=done -- Merged via PR #91; feature 008 complete
