@@ -1,11 +1,8 @@
 ---
 work_package_id: WP03
 title: 'E2E: system menu suite'
-lane: "doing"
-dependencies: [WP02]
-base_branch: 009-system-menu-WP02
-base_commit: 6a893b9dcd9be85e41fd33689b7b36444a0eb1ab
-created_at: '2026-07-14T18:00:48.819203+00:00'
+lane: "for_review"
+dependencies: ["WP02"]
 subtasks: [T010, T011, T012, T013, T014, T015]
 test_status: required
 test_file: frontend/e2e/wp09-system-menu.spec.ts
@@ -90,3 +87,7 @@ From the dashboard, click `#dashboard-properties-link` -> `/properties`
 ```bash
 polaris implement WP03 --base WP02
 ```
+
+## Activity Log
+
+- 2026-07-15T04:50:48Z – unknown – lane=for_review – Implemented on branch 009-system-menu-WP03; PR #101

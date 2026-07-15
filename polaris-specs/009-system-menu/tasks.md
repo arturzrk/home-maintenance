@@ -39,12 +39,12 @@ Dependencies: WP01 (header/menu already on the branch keeps the gate honest).
 
 `frontend/e2e/wp09-system-menu.spec.ts`, one describe "WP09: System menu".
 
-- [ ] T010 WP09-1: stub sign-in without callbackUrl lands on dashboard (SC-02)
-- [ ] T011 WP09-2: menu trigger shows identity; My properties item navigates (US1/US2)
-- [ ] T012 WP09-3: system-info block shows version and Connected state (US4)
-- [ ] T013 WP09-4: sign out -> /signin; then /properties redirects to sign-in (US5/SC-03)
-- [ ] T014 WP09-5: deep link preserved - visit a property page signed out, sign in, land back on it (FR-08)
-- [ ] T015 WP09-6: dashboard My properties CTA navigates (US6)
+- [x] - [x] T010 WP09-1: stub sign-in without callbackUrl lands on dashboard (SC-02)
+- [x] - [x] T011 WP09-2: menu trigger shows identity; My properties item navigates (US1/US2)
+- [x] - [x] T012 WP09-3: system-info block shows version and Connected state (US4)
+- [x] - [x] T013 WP09-4: sign out -> /signin; then /properties redirects to sign-in (US5/SC-03)
+- [x] - [x] T014 WP09-5: deep link preserved - visit a property page signed out, sign in, land back on it (FR-08)
+- [x] - [x] T015 WP09-6: dashboard My properties CTA navigates (US6)
 
 Dependencies: WP02. All tests use uniqueUser() isolation; id-based
 locators (`#system-menu-trigger`, `#dashboard-properties-link`).
