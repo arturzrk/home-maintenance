@@ -98,7 +98,7 @@ polaris implement WP02 --base WP01
 
 ## Activity Log
 
-- 2026-07-12T17:12:48Z – unknown – lane=doing – Implementing assetId threading
-- 2026-07-12T17:12:50Z – unknown – lane=testing – dotnet test + e2e running
-- 2026-07-12T17:12:51Z – unknown – lane=for_review – 169 unit + 197 integration green (15 new); 27/27 e2e unaffected; PR #87
-- 2026-07-12T17:34:13Z – unknown – shell_pid=8313 – lane=done – Merged via PR #87
+- 2026-07-12T17:12:48Z -- unknown -- lane=doing -- Implementing assetId threading
+- 2026-07-12T17:12:50Z -- unknown -- lane=testing -- dotnet test + e2e running
+- 2026-07-12T17:12:51Z -- unknown -- lane=for_review -- 169 unit + 197 integration green (15 new); 27/27 e2e unaffected; PR #87
+- 2026-07-12T17:34:13Z -- unknown -- shell_pid=8313 -- lane=done -- Merged via PR #87

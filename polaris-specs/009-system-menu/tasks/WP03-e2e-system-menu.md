@@ -1,13 +1,15 @@
 ---
 work_package_id: WP03
 title: 'E2E: system menu suite'
-lane: "for_review"
+lane: "done"
 dependencies: ["WP02"]
 subtasks: [T010, T011, T012, T013, T014, T015]
 test_status: required
 test_file: frontend/e2e/wp09-system-menu.spec.ts
 domain: testing-specialist
 shell_pid: "54431"
+reviewed_by: "Artur Żurek"
+review_status: "approved"
 ---
 
 # WP03 - E2E: system menu suite
@@ -90,4 +92,5 @@ polaris implement WP03 --base WP02
 
 ## Activity Log
 
-- 2026-07-15T04:50:48Z – unknown – lane=for_review – Implemented on branch 009-system-menu-WP03; PR #101
+- 2026-07-15T04:50:48Z -- unknown -- lane=for_review -- Implemented on branch 009-system-menu-WP03; PR #101
+- 2026-07-15T16:37:50Z -- unknown -- shell_pid=54431 -- lane=done -- Merged via PR #101; feature 009 complete

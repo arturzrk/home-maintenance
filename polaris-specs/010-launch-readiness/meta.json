@@ -1,0 +1,12 @@
+{
+  "feature_number": "010",
+  "slug": "010-launch-readiness",
+  "friendly_name": "Go-live launch readiness (Maintained House)",
+  "mission": "software-dev",
+  "source_description": "Go-live blockers: production launch readiness - public landing page for signed-out visitors, privacy policy and terms pages, Google OAuth consent screen publishing prerequisites, and production environment provisioning (domain, prod API + managed Mongo, frontend pointing at prod) captured as a runbook",
+  "created_at": "2026-07-15T09:00:00Z",
+  "target_branch": "main",
+  "vcs": "git",
+  "github_issue": 102,
+  "estimation": null
+}

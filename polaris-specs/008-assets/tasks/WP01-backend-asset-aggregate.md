@@ -117,7 +117,7 @@ polaris implement WP01
 
 ## Activity Log
 
-- 2026-07-12T12:33:33Z – unknown – lane=doing – Implementing Asset aggregate
-- 2026-07-12T12:33:35Z – unknown – lane=testing – dotnet test running
-- 2026-07-12T12:33:36Z – unknown – lane=for_review – 165 unit + 186 integration green (25 new); PR #84
-- 2026-07-12T16:32:58Z – unknown – shell_pid=28599 – lane=done – PRs #84 and #85 merged
+- 2026-07-12T12:33:33Z -- unknown -- lane=doing -- Implementing Asset aggregate
+- 2026-07-12T12:33:35Z -- unknown -- lane=testing -- dotnet test running
+- 2026-07-12T12:33:36Z -- unknown -- lane=for_review -- 165 unit + 186 integration green (25 new); PR #84
+- 2026-07-12T16:32:58Z -- unknown -- shell_pid=28599 -- lane=done -- PRs #84 and #85 merged
