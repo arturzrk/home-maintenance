@@ -1,7 +1,7 @@
 ---
 work_package_id: WP03
 title: 'E2E: system menu suite'
-lane: planned
+lane: "for_review"
 dependencies: ["WP02"]
 subtasks: [T010, T011, T012, T013, T014, T015]
 test_status: required
@@ -86,3 +86,7 @@ From the dashboard, click `#dashboard-properties-link` -> `/properties`
 ```bash
 polaris implement WP03 --base WP02
 ```
+
+## Activity Log
+
+- 2026-07-15T04:50:48Z – unknown – lane=for_review – Implemented on branch 009-system-menu-WP03; PR #101
