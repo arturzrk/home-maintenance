@@ -1,7 +1,7 @@
 ---
 work_package_id: WP01
-title: Public pages + branding
-lane: "doing"
+title: 'Public pages + branding'
+lane: "for_review"
 dependencies: []
 base_branch: main
 base_commit: ee2eb59a1c86e6f84b5395b305bc1252413dc5d1
@@ -138,3 +138,7 @@ Playwright.
 ```bash
 polaris implement WP01
 ```
+
+## Activity Log
+
+- 2026-07-19T10:51:06Z – unknown – lane=for_review – Implemented on branch 010-launch-readiness-WP01; PR #105

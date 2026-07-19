@@ -1,7 +1,7 @@
 ---
 work_package_id: WP03
 title: Go-live runbook + docs
-lane: "doing"
+lane: "for_review"
 dependencies: []
 base_branch: main
 base_commit: ee2eb59a1c86e6f84b5395b305bc1252413dc5d1
@@ -102,3 +102,7 @@ runbook, oidc-setup; no lingering ".com" or placeholder domains.
 ```bash
 polaris implement WP03
 ```
+
+## Activity Log
+
+- 2026-07-19T10:51:09Z – unknown – lane=for_review – Docs on branch 010-launch-readiness-WP03; PR #106
