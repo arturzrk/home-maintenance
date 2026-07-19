@@ -1,18 +1,28 @@
 import Link from "next/link";
 import { checkHealth, getApiInfo } from "@/lib/api-client";
-import { requireSession } from "@/lib/session";
+import { auth } from "@/lib/auth";
 import { ConnectionStatus } from "@/components/connection-status";
+import { LandingPage } from "@/components/landing-page";
 import type { ApiInfo } from "@/types/api";
 
 export const dynamic = "force-dynamic";
 
 /**
- * Dashboard - the signed-in landing page. Middleware guards "/", and
- * requireSession() here is defense in depth. Richer content (due jobs,
- * per-property summaries) arrives in future features.
+ * "/" is public: anonymous visitors get the Maintained House landing
+ * page, a usable session gets the dashboard. Richer dashboard content
+ * (due jobs, per-property summaries) arrives in future features.
  */
 export default async function DashboardPage() {
-  await requireSession();
+  // Same bar as middleware/requireSession: a session without a usable
+  // idToken (missing, or refresh failed) is treated as signed out, so
+  // degraded sessions land on the public page instead of a dashboard
+  // shell whose every next click bounces to /signin.
+  const session = await auth();
+  const signedIn =
+    !!session?.idToken && session.error !== "RefreshAccessTokenError";
+  if (!signedIn) {
+    return <LandingPage />;
+  }
 
   let healthy = false;
   let apiInfo: ApiInfo | null = null;

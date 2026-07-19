@@ -6,8 +6,8 @@
 A clean-architecture home maintenance tracking application.
 See [ARCHITECTURE.md](./ARCHITECTURE.md) for all project rules and decisions.
 
-**Working title**: `home-maintenance` (codebase, repo).
-**Intended production domain**: [`maintained.house`](https://maintained.house) (reserved as the public branding target; not yet provisioned).
+**Public brand**: Maintained House at [`maintained.house`](https://maintained.house) (codebase/repo keep the working title `home-maintenance`).
+**Production go-live**: step-by-step in [docs/go-live-runbook.md](./docs/go-live-runbook.md).
 
 ## Prerequisites
 
@@ -121,6 +121,10 @@ Brief sketch (full detail in the runbook):
    then applies.
 
 ## Deployment
+
+Production go-live (domain, Atlas, prod App Service, Vercel domain,
+OAuth publishing): follow [docs/go-live-runbook.md](./docs/go-live-runbook.md).
+The sections below cover the staging setup it builds on.
 
 ### Backend - Azure App Service
 
