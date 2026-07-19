@@ -1,12 +1,16 @@
 ---
 work_package_id: WP01
-title: 'Public pages + branding'
-lane: "planned"
+title: Public pages + branding
+lane: "doing"
 dependencies: []
+base_branch: main
+base_commit: ee2eb59a1c86e6f84b5395b305bc1252413dc5d1
+created_at: '2026-07-19T07:03:39.327028+00:00'
 subtasks: [T001, T002, T003, T004, T005, T006, T007]
 test_status: required
 test_file: frontend/src/components/__tests__/landing-page.test.tsx
 domain: frontend-craft
+shell_pid: "53931"
 ---
 
 # WP01 - Public pages + branding
