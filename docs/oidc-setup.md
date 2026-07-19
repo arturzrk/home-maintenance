@@ -201,7 +201,10 @@ Rotate the Client Secret periodically. The process:
 
 ## Going to production
 
-Same checklist, with these adjustments:
+The end-to-end production procedure (domain, DNS, Atlas, App Service,
+Vercel, consent-screen publishing) lives in
+[go-live-runbook.md](go-live-runbook.md); it references the matrices
+above. Same checklist as staging, with these adjustments:
 
 - Use a separate Google OAuth Client (`home-maintenance-production`).
 - Publish the consent screen so non-test-users can sign in.
