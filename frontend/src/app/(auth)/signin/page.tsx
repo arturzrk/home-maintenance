@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { signIn } from "@/lib/auth";
 
 const enableDevStub = process.env.NEXTAUTH_DEV_STUB === "true";
@@ -69,6 +70,15 @@ export default function SignInPage({
           </button>
         </form>
       )}
+
+      <footer className="flex justify-center gap-4 text-xs text-gray-500">
+        <Link href="/privacy" className="hover:text-gray-900 hover:underline">
+          Privacy policy
+        </Link>
+        <Link href="/terms" className="hover:text-gray-900 hover:underline">
+          Terms of service
+        </Link>
+      </footer>
     </main>
   );
 }
