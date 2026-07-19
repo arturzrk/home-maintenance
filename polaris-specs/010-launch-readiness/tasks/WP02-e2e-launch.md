@@ -1,12 +1,16 @@
 ---
 work_package_id: WP02
 title: E2E launch suite
-lane: planned
-dependencies: ["WP01"]
+lane: "doing"
+dependencies: [WP01]
+base_branch: 010-launch-readiness-WP01
+base_commit: c9bff4bc034defce58f684ae791b2abb69d430a1
+created_at: '2026-07-19T12:20:12.331430+00:00'
 subtasks: [T008, T009, T010, T011, T012]
 test_status: required
 test_file: frontend/e2e/wp10-launch.spec.ts
 domain: testing-specialist
+shell_pid: "87481"
 ---
 
 # WP02 - E2E launch suite
