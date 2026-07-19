@@ -1,7 +1,7 @@
 ---
 work_package_id: WP01
 title: 'Public pages + branding'
-lane: "for_review"
+lane: "done"
 dependencies: []
 base_branch: main
 base_commit: ee2eb59a1c86e6f84b5395b305bc1252413dc5d1
@@ -11,6 +11,8 @@ test_status: required
 test_file: frontend/src/components/__tests__/landing-page.test.tsx
 domain: frontend-craft
 shell_pid: "53931"
+reviewed_by: "Artur Żurek"
+review_status: "approved"
 ---
 
 # WP01 - Public pages + branding
@@ -142,3 +144,4 @@ polaris implement WP01
 ## Activity Log
 
 - 2026-07-19T10:51:06Z – unknown – lane=for_review – Implemented on branch 010-launch-readiness-WP01; PR #105
+- 2026-07-19T12:19:57Z – unknown – shell_pid=53931 – lane=done – Merged via PR #105
