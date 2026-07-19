@@ -7,8 +7,9 @@ import { signOutAction } from "@/app/actions";
 import { SystemMenu } from "@/components/system-menu";
 
 export const metadata: Metadata = {
-  title: "Home Maintenance",
-  description: "Track and manage your home maintenance tasks",
+  title: "Maintained House",
+  description:
+    "Track the maintenance of your home - recurring schedules, checklists, and the assets they keep in shape.",
 };
 
 export default async function RootLayout({
@@ -36,7 +37,7 @@ export default async function RootLayout({
                 href="/"
                 className="text-lg font-semibold tracking-tight hover:text-gray-700"
               >
-                Home Maintenance
+                Maintained House
               </Link>
               {session ? (
                 <SystemMenu
