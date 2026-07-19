@@ -9,12 +9,18 @@ export const dynamic = "force-dynamic";
 
 /**
  * "/" is public: anonymous visitors get the Maintained House landing
- * page, a session gets the dashboard. Richer dashboard content (due
- * jobs, per-property summaries) arrives in future features.
+ * page, a usable session gets the dashboard. Richer dashboard content
+ * (due jobs, per-property summaries) arrives in future features.
  */
 export default async function DashboardPage() {
+  // Same bar as middleware/requireSession: a session without a usable
+  // idToken (missing, or refresh failed) is treated as signed out, so
+  // degraded sessions land on the public page instead of a dashboard
+  // shell whose every next click bounces to /signin.
   const session = await auth();
-  if (!session) {
+  const signedIn =
+    !!session?.idToken && session.error !== "RefreshAccessTokenError";
+  if (!signedIn) {
     return <LandingPage />;
   }
 
