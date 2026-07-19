@@ -1,7 +1,7 @@
 ---
 work_package_id: WP02
 title: E2E launch suite
-lane: planned
+lane: "for_review"
 dependencies: ["WP01"]
 subtasks: [T008, T009, T010, T011, T012]
 test_status: required
@@ -68,3 +68,7 @@ Full local Playwright run (43 = 39 + 4) and CI e2e job green.
 ```bash
 polaris implement WP02 --base WP01
 ```
+
+## Activity Log
+
+- 2026-07-19T12:30:02Z – unknown – lane=for_review – Implemented on branch 010-launch-readiness-WP02; PR #109
