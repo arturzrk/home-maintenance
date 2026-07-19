@@ -19,11 +19,11 @@ Dependencies: none.
 
 ### WP02 - E2E launch suite (testing-specialist, deps: WP01)
 
-- [ ] T008 WP10-1: anonymous `/` renders landing (no redirect; brand, CTA, legal links visible)
-- [ ] T009 WP10-2: CTA navigates to `/signin`
-- [ ] T010 WP10-3: `/privacy` and `/terms` render anonymously with key headings
-- [ ] T011 WP10-4: signed-in `/` still renders the dashboard (signInAs)
-- [ ] T012 Full-suite regression (39 existing + new) local + CI
+- [x] T008 WP10-1: anonymous `/` renders landing (no redirect; brand, CTA, legal links visible)
+- [x] T009 WP10-2: CTA navigates to `/signin`
+- [x] T010 WP10-3: `/privacy` and `/terms` render anonymously with key headings
+- [x] T011 WP10-4: signed-in `/` still renders the dashboard (signInAs)
+- [x] T012 Full-suite regression (39 existing + new) local + CI
 
 Dependencies: WP01.
 
