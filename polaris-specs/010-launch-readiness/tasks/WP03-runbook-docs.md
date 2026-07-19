@@ -1,7 +1,7 @@
 ---
 work_package_id: WP03
 title: Go-live runbook + docs
-lane: planned
+lane: "for_review"
 dependencies: []
 subtasks: [T013, T014, T015]
 test_status: skipped
@@ -98,3 +98,7 @@ runbook, oidc-setup; no lingering ".com" or placeholder domains.
 ```bash
 polaris implement WP03
 ```
+
+## Activity Log
+
+- 2026-07-19T10:51:09Z – unknown – lane=for_review – Docs on branch 010-launch-readiness-WP03; PR #106

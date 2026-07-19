@@ -8,5 +8,39 @@
   "target_branch": "main",
   "vcs": "git",
   "github_issue": 102,
-  "estimation": null
+  "estimation": null,
+  "amendments": [
+    {
+      "amendment_id": "amd-001",
+      "text": "Files changed outside declared WP scope: backend/src/HomeMaintenance.API/Endpoints/AssetEndpoints.cs, backend/src/HomeMaintenance.API/Program.cs, backend/src/HomeMaintenance.Application/Common/Interfaces/IAssetRepository.cs (and 17 more)",
+      "timestamp": "2026-07-19T10:51:07.681373+00:00",
+      "affected_sections": [],
+      "artifacts_updated": {
+        "spec_sections": [],
+        "plan_files": [],
+        "wps_regenerated": [],
+        "wps_locked": [],
+        "wps_created": []
+      },
+      "agent": "unknown",
+      "source": "implement",
+      "drift_type": "expansion"
+    },
+    {
+      "amendment_id": "amd-002",
+      "text": "Files changed outside declared WP scope: polaris-specs/010-launch-readiness/tasks/.gitkeep, frontend/e2e/wp09-system-menu.spec.ts, frontend/src/app/assets/[id]/page.tsx (and 26 more)",
+      "timestamp": "2026-07-19T10:51:09.832581+00:00",
+      "affected_sections": [],
+      "artifacts_updated": {
+        "spec_sections": [],
+        "plan_files": [],
+        "wps_regenerated": [],
+        "wps_locked": [],
+        "wps_created": []
+      },
+      "agent": "unknown",
+      "source": "implement",
+      "drift_type": "expansion"
+    }
+  ]
 }

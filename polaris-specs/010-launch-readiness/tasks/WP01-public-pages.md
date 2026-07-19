@@ -1,7 +1,7 @@
 ---
 work_package_id: WP01
 title: 'Public pages + branding'
-lane: "planned"
+lane: "for_review"
 dependencies: []
 subtasks: [T001, T002, T003, T004, T005, T006, T007]
 test_status: required
@@ -134,3 +134,7 @@ Playwright.
 ```bash
 polaris implement WP01
 ```
+
+## Activity Log
+
+- 2026-07-19T10:51:06Z – unknown – lane=for_review – Implemented on branch 010-launch-readiness-WP01; PR #105
