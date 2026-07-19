@@ -1,12 +1,16 @@
 ---
 work_package_id: WP03
 title: Go-live runbook + docs
-lane: planned
+lane: "doing"
 dependencies: []
+base_branch: main
+base_commit: ee2eb59a1c86e6f84b5395b305bc1252413dc5d1
+created_at: '2026-07-19T10:37:41.963795+00:00'
 subtasks: [T013, T014, T015]
 test_status: skipped
 test_file: tests/e2e/WP03-go-live-runbook-docs.e2e.js
 domain: documentation
+shell_pid: "34039"
 ---
 
 # WP03 - Go-live runbook + docs
