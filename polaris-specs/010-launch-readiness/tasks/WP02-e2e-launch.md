@@ -7,6 +7,7 @@ subtasks: [T008, T009, T010, T011, T012]
 test_status: required
 test_file: frontend/e2e/wp10-launch.spec.ts
 domain: testing-specialist
+shell_pid: "87481"
 ---
 
 # WP02 - E2E launch suite
