@@ -1,7 +1,7 @@
 ---
 work_package_id: WP03
 title: Go-live runbook + docs
-lane: "for_review"
+lane: "done"
 dependencies: []
 base_branch: main
 base_commit: ee2eb59a1c86e6f84b5395b305bc1252413dc5d1
@@ -11,6 +11,8 @@ test_status: skipped
 test_file: tests/e2e/WP03-go-live-runbook-docs.e2e.js
 domain: documentation
 shell_pid: "34039"
+reviewed_by: "Artur Żurek"
+review_status: "approved"
 ---
 
 # WP03 - Go-live runbook + docs
@@ -106,3 +108,4 @@ polaris implement WP03
 ## Activity Log
 
 - 2026-07-19T10:51:09Z – unknown – lane=for_review – Docs on branch 010-launch-readiness-WP03; PR #106
+- 2026-07-19T12:20:00Z – unknown – shell_pid=34039 – lane=done – Merged via PR #106
