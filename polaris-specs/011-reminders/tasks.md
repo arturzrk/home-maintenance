@@ -42,13 +42,13 @@ Dependencies: WP01, WP02.
 
 ### WP04 - Frontend settings + menu link (frontend-craft, deps: WP01)
 
-- [ ] T020 api-client: `notificationPreferences.get/update`
-- [ ] T021 Server actions (`settings/notifications/actions.ts`)
-- [ ] T022 Settings page + toggle component
-- [ ] T023 System menu: "Notification settings" link
-- [ ] T024 Middleware: add `/settings/:path*` to the protected matcher
-- [ ] T025 User manual: new "Reminders" section (FR-10)
-- [ ] T026 Jest: toggle component
+- [x] T020 api-client: `notificationPreferences.get/update`
+- [x] T021 Server actions (`settings/notifications/actions.ts`)
+- [x] T022 Settings page + toggle component
+- [x] T023 System menu: "Notification settings" link
+- [x] T024 Middleware: add `/settings/:path*` to the protected matcher
+- [x] T025 User manual: new "Reminders" section (FR-10)
+- [x] T026 Jest: toggle component
 
 Dependencies: WP01 (not WP02/WP03).
 
