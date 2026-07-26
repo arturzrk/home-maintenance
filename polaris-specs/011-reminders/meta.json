@@ -1,0 +1,12 @@
+{
+  "feature_number": "011",
+  "slug": "011-reminders",
+  "friendly_name": "Reminders (due/overdue job email digest)",
+  "mission": "software-dev",
+  "source_description": "Reminders: notify owners about due and overdue maintenance jobs so the app doesn't rely on users remembering to check back - this was flagged as the single highest-impact gap in the earlier product analysis",
+  "created_at": "2026-07-26T09:00:00Z",
+  "target_branch": "main",
+  "vcs": "git",
+  "github_issue": 112,
+  "estimation": null
+}
