@@ -1,7 +1,7 @@
 ---
 work_package_id: WP03
 title: Reminder digest scheduler
-lane: planned
+lane: "for_review"
 dependencies: ["WP01", "WP02"]
 subtasks: [T013, T014, T015, T016, T017, T018, T019]
 test_status: required
@@ -99,3 +99,9 @@ stored email skipped, one owner's send failure doesn't block others.
 ```bash
 polaris implement WP03 --base WP01
 ```
+
+## Activity Log
+
+- 2026-07-26T16:59:52Z -- unknown -- lane=doing -- Moved to doing
+- 2026-07-26T16:59:53Z -- unknown -- lane=testing -- dotnet test green: 188/188 Unit.Tests + 211/211 Integration.Tests (7 new: due/overdue qualification rules, completed-job exclusion, reminders-disabled skip, no-email skip, per-owner failure isolation, digest link content - plus a dedicated ListDueOrOverdueAsync repository test)
+- 2026-07-26T17:00:01Z -- unknown -- lane=for_review -- Reminder digest scheduler implemented per plan: ReminderDigestService (BackgroundService mirroring JobGeneratorService), IJobRepository.ListDueOrOverdueAsync (system-wide, status_duedate_idx added), per-owner grouping + property grouping + skip rules (no email/reminders off), per-owner failure isolation (FR-09), Frontend:BaseUrl config for job/settings links. dotnet test green: 188/188 Unit + 211/211 Integration. polaris runtests CLI bug (get_specs_dir undefined, same as WP01/WP02 in this feature) - ran dotnet test directly.
