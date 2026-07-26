@@ -102,6 +102,17 @@ internal sealed class JobRepository : IJobRepository
         return doc?.DueDate;
     }
 
+    public async Task<IReadOnlyList<Job>> ListDueOrOverdueAsync(DateOnly onOrBefore, CancellationToken ct = default)
+    {
+        var builder = Builders<JobDocument>.Filter;
+        var filter = builder.Eq(d => d.Status, JobStatus.Active)
+            & builder.Exists(d => d.DueDate)
+            & builder.Lte(d => d.DueDate, onOrBefore);
+
+        var docs = await _collection.Find(filter).ToListAsync(ct);
+        return docs.Select(ToDomain).ToList();
+    }
+
     // ---- Mappers ----
 
     private static Job ToDomain(JobDocument doc)

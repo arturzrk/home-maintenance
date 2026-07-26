@@ -26,4 +26,12 @@ public interface IJobRepository
     Task<bool> HasGeneratedJobForOccurrenceAsync(string definitionId, DateOnly dueDate, CancellationToken ct = default);
 
     Task<DateOnly?> LatestGeneratedJobDueDateAsync(string definitionId, CancellationToken ct = default);
+
+    /// <summary>
+    /// Every active job, across every owner, due on or before
+    /// <paramref name="onOrBefore"/> (includes overdue jobs). System-wide -
+    /// used only by the reminder digest scheduler; mirrors the owner-less
+    /// <c>IJobDefinitionRepository.ListAllActiveAsync</c> precedent.
+    /// </summary>
+    Task<IReadOnlyList<Job>> ListDueOrOverdueAsync(DateOnly onOrBefore, CancellationToken ct = default);
 }

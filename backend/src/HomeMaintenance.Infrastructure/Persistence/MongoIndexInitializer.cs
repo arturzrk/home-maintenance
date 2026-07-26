@@ -92,6 +92,11 @@ internal sealed class MongoIndexInitializer : IHostedService
                 new CreateIndexModel<JobDocument>(
                     Builders<JobDocument>.IndexKeys.Ascending(d => d.JobDefinitionId),
                     new CreateIndexOptions { Name = "job_definition_idx", Sparse = true }),
+                new CreateIndexModel<JobDocument>(
+                    Builders<JobDocument>.IndexKeys
+                        .Ascending(d => d.Status)
+                        .Ascending(d => d.DueDate),
+                    new CreateIndexOptions { Name = "status_duedate_idx" }),
             },
             ct);
     }
