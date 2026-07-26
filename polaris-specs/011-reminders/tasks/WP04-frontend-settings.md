@@ -1,12 +1,14 @@
 ---
 work_package_id: WP04
 title: Frontend settings + menu link
-lane: "for_review"
+lane: "done"
 dependencies: ["WP01"]
 subtasks: [T020, T021, T022, T023, T024, T025, T026]
 test_status: required
 test_file: frontend/src/components/__tests__/notification-settings-toggle.test.tsx
 domain: frontend-craft
+reviewed_by: "Artur Żurek"
+review_status: "approved"
 ---
 
 # WP04 - Frontend settings + menu link
@@ -98,3 +100,4 @@ polaris implement WP04 --base WP01
 - 2026-07-26T20:05:58Z -- unknown -- lane=doing -- Moved to doing
 - 2026-07-26T20:06:00Z -- unknown -- lane=testing -- Jest green: 83/83 (5 new notification-settings-toggle tests, system-menu test updated for the new link). next build succeeds, /settings/notifications registered as a dynamic route.
 - 2026-07-26T20:06:14Z -- unknown -- lane=for_review -- Frontend settings + menu link implemented per plan: /settings/notifications page (requireSession + toggle component mirroring AssetHeader's pattern), notificationPreferences in api-client.ts, system-menu link, middleware matcher, user-manual Reminders section (FR-10) with Good-to-know/FAQ updated to match. Jest green: 83/83. next build succeeds. polaris runtests CLI bug (get_specs_dir undefined, same as earlier WPs in this feature) - ran npx jest + npm run build directly.
+- 2026-07-26T20:47:14Z -- unknown -- lane=done -- Code merged in PR #127 (Copilot: 9/9 files reviewed, no comments). Kanban tracking merged in PR #126.
