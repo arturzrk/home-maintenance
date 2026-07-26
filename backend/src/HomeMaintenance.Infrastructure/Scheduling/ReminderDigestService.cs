@@ -57,7 +57,7 @@ public sealed class ReminderDigestService : BackgroundService
         var emailSender = scope.ServiceProvider.GetRequiredService<IEmailSender>();
         var dateTimeProvider = scope.ServiceProvider.GetRequiredService<IDateTimeProvider>();
         var frontendBaseUrl = scope.ServiceProvider.GetRequiredService<IOptions<FrontendOptions>>().Value.BaseUrl
-            ?.TrimEnd('/');
+            ?.Trim().TrimEnd('/');
 
         if (string.IsNullOrWhiteSpace(frontendBaseUrl))
         {
