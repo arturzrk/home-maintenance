@@ -78,6 +78,7 @@ app.UseMiddleware<CorrelationIdMiddleware>();
 app.UseMiddleware<UnauthorizedProblemDetailsMiddleware>();
 
 app.UseAuthentication();
+app.UseMiddleware<OwnerProfileSyncMiddleware>();
 app.UseAuthorization();
 
 // Endpoints
@@ -119,6 +120,9 @@ app.MapJobEndpoints();
 
 // JobDefinition aggregate (WP04 - 002-recurring-jobs).
 app.MapJobDefinitionEndpoints();
+
+// Account / notification preferences (WP01 - 011-reminders).
+app.MapAccountEndpoints();
 
 app.Run();
 

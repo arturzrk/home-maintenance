@@ -27,6 +27,7 @@ internal sealed class MongoIndexInitializer : IHostedService
         await EnsureAssetIndexes(cancellationToken);
         await EnsureJobIndexes(cancellationToken);
         await EnsureJobDefinitionIndexes(cancellationToken);
+        await EnsureOwnerProfileIndexes(cancellationToken);
         _logger.LogInformation("MongoDB indexes ensured.");
     }
 
@@ -111,5 +112,15 @@ internal sealed class MongoIndexInitializer : IHostedService
                     new CreateIndexOptions { Name = "owner_property_idx" }),
             },
             ct);
+    }
+
+    private Task EnsureOwnerProfileIndexes(CancellationToken ct)
+    {
+        var collection = _db.GetCollection<OwnerProfileDocument>(OwnerProfileRepository.CollectionName);
+        return collection.Indexes.CreateOneAsync(
+            new CreateIndexModel<OwnerProfileDocument>(
+                Builders<OwnerProfileDocument>.IndexKeys.Ascending(d => d.OwnerId),
+                new CreateIndexOptions { Name = "owner_idx", Unique = true }),
+            cancellationToken: ct);
     }
 }
