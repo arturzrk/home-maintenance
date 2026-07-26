@@ -62,6 +62,19 @@ public sealed class NotificationPreferencesEndpointsTests : IClassFixture<ApiFac
     }
 
     [Fact]
+    public async Task Patch_MissingRemindersEnabled_Returns400()
+    {
+        var sub = $"alice-{Guid.NewGuid():N}";
+        var email = $"{sub}@example.com";
+        var client = ClientAs(sub, email);
+        await client.GetAsync("/api/account/notification-preferences");
+
+        var response = await client.PatchAsJsonAsync("/api/account/notification-preferences", new { });
+
+        response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
     public async Task Patch_TogglesReminders_AndPersistsAcrossRequests()
     {
         var sub = $"alice-{Guid.NewGuid():N}";

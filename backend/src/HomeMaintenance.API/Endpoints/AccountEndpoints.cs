@@ -1,6 +1,8 @@
+using System.ComponentModel.DataAnnotations;
 using HomeMaintenance.API.Middleware;
 using HomeMaintenance.Application.Account.Commands;
 using HomeMaintenance.Application.Account.Queries;
+using MiniValidation;
 
 namespace HomeMaintenance.API.Endpoints;
 
@@ -29,8 +31,11 @@ public static class AccountEndpoints
             HttpContext ctx,
             CancellationToken ct) =>
         {
+            if (!MiniValidator.TryValidate(body, out var errors))
+                return Results.ValidationProblem(errors);
+
             var result = await handler.Handle(
-                new UpdateNotificationPreferencesCommand(body.RemindersEnabled),
+                new UpdateNotificationPreferencesCommand(body.RemindersEnabled!.Value),
                 ct);
             return result.ToHttp(ctx);
         })
@@ -40,4 +45,6 @@ public static class AccountEndpoints
     }
 }
 
-public sealed record UpdateNotificationPreferencesApiRequest(bool RemindersEnabled);
+public sealed record UpdateNotificationPreferencesApiRequest(
+    [property: Required]
+    bool? RemindersEnabled);

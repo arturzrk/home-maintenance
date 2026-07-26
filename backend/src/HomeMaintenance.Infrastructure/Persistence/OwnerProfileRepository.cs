@@ -22,14 +22,16 @@ internal sealed class OwnerProfileRepository : IOwnerProfileRepository
 
     public async Task UpsertEmailAsync(OwnerId owner, string email, CancellationToken ct = default)
     {
+        var normalizedEmail = email.Trim();
+
         var existing = await _collection.Find(d => d.OwnerId == owner.Value).FirstOrDefaultAsync(ct);
-        if (existing is not null && existing.Email == email)
+        if (existing is not null && existing.Email == normalizedEmail)
             return;
 
         var now = DateTime.UtcNow;
         var filter = Builders<OwnerProfileDocument>.Filter.Eq(d => d.OwnerId, owner.Value);
         var update = Builders<OwnerProfileDocument>.Update
-            .Set(d => d.Email, email)
+            .Set(d => d.Email, normalizedEmail)
             .Set(d => d.UpdatedAt, now)
             .SetOnInsert(d => d.Id, IdFactory.NewId())
             .SetOnInsert(d => d.RemindersEnabled, true)

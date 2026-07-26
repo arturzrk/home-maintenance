@@ -34,10 +34,10 @@ public sealed class UpdateNotificationPreferencesHandler
         var existing = await _profiles.GetAsync(owner, ct);
         if (existing is null)
         {
-            // Shouldn't happen - the auth-pipeline sync runs on every
-            // authenticated request, including this one, before the
-            // handler is reached. Defensive rather than reachable in
-            // normal operation.
+            // Reachable in practice: the auth-pipeline sync only upserts a
+            // profile when the request's token carries an email claim. A
+            // caller authenticated without one (e.g. a token missing the
+            // claim) never gets a profile, so there's nothing yet to toggle.
             return Result<NotificationPreferencesDto>.Failure(
                 new NotFoundError("OwnerProfile", owner.Value));
         }
