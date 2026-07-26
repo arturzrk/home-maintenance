@@ -30,13 +30,13 @@ Dependencies: none - parallel-safe with WP01.
 
 ### WP03 - Reminder digest scheduler (backend-logic, deps: WP01, WP02)
 
-- [ ] T013 `IJobRepository.ListDueOrOverdueAsync(DateOnly onOrBefore, ct)` - system-wide, active + due-or-overdue
-- [ ] T014 `ReminderDigestService : BackgroundService` (mirrors `JobGeneratorService`: startup pass + 24h `PeriodicTimer` + public `RunDigestPassAsync`)
-- [ ] T015 Digest assembly: group by owner then property, skip disabled/no-email owners
-- [ ] T016 Email content build (subject/HTML, job links, settings footer link) + `Frontend:BaseUrl` config
-- [ ] T017 Send per owner with failure isolation (FR-09) + DI registration
-- [ ] T018 Unit tests: qualification rules against fakes
-- [ ] T019 Integration tests: `ListDueOrOverdueAsync` against Mongo Testcontainers
+- [x] T013 `IJobRepository.ListDueOrOverdueAsync(DateOnly onOrBefore, ct)` - system-wide, active + due-or-overdue
+- [x] T014 `ReminderDigestService : BackgroundService` (mirrors `JobGeneratorService`: startup pass + 24h `PeriodicTimer` + public `RunDigestPassAsync`)
+- [x] T015 Digest assembly: group by owner then property, skip disabled/no-email owners
+- [x] T016 Email content build (subject/HTML, job links, settings footer link) + `Frontend:BaseUrl` config
+- [x] T017 Send per owner with failure isolation (FR-09) + DI registration
+- [x] T018 Unit tests: qualification rules against fakes
+- [x] T019 Integration tests: `ListDueOrOverdueAsync` against Mongo Testcontainers
 
 Dependencies: WP01, WP02.
 
