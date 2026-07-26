@@ -41,6 +41,22 @@
       "agent": "unknown",
       "source": "implement",
       "drift_type": "expansion"
+    },
+    {
+      "amendment_id": "amd-003",
+      "text": "Files changed outside declared WP scope: polaris-specs/010-launch-readiness/tasks/.gitkeep, frontend/e2e/wp09-system-menu.spec.ts, frontend/src/app/assets/[id]/page.tsx (and 50 more)",
+      "timestamp": "2026-07-26T17:00:01.926210+00:00",
+      "affected_sections": [],
+      "artifacts_updated": {
+        "spec_sections": [],
+        "plan_files": [],
+        "wps_regenerated": [],
+        "wps_locked": [],
+        "wps_created": []
+      },
+      "agent": "unknown",
+      "source": "implement",
+      "drift_type": "expansion"
     }
   ]
 }
