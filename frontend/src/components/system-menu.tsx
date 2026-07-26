@@ -66,6 +66,13 @@ export function SystemMenu({ identity, version, healthy, signOutAction }: Props)
           >
             My properties
           </Link>
+          <Link
+            href="/settings/notifications"
+            onClick={() => setOpen(false)}
+            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+          >
+            Notification settings
+          </Link>
           <a
             href="/user-manual/index.html"
             target="_blank"
