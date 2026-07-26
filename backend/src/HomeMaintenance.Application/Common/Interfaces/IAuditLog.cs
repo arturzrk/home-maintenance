@@ -57,4 +57,6 @@ public static class AuditEventTypes
     public const string JobDefinitionRenamed = "job_definition.renamed";
     public const string JobDefinitionScheduleChanged = "job_definition.schedule_changed";
     public const string JobDefinitionStepTemplateMutated = "job_definition.step_template_mutated";
+
+    public const string NotificationPreferencesUpdated = "notification_preferences.updated";
 }

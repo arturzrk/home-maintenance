@@ -50,6 +50,7 @@ public static class DependencyInjection
         services.AddScoped<IAssetRepository, AssetRepository>();
         services.AddScoped<IJobRepository, JobRepository>();
         services.AddScoped<IJobDefinitionRepository, JobDefinitionRepository>();
+        services.AddScoped<IOwnerProfileRepository, OwnerProfileRepository>();
         services.AddScoped<JobGenerationService>();
         services.AddHostedService<MongoIndexInitializer>();
         services.AddHostedService<JobGeneratorService>();

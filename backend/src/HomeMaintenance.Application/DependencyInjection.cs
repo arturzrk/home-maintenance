@@ -1,3 +1,5 @@
+using HomeMaintenance.Application.Account.Commands;
+using HomeMaintenance.Application.Account.Queries;
 using HomeMaintenance.Application.Assets.Commands;
 using HomeMaintenance.Application.Assets.Queries;
 using HomeMaintenance.Application.JobDefinitions.Commands;
@@ -51,6 +53,10 @@ public static class DependencyInjection
         services.AddScoped<GetJobDefinitionHandler>();
         services.AddScoped<UpdateJobDefinitionHandler>();
         services.AddScoped<GenerateNextOccurrenceHandler>();
+
+        // Account / notification preferences (WP01 - 011-reminders)
+        services.AddScoped<GetNotificationPreferencesHandler>();
+        services.AddScoped<UpdateNotificationPreferencesHandler>();
 
         return services;
     }
