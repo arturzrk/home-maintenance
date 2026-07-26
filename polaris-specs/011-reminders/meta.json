@@ -28,8 +28,8 @@
     },
     {
       "amendment_id": "amd-002",
-      "text": "Files changed outside declared WP scope: backend/src/HomeMaintenance.API/Middleware/OwnerProfileSyncMiddleware.cs, backend/src/HomeMaintenance.API/Program.cs, backend/src/HomeMaintenance.Application/Common/Interfaces/IAuditLog.cs (and 30 more)",
-      "timestamp": "2026-07-26T11:36:28.094036+00:00",
+      "text": "Files changed outside declared WP scope: frontend/e2e/wp10-launch.spec.ts, frontend/e2e/helpers/setup.ts, frontend/e2e/wp04-properties.spec.ts (and 19 more)",
+      "timestamp": "2026-07-26T12:04:28.848666+00:00",
       "affected_sections": [],
       "artifacts_updated": {
         "spec_sections": [],

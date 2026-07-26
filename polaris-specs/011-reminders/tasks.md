@@ -20,11 +20,11 @@ Dependencies: none - foundational.
 
 ### WP02 - Email delivery (backend-logic)
 
-- [ ] T008 `IEmailSender` port
-- [ ] T009 `ResendEmailSender` (HttpClient POST to Resend API)
-- [ ] T010 `LoggingEmailSender` (Development/CI default, no-op)
-- [ ] T011 Config (`Email:Provider`, `Email:Resend:ApiKey`, `Email:FromAddress`) + DI + startup fail-fast assertion
-- [ ] T012 Unit tests: request shape, logging sender, startup assertion
+- [x] T008 `IEmailSender` port
+- [x] T009 `ResendEmailSender` (HttpClient POST to Resend API)
+- [x] T010 `LoggingEmailSender` (Development/CI default, no-op)
+- [x] T011 Config (`Email:Provider`, `Email:Resend:ApiKey`, `Email:FromAddress`) + DI + startup fail-fast assertion
+- [x] T012 Unit tests: request shape, logging sender, startup assertion
 
 Dependencies: none - parallel-safe with WP01.
 
