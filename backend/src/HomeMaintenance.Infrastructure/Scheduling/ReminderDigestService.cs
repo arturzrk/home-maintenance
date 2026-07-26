@@ -56,7 +56,14 @@ public sealed class ReminderDigestService : BackgroundService
         var propertyRepository = scope.ServiceProvider.GetRequiredService<IPropertyRepository>();
         var emailSender = scope.ServiceProvider.GetRequiredService<IEmailSender>();
         var dateTimeProvider = scope.ServiceProvider.GetRequiredService<IDateTimeProvider>();
-        var frontendBaseUrl = scope.ServiceProvider.GetRequiredService<IOptions<FrontendOptions>>().Value.BaseUrl;
+        var frontendBaseUrl = scope.ServiceProvider.GetRequiredService<IOptions<FrontendOptions>>().Value.BaseUrl
+            ?.Trim().TrimEnd('/');
+
+        if (string.IsNullOrWhiteSpace(frontendBaseUrl))
+        {
+            _logger.LogError("Reminder digest pass skipped: Frontend:BaseUrl is not configured.");
+            return;
+        }
 
         var today = dateTimeProvider.UtcToday;
         var horizon = today.AddDays(HorizonDays);
@@ -123,14 +130,15 @@ public sealed class ReminderDigestService : BackgroundService
                 var status = job.DueDate!.Value < today
                     ? "Overdue"
                     : $"Due {job.DueDate.Value:yyyy-MM-dd}";
-                sb.Append("<li><a href=\"").Append(frontendBaseUrl).Append("/jobs/").Append(job.Id).Append("\">")
+                var jobUrl = WebUtility.HtmlEncode($"{frontendBaseUrl}/jobs/{Uri.EscapeDataString(job.Id)}");
+                sb.Append("<li><a href=\"").Append(jobUrl).Append("\">")
                     .Append(WebUtility.HtmlEncode(job.Name)).Append("</a> - ").Append(status).Append("</li>");
             }
             sb.Append("</ul>");
         }
 
-        sb.Append("<p><a href=\"").Append(frontendBaseUrl)
-            .Append("/settings/notifications\">Turn reminder emails off</a></p>");
+        var settingsUrl = WebUtility.HtmlEncode($"{frontendBaseUrl}/settings/notifications");
+        sb.Append("<p><a href=\"").Append(settingsUrl).Append("\">Turn reminder emails off</a></p>");
         sb.Append("</body></html>");
         return sb.ToString();
     }

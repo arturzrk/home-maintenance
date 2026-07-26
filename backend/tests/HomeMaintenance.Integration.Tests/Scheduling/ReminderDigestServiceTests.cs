@@ -52,7 +52,8 @@ public sealed class ReminderDigestServiceTests : IClassFixture<ApiFactory>
     /// a fake email sender so sent digests can be asserted on directly.
     /// </summary>
     private (ReminderDigestService service, FakeEmailSender emailSender, IJobRepository jobs,
-        IOwnerProfileRepository profiles, IPropertyRepository properties) BuildService(DateOnly today)
+        IOwnerProfileRepository profiles, IPropertyRepository properties) BuildService(
+            DateOnly today, string frontendBaseUrl = "https://app.example.com")
     {
         var hostScope = _factory.Services.CreateScope();
         var jobs = hostScope.ServiceProvider.GetRequiredService<IJobRepository>();
@@ -66,7 +67,7 @@ public sealed class ReminderDigestServiceTests : IClassFixture<ApiFactory>
         services.AddSingleton(properties);
         services.AddSingleton<IEmailSender>(emailSender);
         services.AddSingleton<IDateTimeProvider>(new StubDateTimeProvider(today));
-        services.Configure<FrontendOptions>(o => o.BaseUrl = "https://app.example.com");
+        services.Configure<FrontendOptions>(o => o.BaseUrl = frontendBaseUrl);
         var provider = services.BuildServiceProvider();
 
         var service = new ReminderDigestService(
@@ -216,5 +217,67 @@ public sealed class ReminderDigestServiceTests : IClassFixture<ApiFactory>
         var mine = emailSender.Sent.Single(e => e.To == email);
         mine.Html.ShouldContain($"https://app.example.com/jobs/{job.Id}");
         mine.Html.ShouldContain("https://app.example.com/settings/notifications");
+    }
+
+    [Fact]
+    public async Task TrailingSlashOnBaseUrl_DoesNotProduceDoubleSlashInLinks()
+    {
+        var owner = new OwnerId($"owner-{Guid.NewGuid():N}");
+        var email = UniqueEmail();
+        var today = new DateOnly(2026, 6, 1);
+        var (service, emailSender, jobs, profiles, properties) =
+            BuildService(today, frontendBaseUrl: "https://app.example.com/");
+
+        var property = Property.Create($"prop-{Guid.NewGuid():N}", owner, "Main House");
+        await properties.AddAsync(property, CancellationToken.None);
+        await profiles.UpsertEmailAsync(owner, email, CancellationToken.None);
+        var job = MakeJob(owner, property.Id, "Boiler service", today.AddDays(-1));
+        await jobs.AddAsync(job, CancellationToken.None);
+
+        await service.RunDigestPassAsync(CancellationToken.None);
+
+        var mine = emailSender.Sent.Single(e => e.To == email);
+        mine.Html.ShouldContain($"https://app.example.com/jobs/{job.Id}");
+        mine.Html.ShouldNotContain($"https://app.example.com//jobs/{job.Id}");
+    }
+
+    [Fact]
+    public async Task TrailingWhitespaceAndSlashOnBaseUrl_DoesNotProduceMalformedLinks()
+    {
+        var owner = new OwnerId($"owner-{Guid.NewGuid():N}");
+        var email = UniqueEmail();
+        var today = new DateOnly(2026, 6, 1);
+        var (service, emailSender, jobs, profiles, properties) =
+            BuildService(today, frontendBaseUrl: "https://app.example.com/ ");
+
+        var property = Property.Create($"prop-{Guid.NewGuid():N}", owner, "Main House");
+        await properties.AddAsync(property, CancellationToken.None);
+        await profiles.UpsertEmailAsync(owner, email, CancellationToken.None);
+        var job = MakeJob(owner, property.Id, "Boiler service", today.AddDays(-1));
+        await jobs.AddAsync(job, CancellationToken.None);
+
+        await service.RunDigestPassAsync(CancellationToken.None);
+
+        var mine = emailSender.Sent.Single(e => e.To == email);
+        mine.Html.ShouldContain($"href=\"https://app.example.com/jobs/{job.Id}\"");
+    }
+
+    [Fact]
+    public async Task MissingBaseUrl_SkipsPass_AndDoesNotThrow()
+    {
+        var owner = new OwnerId($"owner-{Guid.NewGuid():N}");
+        var email = UniqueEmail();
+        var today = new DateOnly(2026, 6, 1);
+        var (service, emailSender, jobs, profiles, properties) = BuildService(today, frontendBaseUrl: "");
+
+        var property = Property.Create($"prop-{Guid.NewGuid():N}", owner, "Main House");
+        await properties.AddAsync(property, CancellationToken.None);
+        await profiles.UpsertEmailAsync(owner, email, CancellationToken.None);
+        var job = MakeJob(owner, property.Id, "Boiler service", today.AddDays(-1));
+        await jobs.AddAsync(job, CancellationToken.None);
+
+        await Should.NotThrowAsync(() => service.RunDigestPassAsync(CancellationToken.None));
+
+        emailSender.Sent.ShouldNotContain(e => e.To == email);
     }
 }
