@@ -1,12 +1,14 @@
 ---
 work_package_id: WP01
 title: "Owner profile + preferences API"
-lane: "for_review"
+lane: "done"
 dependencies: []
 subtasks: [T001, T002, T003, T004, T005, T006, T007]
 test_status: required
 test_file: backend/tests/HomeMaintenance.UnitTests/Domain/OwnerProfileTests.cs
 domain: backend-logic
+reviewed_by: "Artur Żurek"
+review_status: "approved"
 ---
 
 # WP01 - Owner profile + preferences API
@@ -109,3 +111,4 @@ polaris implement WP01
 - 2026-07-26T10:01:49Z -- unknown -- lane=doing -- Moved to doing
 - 2026-07-26T10:01:55Z -- unknown -- lane=testing -- dotnet test green: 180/180 Unit.Tests + 203/203 Integration.Tests (6 new notification-preferences integration tests, 12 new domain/handler unit tests)
 - 2026-07-26T10:02:01Z -- unknown -- lane=for_review -- Owner profile + notification-preferences API implemented per plan: OwnerProfile domain entity, IOwnerProfileRepository + Mongo (unique index on ownerId), OwnerProfileSyncMiddleware (auth-pipeline email capture, no frontend change), GET/PATCH /api/account/notification-preferences, DevStub dev-<sub>:<email> extension for tests. dotnet test green: 180/180 Unit + 203/203 Integration. polaris runtests CLI bug (get_specs_dir undefined, same as WP02/WP03/WP04 in prior features) - ran dotnet test directly.
+- 2026-07-26T11:36:26Z -- unknown -- lane=done -- Merged via PR #117 (code) - Copilot findings addressed. Kanban tracking merged via PR #116.
