@@ -8,13 +8,13 @@ Spec: [spec.md](spec.md), plan: [plan.md](plan.md). Issue #112.
 
 ### WP01 - Owner profile + preferences API (backend-logic)
 
-- [ ] T001 Domain: `OwnerProfile` (Owner, Email, RemindersEnabled) - `Create`/`Hydrate`, `UpdateEmail`, `SetRemindersEnabled`
-- [ ] T002 `IOwnerProfileRepository` + Mongo document/repository + unique index on `ownerId`
-- [ ] T003 Auth-pipeline email capture (reads the `email` claim, upserts if missing/changed) - zero frontend involvement
-- [ ] T004 Application: `GetNotificationPreferencesQuery` / `UpdateNotificationPreferencesCommand` (default `RemindersEnabled: true` when no profile exists)
-- [ ] T005 `AccountEndpoints`: `GET`/`PATCH /api/account/notification-preferences`
-- [ ] T006 Unit tests: `OwnerProfile` domain behavior + handlers
-- [ ] T007 Integration tests: endpoints (auth/default/persist) + auto-capture, Mongo Testcontainers
+- [x] T001 Domain: `OwnerProfile` (Owner, Email, RemindersEnabled) - `Create`/`Hydrate`, `UpdateEmail`, `SetRemindersEnabled`
+- [x] T002 `IOwnerProfileRepository` + Mongo document/repository + unique index on `ownerId`
+- [x] T003 Auth-pipeline email capture (reads the `email` claim, upserts if missing/changed) - zero frontend involvement
+- [x] T004 Application: `GetNotificationPreferencesQuery` / `UpdateNotificationPreferencesCommand` (default `RemindersEnabled: true` when no profile exists)
+- [x] T005 `AccountEndpoints`: `GET`/`PATCH /api/account/notification-preferences`
+- [x] T006 Unit tests: `OwnerProfile` domain behavior + handlers
+- [x] T007 Integration tests: endpoints (auth/default/persist) + auto-capture, Mongo Testcontainers
 
 Dependencies: none - foundational.
 
