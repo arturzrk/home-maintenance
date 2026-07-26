@@ -2,6 +2,7 @@ using HomeMaintenance.Application.Common.Interfaces;
 using HomeMaintenance.Application.JobDefinitions;
 using HomeMaintenance.Infrastructure.AuditLog;
 using HomeMaintenance.Infrastructure.Auth;
+using HomeMaintenance.Infrastructure.Email;
 using HomeMaintenance.Infrastructure.Persistence;
 using HomeMaintenance.Infrastructure.Scheduling;
 using HomeMaintenance.Infrastructure.Time;
@@ -45,6 +46,8 @@ public static class DependencyInjection
         services.Configure<AuditLogOptions>(
             configuration.GetSection(AuditLogOptions.SectionName));
         services.AddSingleton<IAuditLog, FileAuditLog>();
+
+        services.AddEmailSending(configuration);
 
         services.AddScoped<IPropertyRepository, PropertyRepository>();
         services.AddScoped<IAssetRepository, AssetRepository>();
