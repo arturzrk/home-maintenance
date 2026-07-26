@@ -4,9 +4,11 @@ using HomeMaintenance.Domain.Jobs;
 namespace HomeMaintenance.Application.Common.Interfaces;
 
 /// <summary>
-/// Persistence contract for the Job aggregate. Every query is scoped
-/// to a single <see cref="OwnerId"/>; cross-owner reads return null,
-/// which handlers map to NotFoundError.
+/// Persistence contract for the Job aggregate. Every owner-facing query
+/// is scoped to a single <see cref="OwnerId"/>; cross-owner reads return
+/// null, which handlers map to NotFoundError. The one exception is
+/// <see cref="ListDueOrOverdueAsync"/>, which is deliberately system-wide
+/// for the reminder digest scheduler - see its own doc comment.
 /// </summary>
 public interface IJobRepository
 {
