@@ -75,6 +75,11 @@ mechanism: one daily email, not a notification platform.
 - **FR-09** If a digest cannot be delivered for one owner (delivery
   failure, missing contact information), that failure does not prevent
   digests from being evaluated and sent for other owners.
+- **FR-10** The user manual documents reminder emails: what triggers
+  one, what it contains, and how to turn them on or off - matching the
+  standard this project already holds every other user-facing feature
+  to (assets, the system menu, and the dashboard were each documented
+  when they shipped).
 
 ## Success Criteria
 

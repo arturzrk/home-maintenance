@@ -194,7 +194,10 @@ link give owners the on/off toggle.
   digest assembly + send, tests.
 - **WP04 - Frontend settings + menu link** (frontend-craft, deps WP01):
   api-client, server actions, settings page + toggle component, system
-  menu link, middleware matcher, jest tests.
+  menu link, middleware matcher, jest tests, and a user-manual update
+  (new "Reminders" section: what triggers a digest, what it contains,
+  how to turn it on/off - same treatment assets and the system menu
+  got in features 008/009) (FR-10).
 - **WP05 - E2E suite** (testing-specialist, deps WP04): preference
   toggle flow + menu-link coverage, full-suite regression.
 
