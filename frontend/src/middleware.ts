@@ -20,5 +20,6 @@ export const config = {
     "/jobs/:path*",
     "/job-definitions/:path*",
     "/assets/:path*",
+    "/settings/:path*",
   ],
 };

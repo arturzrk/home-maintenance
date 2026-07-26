@@ -386,3 +386,27 @@ export const jobDefinitions = {
       idToken,
     }),
 };
+
+// ---------------------------------------------------------------------------
+// Notification preferences (WP01 backend, 011-reminders)
+// Server-only.
+// ---------------------------------------------------------------------------
+
+export interface NotificationPreferencesDto {
+  email: string | null;
+  remindersEnabled: boolean;
+}
+
+export const notificationPreferences = {
+  get: (idToken: string) =>
+    apiFetch<NotificationPreferencesDto>("/api/account/notification-preferences", {
+      idToken,
+    }),
+
+  update: (remindersEnabled: boolean, idToken: string) =>
+    apiFetch<NotificationPreferencesDto>("/api/account/notification-preferences", {
+      method: "PATCH",
+      body: { remindersEnabled },
+      idToken,
+    }),
+};

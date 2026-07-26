@@ -45,6 +45,9 @@ describe("SystemMenu", () => {
     const properties = screen.getByRole("link", { name: "My properties" });
     expect(properties).toHaveAttribute("href", "/properties");
 
+    const notificationSettings = screen.getByRole("link", { name: "Notification settings" });
+    expect(notificationSettings).toHaveAttribute("href", "/settings/notifications");
+
     const guide = screen.getByRole("link", { name: /User guide/ });
     expect(guide).toHaveAttribute("href", "/user-manual/index.html");
     expect(guide).toHaveAttribute("target", "_blank");
