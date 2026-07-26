@@ -107,5 +107,5 @@ polaris implement WP03
 
 ## Activity Log
 
-- 2026-07-19T10:51:09Z – unknown – lane=for_review – Docs on branch 010-launch-readiness-WP03; PR #106
-- 2026-07-19T12:20:00Z – unknown – shell_pid=34039 – lane=done – Merged via PR #106
+- 2026-07-19T10:51:09Z -- unknown -- lane=for_review -- Docs on branch 010-launch-readiness-WP03; PR #106
+- 2026-07-19T12:20:00Z -- unknown -- shell_pid=34039 -- lane=done -- Merged via PR #106

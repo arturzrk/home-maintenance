@@ -74,5 +74,5 @@ polaris implement WP02 --base WP01
 
 ## Activity Log
 
-- 2026-07-19T12:30:02Z – unknown – lane=for_review – Implemented on branch 010-launch-readiness-WP02; PR #109
-- 2026-07-20T10:15:29Z – unknown – shell_pid=87481 – lane=done – Merged via PR #109; feature 010 complete
+- 2026-07-19T12:30:02Z -- unknown -- lane=for_review -- Implemented on branch 010-launch-readiness-WP02; PR #109
+- 2026-07-20T10:15:29Z -- unknown -- shell_pid=87481 -- lane=done -- Merged via PR #109; feature 010 complete
