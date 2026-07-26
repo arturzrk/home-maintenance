@@ -45,6 +45,39 @@ public sealed class EmailExtensionsTests
     }
 
     [Fact]
+    public void ProviderResend_MissingFromAddress_Throws()
+    {
+        var services = new ServiceCollection();
+        var configuration = new ConfigurationBuilder().AddInMemoryCollection(
+            new Dictionary<string, string?>
+            {
+                ["Email:Provider"] = "Resend",
+                ["Email:Resend:ApiKey"] = "re_test_key",
+            }).Build();
+
+        var ex = Should.Throw<InvalidOperationException>(
+            () => services.AddEmailSending(configuration));
+
+        ex.Message.ShouldContain("Email:FromAddress");
+    }
+
+    [Fact]
+    public void UnknownProvider_Throws()
+    {
+        var services = new ServiceCollection();
+        var configuration = new ConfigurationBuilder().AddInMemoryCollection(
+            new Dictionary<string, string?>
+            {
+                ["Email:Provider"] = "Sendgrid",
+            }).Build();
+
+        var ex = Should.Throw<InvalidOperationException>(
+            () => services.AddEmailSending(configuration));
+
+        ex.Message.ShouldContain("Sendgrid");
+    }
+
+    [Fact]
     public void ProviderResend_WithApiKey_DoesNotThrow_RegistersResendSender()
     {
         var services = new ServiceCollection();

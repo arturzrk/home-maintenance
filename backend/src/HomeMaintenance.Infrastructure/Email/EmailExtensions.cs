@@ -9,8 +9,11 @@ namespace HomeMaintenance.Infrastructure.Email;
 /// <c>Email:Provider</c>: "Log" (the Development/CI default) registers
 /// <see cref="LoggingEmailSender"/>; "Resend" registers
 /// <see cref="ResendEmailSender"/> as a typed HttpClient and fails fast
-/// at startup if <c>Email:Resend:ApiKey</c> is missing, mirroring
-/// <see cref="Auth.AuthenticationExtensions"/>'s misconfiguration check.
+/// at startup if <c>Email:Resend:ApiKey</c> or <c>Email:FromAddress</c>
+/// is missing, or if <c>Email:Provider</c> is set to anything other than
+/// "Log"/"Resend" (a typo would otherwise silently fall back to no-op
+/// sending) - mirroring <see cref="Auth.AuthenticationExtensions"/>'s
+/// misconfiguration check.
 /// </summary>
 public static class EmailExtensions
 {
@@ -31,14 +34,25 @@ public static class EmailExtensions
                     "Email:Resend:ApiKey is required when Email:Provider is 'Resend'.");
             }
 
+            if (string.IsNullOrWhiteSpace(configuration["Email:FromAddress"]))
+            {
+                throw new InvalidOperationException(
+                    "Email:FromAddress is required when Email:Provider is 'Resend'.");
+            }
+
             services.AddHttpClient<IEmailSender, ResendEmailSender>(client =>
             {
                 client.BaseAddress = new Uri("https://api.resend.com/");
             });
         }
-        else
+        else if (string.Equals(provider, "Log", StringComparison.OrdinalIgnoreCase))
         {
             services.AddSingleton<IEmailSender, LoggingEmailSender>();
+        }
+        else
+        {
+            throw new InvalidOperationException(
+                $"Unknown Email:Provider '{provider}'. Valid values are 'Log' or 'Resend'.");
         }
 
         return services;

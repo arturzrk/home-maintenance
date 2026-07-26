@@ -35,7 +35,7 @@ public sealed class ResendEmailSender : IEmailSender
         };
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _options.Resend.ApiKey);
 
-        var response = await _http.SendAsync(request, ct);
+        using var response = await _http.SendAsync(request, ct);
         response.EnsureSuccessStatusCode();
     }
 }
