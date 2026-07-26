@@ -1,7 +1,7 @@
 ---
 work_package_id: WP02
 title: "Email delivery"
-lane: "planned"
+lane: "for_review"
 dependencies: []
 subtasks: [T008, T009, T010, T011, T012]
 test_status: required
@@ -82,3 +82,9 @@ a missing Resend key when `Email:Provider=Resend`.
 ```bash
 polaris implement WP02
 ```
+
+## Activity Log
+
+- 2026-07-26T12:04:16Z -- unknown -- lane=doing -- Moved to doing
+- 2026-07-26T12:04:18Z -- unknown -- lane=testing -- dotnet test green: 186/186 Unit.Tests + 204/204 Integration.Tests (6 new email unit tests: provider selection/startup assertion, Resend request-shape + non-2xx handling, logging sender)
+- 2026-07-26T12:04:27Z -- unknown -- lane=for_review -- Email delivery implemented per plan: IEmailSender port, ResendEmailSender (typed HttpClient), LoggingEmailSender (Development/CI default), EmailExtensions.AddEmailSending with startup fail-fast when Provider=Resend and no ApiKey (mirrors Auth:UseStub). appsettings.json defaults to Log; appsettings.Staging.json set to Resend with ApiKey via env var. dotnet test green: 186/186 Unit + 204/204 Integration. polaris runtests CLI bug (get_specs_dir undefined, same as WP01/WP02/WP03/WP04 in prior features) - ran dotnet test directly.
