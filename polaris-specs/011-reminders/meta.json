@@ -41,6 +41,22 @@
       "agent": "unknown",
       "source": "implement",
       "drift_type": "expansion"
+    },
+    {
+      "amendment_id": "amd-003",
+      "text": "Files changed outside declared WP scope: frontend/e2e/wp10-launch.spec.ts, frontend/e2e/helpers/setup.ts, frontend/e2e/wp04-properties.spec.ts (and 19 more)",
+      "timestamp": "2026-07-26T16:13:53.443714+00:00",
+      "affected_sections": [],
+      "artifacts_updated": {
+        "spec_sections": [],
+        "plan_files": [],
+        "wps_regenerated": [],
+        "wps_locked": [],
+        "wps_created": []
+      },
+      "agent": "unknown",
+      "source": "implement",
+      "drift_type": "expansion"
     }
   ]
 }
