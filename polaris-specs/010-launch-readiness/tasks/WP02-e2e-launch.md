@@ -1,13 +1,15 @@
 ---
 work_package_id: WP02
 title: E2E launch suite
-lane: "for_review"
+lane: "done"
 dependencies: ["WP01"]
 subtasks: [T008, T009, T010, T011, T012]
 test_status: required
 test_file: frontend/e2e/wp10-launch.spec.ts
 domain: testing-specialist
 shell_pid: "87481"
+reviewed_by: "Artur Żurek"
+review_status: "approved"
 ---
 
 # WP02 - E2E launch suite
@@ -73,3 +75,4 @@ polaris implement WP02 --base WP01
 ## Activity Log
 
 - 2026-07-19T12:30:02Z – unknown – lane=for_review – Implemented on branch 010-launch-readiness-WP02; PR #109
+- 2026-07-20T10:15:29Z – unknown – shell_pid=87481 – lane=done – Merged via PR #109; feature 010 complete
