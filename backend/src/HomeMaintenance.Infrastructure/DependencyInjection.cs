@@ -49,6 +49,9 @@ public static class DependencyInjection
 
         services.AddEmailSending(configuration);
 
+        services.Configure<FrontendOptions>(
+            configuration.GetSection(FrontendOptions.SectionName));
+
         services.AddScoped<IPropertyRepository, PropertyRepository>();
         services.AddScoped<IAssetRepository, AssetRepository>();
         services.AddScoped<IJobRepository, JobRepository>();
@@ -57,6 +60,7 @@ public static class DependencyInjection
         services.AddScoped<JobGenerationService>();
         services.AddHostedService<MongoIndexInitializer>();
         services.AddHostedService<JobGeneratorService>();
+        services.AddHostedService<ReminderDigestService>();
 
         return services;
     }
