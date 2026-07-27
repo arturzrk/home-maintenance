@@ -1,7 +1,7 @@
 ---
 work_package_id: WP05
 title: 'E2E: notification settings suite'
-lane: "doing"
+lane: "testing"
 dependencies: ["WP04"]
 subtasks: [T027, T028, T029, T030]
 test_status: required
@@ -64,3 +64,4 @@ polaris implement WP05 --base WP04
 ## Activity Log
 
 - 2026-07-27T09:35:29Z -- unknown -- lane=doing -- Backfilling missing doing-transition (implement command's earlier transition never landed on main).
+- 2026-07-27T09:35:41Z -- unknown -- lane=testing -- Moved to testing
