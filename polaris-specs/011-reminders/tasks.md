@@ -54,10 +54,10 @@ Dependencies: WP01 (not WP02/WP03).
 
 ### WP05 - E2E: notification settings suite (testing-specialist, deps: WP04)
 
-- [ ] T027 WP11-1: menu link navigates to settings
-- [ ] T028 WP11-2: toggle off persists across reload
-- [ ] T029 WP11-3: toggle on persists across reload
-- [ ] T030 Full-suite regression (existing + new) local + CI
+- [x] T027 WP11-1: menu link navigates to settings
+- [x] T028 WP11-2: toggle off persists across reload
+- [x] T029 WP11-3: toggle on persists across reload
+- [x] T030 Full-suite regression (existing + new) local + CI
 
 Dependencies: WP04.
 
