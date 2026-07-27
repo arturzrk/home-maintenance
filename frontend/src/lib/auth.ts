@@ -43,7 +43,9 @@ const devStubProvider = Credentials({
   },
   async authorize(input) {
     const sub = String(input?.sub ?? "").trim();
-    if (!sub) return null;
+    // ":" is the token's sub/email delimiter - a sub containing it would
+    // make the backend authenticate only the prefix as the subject.
+    if (!sub || sub.includes(":")) return null;
     const email = `${sub}@dev.local`;
     return {
       id: sub,
