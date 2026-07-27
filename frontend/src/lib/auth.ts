@@ -5,9 +5,11 @@ import { refreshGoogleIdToken, readJwtExp } from "@/lib/google-token";
 
 // In Development a developer can sign in without going through Google by
 // using the dev-stub credentials provider, which mints an idToken of the
-// shape "dev-<sub>" that the backend's DevStubAuthenticationHandler
-// accepts. Set NEXTAUTH_DEV_STUB=true in .env.local. Production MUST NOT
-// enable this.
+// shape "dev-<sub>:<email>" that the backend's DevStubAuthenticationHandler
+// accepts - the email suffix lets OwnerProfileSyncMiddleware upsert a
+// profile the same way a real Google id token's email claim would, so
+// email-dependent features (e.g. notification preferences) work locally.
+// Set NEXTAUTH_DEV_STUB=true in .env.local. Production MUST NOT enable this.
 const enableDevStub = process.env.NEXTAUTH_DEV_STUB === "true";
 
 // Refresh when the token has less than 60s of life remaining, so we never
@@ -41,12 +43,15 @@ const devStubProvider = Credentials({
   },
   async authorize(input) {
     const sub = String(input?.sub ?? "").trim();
-    if (!sub) return null;
+    // ":" is the token's sub/email delimiter - a sub containing it would
+    // make the backend authenticate only the prefix as the subject.
+    if (!sub || sub.includes(":")) return null;
+    const email = `${sub}@dev.local`;
     return {
       id: sub,
       name: sub,
-      email: `${sub}@dev.local`,
-      idToken: `dev-${sub}`,
+      email,
+      idToken: `dev-${sub}:${email}`,
     };
   },
 });
