@@ -1,7 +1,7 @@
 ---
 work_package_id: WP05
 title: 'E2E: notification settings suite'
-lane: planned
+lane: "doing"
 dependencies: ["WP04"]
 subtasks: [T027, T028, T029, T030]
 test_status: required
@@ -60,3 +60,7 @@ Full local Playwright run (existing suite + new) and CI e2e job green.
 ```bash
 polaris implement WP05 --base WP04
 ```
+
+## Activity Log
+
+- 2026-07-27T09:35:29Z -- unknown -- lane=doing -- Backfilling missing doing-transition (implement command's earlier transition never landed on main).
