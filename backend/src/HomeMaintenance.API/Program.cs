@@ -83,14 +83,15 @@ app.UseAuthorization();
 
 // Endpoints
 
-// Health check - public, used by the frontend to confirm the backend is reachable.
-app.MapHealthChecks("/health").AllowAnonymous();
+// Health endpoints - /health, /liveness, /readiness, /detailed. Public,
+// used by the frontend status widget, CI, Docker HEALTHCHECK, and probes.
+app.MapHealthEndpoints();
 
 // Root - public smoke-test that the API is running.
 app.MapGet("/", () => Results.Ok(new
 {
     Service = "HomeMaintenance API",
-    Version = "0.1.1",
+    Version = ApiVersion.Current,
     Status = "Running"
 }))
 .WithName("Root")
