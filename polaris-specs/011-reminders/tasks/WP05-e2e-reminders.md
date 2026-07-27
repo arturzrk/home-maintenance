@@ -1,12 +1,14 @@
 ---
 work_package_id: WP05
 title: 'E2E: notification settings suite'
-lane: "for_review"
+lane: "done"
 dependencies: ["WP04"]
 subtasks: [T027, T028, T029, T030]
 test_status: required
 test_file: frontend/e2e/wp11-reminders.spec.ts
 domain: testing-specialist
+reviewed_by: "Artur Żurek"
+review_status: "approved"
 ---
 
 # WP05 - E2E: notification settings suite
@@ -66,3 +68,4 @@ polaris implement WP05 --base WP04
 - 2026-07-27T09:35:29Z -- unknown -- lane=doing -- Backfilling missing doing-transition (implement command's earlier transition never landed on main).
 - 2026-07-27T09:35:41Z -- unknown -- lane=testing -- Moved to testing
 - 2026-07-27T09:35:49Z -- unknown -- lane=for_review -- polaris runtests broken (NameError: get_specs_dir not defined, known CLI bug). Ran tests manually against a production build (next build && next start), matching CI: Playwright 46/46 (incl. new wp11-reminders.spec.ts 3/3), Jest 83/83, dotnet test 402/402 (188 unit + 214 integration).
+- 2026-07-27T09:49:38Z -- unknown -- lane=done -- PR #130 merged (E2E suite + dev-stub email fix, Copilot finding addressed). Feature 011-reminders complete: WP01-WP05 all done.
