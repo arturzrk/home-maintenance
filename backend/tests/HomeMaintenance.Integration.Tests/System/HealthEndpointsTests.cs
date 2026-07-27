@@ -30,7 +30,8 @@ public sealed class HealthEndpointsTests : IClassFixture<ApiFactory>
     private static async Task<JsonElement> ReadJsonAsync(HttpResponseMessage response)
     {
         var body = await response.Content.ReadAsStringAsync();
-        return JsonDocument.Parse(body).RootElement;
+        using var document = JsonDocument.Parse(body);
+        return document.RootElement.Clone();
     }
 
     [Fact]

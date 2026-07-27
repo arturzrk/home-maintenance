@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Reflection;
 using HomeMaintenance.API.Middleware;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
