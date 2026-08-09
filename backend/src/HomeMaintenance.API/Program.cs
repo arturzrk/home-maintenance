@@ -5,6 +5,7 @@ using HomeMaintenance.Application;
 using HomeMaintenance.Application.Common.Interfaces;
 using HomeMaintenance.Infrastructure;
 using HomeMaintenance.Infrastructure.Auth;
+using HomeMaintenance.Infrastructure.AuditLog;
 using System.Text.Json.Serialization;
 using MongoDB.Driver;
 using OpenTelemetry;
@@ -14,7 +15,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Layer registrations
 builder.Services
     .AddApplication()
-    .AddInfrastructure(builder.Configuration)
+    .AddInfrastructure(builder.Configuration, builder.Environment)
     .AddAppAuthentication(builder.Configuration, builder.Environment);
 
 // Azure Monitor OpenTelemetry distro. Auto-instruments ASP.NET Core
@@ -24,7 +25,9 @@ builder.Services
 // unless a developer opts in.
 if (!string.IsNullOrEmpty(builder.Configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"]))
 {
-    builder.Services.AddOpenTelemetry().UseAzureMonitor();
+    builder.Services.AddOpenTelemetry()
+        .WithTracing(b => b.AddSource(AppInsightsAuditMirror.ActivitySourceName))
+        .UseAzureMonitor();
 }
 
 // Health checks

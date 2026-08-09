@@ -210,7 +210,11 @@ above. Same checklist as staging, with these adjustments:
 - Publish the consent screen so non-test-users can sign in.
 - The production audit-log sink MUST be a managed service; the
   ephemeral container filesystem is not acceptable for the
-  constitution's append-only retention requirement.
+  constitution's append-only retention requirement. Set
+  `AuditLog__Provider=Mongo` in App Service Configuration (see
+  go-live-runbook.md phase 4.3 for the concrete mechanism). The
+  `auditEvents` MongoDB collection and its indexes are created
+  automatically on first startup.
 - Add a Content Security Policy header allowing
   `https://accounts.google.com` for the sign-in iframe.
 - Run the `Stub_In_Production` integration test pattern against the
