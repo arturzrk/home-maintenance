@@ -85,7 +85,7 @@ Production values used throughout:
    (`actor+timestamp`, `target+timestamp`, `eventType`,
    `correlationId`) are created automatically by `MongoIndexInitializer`
    on first startup. No additional resources or runbook phases are
-   required — Atlas is already a launch prerequisite, so the audit
+   required: Atlas is already a launch prerequisite, so the audit
    trail inherits its TLS and backup posture.
 4. **Custom domain**: portal -> Custom domains -> add
    `api.maintained.house`; create the CNAME (and TXT validation
