@@ -19,16 +19,22 @@ This skill includes official Aptean font and screenshot files:
 
 ```
 fonts/
-  SuisseIntl-Book.otf              # Body text (regular weight 400)
-  SuisseIntl-BookItalic.otf        # Body text italic
-  SuisseIntl-Bold.otf              # Bold body text, card titles (weight 700)
-  SuisseIntl-BoldItalic.otf        # Bold italic
-  SuisseIntlCond-Regular.otf       # Condensed headings regular (weight 400)
-  SuisseIntlCond-RegularItalic.otf # Condensed headings italic
-  SuisseIntlCond-Bold.otf          # Condensed headings bold (weight 700)
-  SuisseIntlCond-BoldItalic.otf    # Condensed headings bold italic
+  fira-sans-500.woff2   # Headings, Medium  (Heading/MD, Heading/SM)
+  fira-sans-600.woff2   # Headings, SemiBold (Display/*, Heading/XL, Heading/LG)
+  inter-400.woff2       # Body and labels, Regular
+  inter-500.woff2       # Labels, Medium (Label/MD)
+  inter-600.woff2       # Labels, SemiBold (Label/XS Strong only)
+  inter-700.woff2       # Body and labels, Bold (every *Strong role)
+  fira-mono-400.woff2   # Code, Regular
+  fira-mono-700.woff2   # Code, Bold
+  OFL.txt               # SIL Open Font License 1.1 for all three families
 
 assets/
+  aptean-logo-black.png             # 2026 wordmark for light backgrounds
+  aptean-logo-black.svg
+  aptean-logo-white.png             # 2026 wordmark for dark/gradient backgrounds
+  aptean-logo-white.svg
+  Aptean-A-Logo-Icon-Black.svg      # Black "A" icon mark (retained; icon-only use)
   resolve360-task-list.png          # Reference: task list UI pattern
   resolve360-case-detail.png        # Reference: case detail layout
   sales-smart-workspace.png         # Reference: action hub pattern
@@ -39,103 +45,227 @@ assets/
 
 ## Shared Typography (All Themes)
 
+The AppCentral design system (AC-DS-001) ratified a three-family stack. This is the
+type system for every Aptean application, not a suggestion: an app launched from
+AppCentral runs inside an iframe, and Core's CSS cannot reach into an iframe, so the
+app has to serve the same stack from its own origin or it will visibly not match the
+shell around it.
+
 ### Font Families
 
-| Role | Font Family | Fallback Stack | Usage |
-|------|------------|----------------|-------|
-| Headings / Display | Suisse Intl Condensed | Barlow Condensed, Arial Narrow, sans-serif | Page titles, section headers, slide titles |
-| Body / UI | Suisse Intl | -apple-system, BlinkMacSystemFont, Segoe UI, Arial, sans-serif | Body text, buttons, labels, inputs, table cells |
-| Monospace | SF Mono, Fira Code | Consolas, monospace | Code blocks, data values |
+| Role | Font Family | Weights bundled | Usage |
+|------|------------|-----------------|-------|
+| Headings / Display | Fira Sans | 500, 600 | Page titles, section headers, modal and card headers, app-tile initials |
+| Body / UI Label | Inter | 400, 500, 600, 700 | Body copy, buttons, inputs, nav, tabs, badges, table cells |
+| Code / Mono | Fira Mono | 400, 700 | Code blocks, token values, structured machine output |
+
+All three are SIL Open Font License, which is why Polaris can bundle them. Latin and
+latin-ext subsets are shipped, which covers all nine AppCentral header languages
+(`en, de, fr, nl, es, pt, da, no, sv`).
 
 ### Rules
 
-- Suisse Intl Condensed = headings ONLY -- never use for body, labels, or buttons
-- Suisse Intl = all other text (body, buttons, labels, inputs, table cells, badges)
-- Never substitute Inter, Roboto, or other generic fonts as primary
-- Use the bundled OTF files; never use Google Fonts or CDN alternatives when bundled fonts are available
+- Fira Sans = headings and display ONLY. Never for body copy or UI control labels.
+- Inter = body and UI labels ONLY. Never for headings or display text.
+- Fira Mono = code and token values ONLY. Never substitute Inter into a mono context.
+- Never use `font-semibold` on body or label text, with the single exception of
+  `Label/XS Strong`.
+- Never invent a size. Pick a named role from the type scale below; if none fits
+  exactly, compose from the roles' sizes rather than reaching for `text-[13px]`.
+- Never leave an inline `font-family` string. Convert it to a role.
+- Self-host. Never link the Google Fonts CDN at runtime, even though the families
+  come from Google Fonts.
+
+### Legacy Faces to Remove
+
+Three spellings of the retired Suisse trial font appear in older Aptean code and
+design files. All three must go, along with the pre-migration monospace:
+
+| Legacy string | Replace with |
+|---|---|
+| `Suisse International Condensed` | A `Heading/*` or `Display/*` role, by context |
+| `Suisse Intl Trial` | A `Heading/*` or `Display/*` role, by context |
+| `Suisse Int'l Condensed Trial` | A `Heading/*` or `Display/*` role, by context |
+| `Suisse Intl` | A `Body/*` or `Label/*` role, by context |
+| `Roboto Mono` | `Mono/MD` or `Mono/MD Strong` |
 
 ### @font-face Declarations
 
-Copy font files from `.polaris/skills/aptean-brand/fonts/` to your project's font directory and declare:
+`polaris init` auto-applies the `appcentral-shell` skill, which drops ready-made
+`@font-face` rules and role classes at `styles/appcentral-typography.css` with the
+`.woff2` files under `public/fonts/`. Import that file and you are done.
+
+For a stack the skill does not cover, copy the fonts from
+`.polaris/skills/aptean-brand/fonts/` into whatever directory your framework serves
+statically (`static/fonts/` for Django, `wwwroot/fonts/` for ASP.NET) and declare:
 
 ```css
 @font-face {
-  font-family: 'Suisse Intl';
-  src: url('/fonts/SuisseIntl-Book.otf') format('opentype');
-  font-weight: 400;
+  font-family: 'Fira Sans';
+  src: url('/fonts/fira-sans-600.woff2') format('woff2');
+  font-weight: 600;
   font-style: normal;
   font-display: swap;
 }
-@font-face {
-  font-family: 'Suisse Intl';
-  src: url('/fonts/SuisseIntl-BookItalic.otf') format('opentype');
-  font-weight: 400;
-  font-style: italic;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Suisse Intl';
-  src: url('/fonts/SuisseIntl-Bold.otf') format('opentype');
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Suisse Intl';
-  src: url('/fonts/SuisseIntl-BoldItalic.otf') format('opentype');
-  font-weight: 700;
-  font-style: italic;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Suisse Intl Condensed';
-  src: url('/fonts/SuisseIntlCond-Regular.otf') format('opentype');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Suisse Intl Condensed';
-  src: url('/fonts/SuisseIntlCond-RegularItalic.otf') format('opentype');
-  font-weight: 400;
-  font-style: italic;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Suisse Intl Condensed';
-  src: url('/fonts/SuisseIntlCond-Bold.otf') format('opentype');
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Suisse Intl Condensed';
-  src: url('/fonts/SuisseIntlCond-BoldItalic.otf') format('opentype');
-  font-weight: 700;
-  font-style: italic;
-  font-display: swap;
+/* ... repeat for fira-sans-500, inter-400/500/600/700, fira-mono-400/700 ... */
+
+:root {
+  --font-heading: 'Fira Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'Fira Mono', ui-monospace, 'Cascadia Code', 'Courier New', monospace;
 }
 
-h1, h2, h3 {
-  font-family: 'Suisse Intl Condensed', 'Barlow Condensed', 'Arial Narrow', sans-serif;
-}
-body, p, span, button, input, select, textarea, label, td, th {
-  font-family: 'Suisse Intl', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+body { font-family: var(--font-body); }
+h1, h2, h3, h4 { font-family: var(--font-heading); }
+code, kbd, pre, samp { font-family: var(--font-mono); }
+```
+
+### Type Scale - the 20 Roles
+
+Desktop sizes. Pick the role, then use either the CSS class the skill ships or the
+Tailwind classes, whichever your app uses.
+
+| Role | Family | Weight | Size | Line height | Tracking | CSS class | Tailwind |
+|---|---|---|---|---|---|---|---|
+| Display/XL | Fira Sans | 600 | 40 | 48 | 0 | `.ac-display-xl` | `font-['Fira_Sans'] text-[40px] font-semibold leading-[48px]` |
+| Display/LG | Fira Sans | 600 | 32 | 40 | 0 | `.ac-display-lg` | `font-['Fira_Sans'] text-[32px] font-semibold leading-10` |
+| Heading/XL | Fira Sans | 600 | 24 | 32 | 0 | `.ac-heading-xl` | `font-['Fira_Sans'] text-2xl font-semibold leading-8` |
+| Heading/LG | Fira Sans | 600 | 20 | 28 | 0 | `.ac-heading-lg` | `font-['Fira_Sans'] text-xl font-semibold leading-7` |
+| Heading/MD | Fira Sans | 500 | 17 | 24 | 0 | `.ac-heading-md` | `font-['Fira_Sans'] text-[17px] font-medium leading-6` |
+| Heading/SM | Fira Sans | 500 | 15 | 22 | 0 | `.ac-heading-sm` | `font-['Fira_Sans'] text-[15px] font-medium leading-[22px]` |
+| Body/LG Strong | Inter | 700 | 16 | 24 | 0 | `.ac-body-lg-strong` | `font-['Inter'] text-base font-bold leading-6` |
+| Body/LG | Inter | 400 | 16 | 24 | 0 | `.ac-body-lg` | `font-['Inter'] text-base font-normal leading-6` |
+| Body/MD Strong | Inter | 700 | 14 | 20 | 0 | `.ac-body-md-strong` | `font-['Inter'] text-sm font-bold leading-5` |
+| Body/MD (default) | Inter | 400 | 14 | 20 | 0 | `.ac-body-md` | `font-['Inter'] text-sm font-normal leading-5` |
+| Body/SM Strong | Inter | 700 | 12 | 16 | 0 | `.ac-body-sm-strong` | `font-['Inter'] text-xs font-bold leading-4` |
+| Body/SM | Inter | 400 | 12 | 16 | 0 | `.ac-body-sm` | `font-['Inter'] text-xs font-normal leading-4` |
+| Label/LG Strong | Inter | 700 | 14 | 20 | 0 | `.ac-label-lg-strong` | `font-['Inter'] text-sm font-bold leading-5` |
+| Label/LG | Inter | 400 | 14 | 20 | 0 | `.ac-label-lg` | `font-['Inter'] text-sm font-normal leading-5` |
+| Label/MD Strong | Inter | 700 | 12 | 16 | 0 | `.ac-label-md-strong` | `font-['Inter'] text-xs font-bold leading-4` |
+| Label/MD | Inter | 500 | 12 | 16 | 0 | `.ac-label-md` | `font-['Inter'] text-xs font-medium leading-4` |
+| Label/SM Strong CAPS | Inter | 700 | 11 | 16 | 0.06em | `.ac-label-sm-strong-caps` | `font-['Inter'] text-[11px] font-bold leading-4 tracking-[0.06em] uppercase` |
+| Label/XS Strong | Inter | 600 | 10 | none | 0.02em | `.ac-label-xs-strong` | `font-['Inter'] text-[10px] font-semibold tracking-[0.02em] leading-none` |
+| Mono/MD Strong | Fira Mono | 700 | 14 | 20 | 0 | `.ac-mono-md-strong` | `font-['Fira_Mono'] text-sm font-bold leading-5` |
+| Mono/MD | Fira Mono | 400 | 14 | 20 | 0 | `.ac-mono-md` | `font-['Fira_Mono'] text-sm font-normal leading-5` |
+
+`Label/XS Strong` genuinely has no line-height token, so `leading-none` is correct
+rather than a guessed value.
+
+### Mobile Sizes
+
+Seven roles step down below the `sm` breakpoint (640px). Everything else is
+unchanged. The shipped CSS applies these already; Tailwind users express them with
+`max-sm:`.
+
+| Role | Mobile size | Mobile line height |
+|---|---|---|
+| Display/XL | 32 | 40 |
+| Display/LG | 24 | 32 |
+| Heading/XL | 22 | 28 |
+| Body/MD | 15 | 22 |
+| Body/SM | 13 | 16 |
+| Label/LG | 15 | 20 |
+| Label/MD | 13 | 16 |
+
+### Choosing a Role
+
+```
+Page-level / hero headline?                  -> Display/XL or Display/LG
+Anchors a section or content area?           -> Heading/XL ... Heading/SM
+   modal header, section title               -> Heading/XL
+   card header, panel title                  -> Heading/LG
+   sub-section label                         -> Heading/MD
+   tight sub-header, table group label       -> Heading/SM
+Narrative / readable content?                -> Body/LG ... Body/SM (+Strong for emphasis)
+   editorial, onboarding, announcements 16   -> Body/LG
+   dashboards, forms, standard 14            -> Body/MD  (DEFAULT)
+   dense tables, secondary descriptions 12   -> Body/SM
+UI control label (button, input, nav, tab, badge, tag)?
+   button text, form labels, primary action  -> Label/LG
+   tags, badges, tab labels, metadata        -> Label/MD
+   eyebrow labels (ALWAYS uppercase)         -> Label/SM Strong CAPS
+   icon-paired condensed nav-rail labels     -> Label/XS Strong
+Code, token value, structured machine output? -> Mono/MD or Mono/MD Strong
+```
+
+**Body/MD and Label/LG are both 14px Inter Regular.** Disambiguate by context:
+surrounded by paragraph or explanatory copy means Body/MD; inside a button, input,
+dropdown, nav item, tab or control means Label/LG. Genuinely ambiguous defaults to
+Label/MD and gets flagged for a human.
+
+**Avatars and monogram badges** are assigned by component, not by size. Person or
+user avatar initials use Label/LG Strong. App-tile logobadge initials use
+Heading/XL. An app-tile app name uses Label/MD. Never carry a legacy 27px Suisse
+monogram size forward.
+
+### Tailwind Registration
+
+So the bracketed classes resolve to the self-hosted files rather than a raw web-font
+lookup:
+
+```js
+theme: {
+  extend: {
+    fontFamily: {
+      sans: ['var(--font-inter)', 'system-ui', 'sans-serif'],
+      'Fira_Sans': ['var(--font-fira-sans)', 'system-ui', 'sans-serif'],
+      'Fira_Mono': ['var(--font-fira-mono)', 'ui-monospace', 'monospace'],
+    },
+  },
 }
 ```
 
-### Type Scale
+`font-sans` must resolve to Inter, so a body element with no explicit role still
+lands on the right family.
 
-| Element | Font | Weight | Size | Line Height | Letter Spacing |
-|---------|------|--------|------|-------------|----------------|
-| Page title | Suisse Intl Condensed | 700 | 28-32px | 1.2 | -0.02em |
-| Section header | Suisse Intl Condensed | 700 | 22-26px | 1.25 | -0.01em |
-| Card title | Suisse Intl | 700 | 16-18px | 1.3 | 0 |
-| Body text | Suisse Intl | 400 | 14px | 1.5 | 0 |
-| Secondary/meta | Suisse Intl | 400 | 12-13px | 1.4 | 0 |
-| Column header | Suisse Intl | 700 | 11-12px | 1.2 | 0.05em (uppercase) |
-| Badge/chip | Suisse Intl | 500 | 12px | 1.3 | 0 |
-| Link text | Suisse Intl | 400 | inherit | inherit | 0 |
+### next/font Registration (Next.js)
+
+Register with `next/font/local` pointing at the bundled files, never
+`next/font/google` - the whole point is that nothing is fetched at runtime:
+
+```ts
+import localFont from 'next/font/local'
+
+export const inter = localFont({
+  variable: '--font-inter', display: 'swap',
+  src: [
+    { path: '../public/fonts/inter-400.woff2', weight: '400', style: 'normal' },
+    { path: '../public/fonts/inter-500.woff2', weight: '500', style: 'normal' },
+    { path: '../public/fonts/inter-600.woff2', weight: '600', style: 'normal' },
+    { path: '../public/fonts/inter-700.woff2', weight: '700', style: 'normal' },
+  ],
+})
+export const firaSans = localFont({
+  variable: '--font-fira-sans', display: 'swap',
+  src: [
+    { path: '../public/fonts/fira-sans-500.woff2', weight: '500', style: 'normal' },
+    { path: '../public/fonts/fira-sans-600.woff2', weight: '600', style: 'normal' },
+  ],
+})
+export const firaMono = localFont({
+  variable: '--font-fira-mono', display: 'swap',
+  src: [
+    { path: '../public/fonts/fira-mono-400.woff2', weight: '400', style: 'normal' },
+    { path: '../public/fonts/fira-mono-700.woff2', weight: '700', style: 'normal' },
+  ],
+})
+```
+
+Apply all three variables on `<html>` or `<body>`.
+
+### Not Covered: CJK
+
+Inter, Fira Sans and Fira Mono cover Latin and extended Latin but not Chinese,
+Japanese or Korean. The AppCentral design system has an open question on adopting
+Noto Sans CJK and has asked teams NOT to stand up their own CJK stack before it is
+settled. If you hit CJK content, flag it rather than adding a font.
+
+### Do Not Touch
+
+A typography change is a type-stack swap and nothing else. Leave alone: SVG icon
+internals and the Aptean logo, animation and transition classes, colour and surface
+classes, layout and spacing utilities, focus and accessibility attributes,
+non-typography CSS custom properties, and iframe `src` values.
 
 ---
 
@@ -562,7 +692,8 @@ Large: padding 10px 24px, font-size 14px, min-height 40px.
 - DO NOT use #FFFC3B yellow anywhere except the Aptean logo triangle
 - DO NOT use bright, saturated neon colors -- keep tones desaturated and professional
 - DO NOT use gratuitous animations -- transitions should be fast (0.15s) and subtle
-- DO NOT substitute Arial, Inter, or Roboto when Suisse Intl fonts are available
+- DO NOT substitute Arial or Roboto for the bundled stack - Fira Sans for
+  headings, Inter for body and labels, Fira Mono for code
 
 ---
 
@@ -600,15 +731,21 @@ DO NOT use bright/saturated colors like #42A2DA, #9E28D2, or #EA338E -- those ar
 
 | Element | Font | Weight | Size (pt) | Color |
 |---------|------|--------|-----------|-------|
-| Slide title (content) | Suisse Intl Condensed | Bold | 36-44 | #000000 or #050852 |
-| Large impact title | Suisse Intl Condensed | Bold | 60-80 | #FFFFFF (on dark/gradient) |
-| Section header | Suisse Intl Condensed | Bold | 28-36 | #FFFFFF (on gradient) |
-| Subheading | Suisse Intl | Bold | 20-24 | #3A3A3A or #050852 |
-| Body text | Suisse Intl | Regular | 16-20 | #3A3A3A |
-| Captions / footnotes | Suisse Intl | Regular | 10-12 | #3A3A3A at 60% opacity |
-| Footer text | Suisse Intl | Regular | 9-10 | #FFFFFF (on footer bar) |
+| Slide title (content) | Inter | Bold | 36-44 | #000000 or #050852 |
+| Large impact title | Inter | Bold | 60-80 | #FFFFFF (on dark/gradient) |
+| Section header | Inter | Bold | 28-36 | #FFFFFF (on gradient) |
+| Subheading | Inter | Bold | 20-24 | #3A3A3A or #050852 |
+| Body text | Inter | Regular | 16-20 | #3A3A3A |
+| Captions / footnotes | Inter | Regular | 10-12 | #3A3A3A at 60% opacity |
+| Footer text | Inter | Regular | 9-10 | #FFFFFF (on footer bar) |
+| Code / token values | Fira Mono | Regular | 12-16 | #3A3A3A |
 
-Fallbacks: Suisse Intl Condensed -> Barlow Condensed. Suisse Intl -> Arial.
+Decks are Inter only, with no condensed face - that is the Brand Evolution
+2026 standard and it is what `references/report-pptx-design-system.md`
+already generates. The Fira Sans heading face belongs to the AppCentral
+web stack; do not carry it into slides. Fallback: Inter -> Arial. If Inter
+is not installed on the machine that opens the deck, PowerPoint substitutes
+its own default; embedding fonts is out of scope.
 
 ### Slide Types
 
@@ -633,7 +770,7 @@ Ask the user the distribution intent before generating any document:
 
 Every slide (except section dividers) includes a clean footer (no dark background bar):
 - Thin separator line (`#E5E7EB`, 0.5pt) above the footer area
-- Left side: Aptean logo image (`aptean-logo-black.png` on white bg, `aptean-logo-yellow-white.png` on dark bg)
+- Left side: Aptean logo image (`aptean-logo-black.png` on white bg, `aptean-logo-white.png` on dark/gradient bg). Do not use the retired yellow-white wordmark.
 - Right side: Classification text + " | [page number]" in `#4B5563`
 - Never render "aptean" as text - always use the logo image file
 - Logo appears exactly once per slide - never in both header and footer
@@ -660,7 +797,7 @@ Every slide (except section dividers) includes a clean footer (no dark backgroun
 
 - DO NOT use #FFFC3B yellow anywhere except the Aptean logo triangle
 - DO NOT use bright neon gradients -- the Aptean gradient is muted and professional
-- DO NOT use fonts other than Suisse Intl / Suisse Intl Condensed (with fallbacks)
+- DO NOT use fonts other than Inter, or Fira Mono for code (with fallbacks)
 - DO NOT omit the footer bar from content and impact slides
 - DO NOT use gratuitous 3D effects on charts
 - DO NOT center body text -- left-align unless it is a single-line callout or title

@@ -12,6 +12,7 @@ domain: backend-logic
 shell_pid: "82073"
 agent: "claude"
 assignee: "arturzrk@gmail.com"
+evidence: "legacy-exempt"
 ---
 
 # WP02 - Cross-cutting infrastructure

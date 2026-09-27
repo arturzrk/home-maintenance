@@ -9,6 +9,7 @@ test_file: backend/tests/HomeMaintenance.UnitTests/Domain/OwnerProfileTests.cs
 domain: backend-logic
 reviewed_by: "Artur Żurek"
 review_status: "approved"
+evidence: "legacy-exempt"
 ---
 
 # WP01 - Owner profile + preferences API

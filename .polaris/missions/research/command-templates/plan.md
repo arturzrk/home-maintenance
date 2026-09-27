@@ -2,6 +2,10 @@
 description: Execute the implementation planning workflow using the plan template to generate design artifacts.
 ---
 
+## Advanced Command Gate
+
+Load `.claude/commands/references/advanced-gate.md` and apply it before proceeding: gate on `advanced_commands` in `.polaris/config.yaml`, bypassing for autopilot or NL routing invocations.
+
 ## User Input
 
 **Telemetry**: Run: `polaris telemetry record plan --feature <slug> --phase start --agent {{AGENT_NAME}}`

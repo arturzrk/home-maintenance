@@ -4,13 +4,11 @@ description: Merge a completed feature into the target branch and clean up workt
 
 ## Advanced Command Gate
 
-Load `.claude/commands/references/advanced-gate.md` and apply it before proceeding.
+Load `references/advanced-gate.md` and apply the `advanced_commands` gate (bypassed for autopilot or NL routing).
 
 ## Model Guidance
 
-This command does implementation work. Use **claude-sonnet-4-6** for this session.
-
-Execution against a defined plan - this is where call volume lives and where savings compound.
+Model: impl tier (see references/model-selection.md); the launcher enforces routing.
 
 ---
 
@@ -23,11 +21,11 @@ Execution against a defined plan - this is where call volume lives and where sav
 $ARGUMENTS
 ```
 
-You **MUST** consider the user input before proceeding (if not empty).
+Consider the user input before proceeding (if not empty).
 
 ## Location Pre-flight (CRITICAL)
 
-You MUST be in a feature worktree, NOT the main repository.
+You MUST run from a feature worktree, not the main repository:
 
 ```bash
 python -c "
@@ -40,67 +38,61 @@ print('Location verified:', result.branch_name)
 "
 ```
 
-If validation fails, navigate to a WP worktree first: `cd .worktrees/<feature>-WP01`
+On failure, `cd` into a WP worktree first, or run from the target branch with `polaris merge --feature <slug>`.
 
-**Exception**: From the target branch, use `polaris merge --feature <slug>`.
+## Prerequisites and Preflight
 
-## Prerequisites
+Protected-branch and preflight rules (all WPs `done`, feature accepted, clean worktrees, synced target) are enforced by the CLI. Run `polaris merge` (`--json` in automation); on a blocked verdict follow each `remediation`, fix, and retry once. Never pass human-override flags.
 
-1. All WPs in `done` lane (reviewed and approved)
-2. Feature passed `/polaris.accept`
-3. Clean working directory
+## Security Gate (Required Before Merge)
+
+Run this non-blocking secret scan on the diff before merging (reports issues, never blocks):
+
+```python
+import subprocess, re
+from pathlib import Path
+
+target = "main"
+diff = subprocess.run(["git", "diff", f"origin/{target}...HEAD"], capture_output=True, text=True).stdout
+names = subprocess.run(["git", "diff", f"origin/{target}...HEAD", "--name-only"], capture_output=True, text=True).stdout
+changed = [f for f in names.splitlines() if f]
+
+secret_patterns = [
+    (r'^\+.*(?i)(password|passwd|pwd)\s*[=:]\s*["\']?\S{6,}', "Hardcoded password"),
+    (r'^\+.*(?i)(api[_-]?key|apikey|secret[_-]?key)\s*[=:]\s*["\']?\S{8,}', "Hardcoded API key"),
+    (r'^\+.*(?i)(token|auth[_-]?token|bearer)\s*[=:]\s*["\']?[A-Za-z0-9\-_.]{16,}', "Hardcoded token"),
+    (r'^\+.*-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----', "Private key committed"),
+    (r'^\+.*(?i)aws[_-]?secret[_-]?access[_-]?key\s*[=:]\s*\S+', "AWS secret key"),
+]
+findings = [f"[{label}] in diff" for pat, label in secret_patterns if re.search(pat, diff, re.MULTILINE)]
+findings += [f"[Sensitive file] {f}" for f in changed if Path(f).suffix.lower() in (".pem", ".pfx", ".p12", ".key", ".jks", ".keystore")]
+findings += [f"[Env file] {f}" for f in changed if Path(f).name == ".env" or (Path(f).name.startswith(".env.") and not f.endswith(".example"))]
+
+if findings:
+    print("Security gate findings:")
+    for f in findings:
+        print(f"  {f}")
+    print("Self-heal: redact secrets from source, commit, re-run /polaris.merge, and rotate any credential seen in history.")
+if not Path(".polaris/memory/constitution.md").exists():
+    print("Warning: no constitution.md - run /polaris.constitution")
+print(f"Security gate complete. {len(changed)} files scanned. Proceeding with merge.")
+```
 
 ## What This Command Does
 
-1. Detect feature branch and worktree status
-2. Run pre-flight validation across all worktrees and target branch
-3. Determine merge order from WP dependencies
-4. Forecast conflicts in `--dry-run` mode
-5. Switch to target branch (from meta.json, fallback: `main`)
-6. Update target (`git pull --ff-only`)
-7. Merge using chosen strategy, auto-resolve status file conflicts
-8. Optionally push, remove worktrees, delete branches
+Detects the feature branch and worktrees, runs preflight validation, determines merge order from WP dependencies (forecast with `--dry-run`), switches to the target branch (from meta.json, fallback `main`), updates it with `git pull --ff-only`, merges with the chosen strategy (auto-resolving status-file conflicts), then optionally pushes and removes worktrees and branches.
 
 ## Options
 
-| Option | Description | Default |
-|--------|-------------|---------|
-| `--strategy` | `merge`, `squash`, or `rebase` | `merge` |
-| `--keep-branch` | Keep feature branch after merge | delete |
-| `--keep-worktree` | Keep worktree after merge | remove |
-| `--push` | Push to origin after merge | no push |
-| `--target` | Target branch | auto from meta.json |
-| `--dry-run` | Preview without executing | off |
-| `--feature` | Feature slug (when on target branch) | none |
-| `--resume` | Resume interrupted merge | off |
+Key options (`polaris merge --help` for the full set): `--strategy merge|squash|rebase` (default `merge`), `--push`, `--dry-run` (preview), `--target <branch>`, `--feature <slug>` (from the target branch), `--resume`, `--keep-branch`, `--keep-worktree`.
 
-## Strategies
-
-- **merge** (default): Merge commit preserving history. Best for feature boundaries in git log.
-- **squash**: Single commit per feature. Clean linear history.
-- **rebase**: Linear history, no merge commits. Requires manual rebase first.
-
-## Workspace-per-WP (0.11.0+)
-
-Each WP has its own worktree under `.worktrees/<feature>-WP##/`. Run `polaris merge` from ANY WP worktree - it auto-detects all WP branches and merges sequentially. Cleans up all WP worktrees and branches.
-
-## Error Recovery
-
-- **Already on target branch**: Navigate to worktree first: `cd .worktrees/<feature-slug>`
-- **Uncommitted changes**: Commit or stash before merging
-- **Fast-forward failed**: Pull target branch manually, then retry
-- **Merge conflicts**: Resolve files, `git add`, `git commit` (include `Co-Authored-By: Aptean Polaris <polaris@aptean.com>` trailer), then manually clean up worktree/branch
-
-## Safety
-
-Clean directory check, ff-only pull, graceful failure, configurable cleanup, dry-run preview.
+On a merge conflict: resolve files, `git add`, then `git commit` (the `commit-msg` hook adds the Aptean Polaris trailer). For any other blocked step the CLI prints a verdict - follow its `remediation` and retry once.
 
 ## Typical Flow
 
 ```bash
 /polaris.accept --mode local
 /polaris.merge --push
-# specify -> plan -> tasks -> implement -> review -> accept -> merge
 ```
 
 

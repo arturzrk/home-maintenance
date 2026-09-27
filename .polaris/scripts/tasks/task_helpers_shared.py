@@ -13,6 +13,7 @@ Functions are dependency-light (stdlib only) and fully typed.
 
 from __future__ import annotations
 
+import functools
 import json
 import re
 import subprocess
@@ -49,12 +50,131 @@ class TaskCliError(RuntimeError):
 # ---------------------------------------------------------------------------
 
 
+def _is_bare_repo_layout(main_git_dir: Path) -> bool:
+    """True when ``main_git_dir`` belongs to a bare-repo + sibling-worktree
+    layout (used by the filesystem-arithmetic fallback below).
+
+    DUPLICATE of ``specify_cli.core.paths._is_bare_repo_layout``. This
+    module is loaded as a standalone script (``specify_cli.scripts.tasks``)
+    where the ``specify_cli`` package is not importable, so the
+    worktree-resolution primitives must live here too (stdlib only).
+    """
+    return main_git_dir.name != ".git"
+
+
+def _resolve_main_repo_root_via_git(worktree_root: Path) -> Optional[Path]:
+    """Authoritative resolution via ``git rev-parse`` (stdlib subprocess).
+
+    DUPLICATE of ``specify_cli.core.paths._resolve_main_repo_root_via_git``.
+    """
+    try:
+        result = subprocess.run(
+            [
+                "git",
+                "rev-parse",
+                "--git-common-dir",
+                "--show-toplevel",
+                "--show-superproject-working-tree",
+            ],
+            cwd=str(worktree_root),
+            capture_output=True,
+            text=True, encoding="utf-8", errors="replace",
+            timeout=10,
+        )
+    except (subprocess.SubprocessError, OSError):
+        return None
+    if result.returncode != 0:
+        return None
+    lines = result.stdout.splitlines()
+    if len(lines) < 3:
+        return None
+    common_str, toplevel_str, superproject_str = lines[0], lines[1], lines[2]
+
+    common_git_dir = Path(common_str)
+    if not common_git_dir.is_absolute():
+        common_git_dir = (worktree_root / common_git_dir).resolve()
+
+    toplevel = Path(toplevel_str) if toplevel_str else worktree_root
+
+    if superproject_str:
+        return toplevel
+
+    if common_git_dir.name == ".git":
+        return common_git_dir.parent
+
+    return toplevel
+
+
+def _resolve_main_repo_root_filesystem(worktree_root: Path) -> Path:
+    """Filesystem-arithmetic fallback when ``git`` is unavailable.
+
+    DUPLICATE of ``specify_cli.core.paths._resolve_main_repo_root_filesystem``.
+    Hand-rolled (no ``core.git_ops`` import) because this module must run
+    standalone without the ``specify_cli`` package on sys.path.
+    """
+    git_path = worktree_root / ".git"
+
+    if git_path.is_dir():
+        return worktree_root
+
+    if git_path.is_file():
+        try:
+            gitdir_text = git_path.read_text().strip()
+        except (OSError, ValueError):
+            return worktree_root
+        if not gitdir_text.startswith("gitdir:"):
+            return worktree_root
+        gitdir = Path(gitdir_text.split(":", 1)[1].strip())
+        if not gitdir.is_absolute():
+            gitdir = (worktree_root / gitdir).resolve()
+        # Conservative: only navigate real ``git worktree``-managed
+        # pointers. Submodules (``modules/<name>``) etc. are NOT
+        # worktree pointers -- return the working tree itself.
+        if "worktrees" not in gitdir.parts:
+            return worktree_root
+        # Navigate: <git>/worktrees/<name> -> <git>
+        main_git_dir = gitdir.parent.parent
+        if _is_bare_repo_layout(main_git_dir):
+            return worktree_root
+        return main_git_dir.parent
+
+    return worktree_root
+
+
+@functools.lru_cache(maxsize=None)
+def _resolve_main_repo_root(worktree_root: Path) -> Path:
+    """Return the main repository root for any directory inside a worktree.
+
+    Delegates to the single canonical implementation
+    (``specify_cli.core.paths._resolve_main_repo_root``) whenever the
+    ``specify_cli`` package is importable (T030: one implementation, no
+    silent drift). Falls back to the stdlib-only hand-rolled resolver below
+    only for the standalone-script entrypoint (``specify_cli.scripts.tasks``),
+    where the package is not on ``sys.path``. Same contract either way: try
+    ``git rev-parse`` first, then filesystem arithmetic when git is
+    unavailable. Cached in-process to amortise the subprocess cost.
+
+    Behavioural parity between the delegated and fallback paths is asserted
+    by ``tests/specify_cli/test_task_helpers.py``.
+    """
+    try:
+        from specify_cli.core.paths import (
+            _resolve_main_repo_root as _canonical_resolve,
+        )
+    except Exception:
+        via_git = _resolve_main_repo_root_via_git(worktree_root)
+        if via_git is not None:
+            return via_git
+        return _resolve_main_repo_root_filesystem(worktree_root)
+    return _canonical_resolve(worktree_root)
+
+
 def find_repo_root(start: Optional[Path] = None) -> Path:
     """Find the MAIN repository root, even when inside a worktree.
 
-    This function correctly handles git worktrees by detecting when ``.git`` is
-    a file (worktree pointer) vs a directory (main repo), and following the
-    pointer back to the main repository.
+    Uses the stdlib-only :func:`_resolve_main_repo_root` for the standard /
+    bare-repo / relative-gitdir distinctions, then falls back to a
+    ``.polaris`` marker walk-up for non-git scenarios.
 
     Args:
         start: Starting directory for search (defaults to cwd)
@@ -71,19 +191,20 @@ def find_repo_root(start: Optional[Path] = None) -> Path:
         git_path = candidate / ".git"
 
         if git_path.is_file():
-            # This is a worktree! The .git file contains a pointer to the main
-            # repo.  Format: "gitdir: /path/to/main/.git/worktrees/name"
             try:
                 content = git_path.read_text().strip()
-                if content.startswith("gitdir:"):
-                    gitdir = Path(content.split(":", 1)[1].strip())
-                    # Navigate: .git/worktrees/name -> .git -> main repo root
-                    main_git_dir = gitdir.parent.parent
-                    main_repo = main_git_dir.parent
-                    if main_repo.exists():
-                        return main_repo
             except (OSError, ValueError):
-                pass
+                # OSError: unreadable. ValueError (incl. UnicodeDecodeError):
+                # binary / malformed .git file. Treat as not-a-marker.
+                content = ""
+            if content.startswith("gitdir:"):
+                resolved = _resolve_main_repo_root(candidate)
+                # Existence guard mirrors the original behaviour: only accept
+                # a resolved root that exists, otherwise keep walking parents.
+                if resolved.exists():
+                    return resolved
+            # Malformed/unreadable .git file: do NOT treat as a valid
+            # worktree marker; continue walking parents.
 
         elif git_path.is_dir():
             return candidate
@@ -122,7 +243,7 @@ def run_git(
             ["git", *args],
             cwd=str(cwd),
             check=check,
-            text=True,
+            text=True, encoding="utf-8", errors="replace",
             capture_output=True,
         )
     except FileNotFoundError as exc:
@@ -411,6 +532,50 @@ def set_scalar(frontmatter: str, key: str, value: str) -> str:
     if frontmatter and not frontmatter.endswith("\n"):
         frontmatter += "\n"
     return frontmatter + insertion
+
+
+def set_sequence(frontmatter: str, key: str, values: list) -> str:
+    """Replace or insert a YAML block sequence for ``key`` in raw frontmatter.
+
+    Removes any existing block for ``key`` (the key line plus the ``- item``
+    lines that follow it) and appends a fresh block sequence at the end of the
+    frontmatter. Other frontmatter fields are left untouched. Intended for
+    list-valued fields (for example ``files_touched``) that ``set_scalar``
+    cannot render as a proper YAML sequence.
+
+    Args:
+        frontmatter: Raw frontmatter string (without ``---`` delimiters).
+        key: YAML key to set.
+        values: Sequence of scalar values to write as block-sequence items.
+
+    Returns:
+        Updated frontmatter string.
+    """
+    key_re = re.compile(rf"^{re.escape(key)}:")
+    item_re = re.compile(r"^\s*-\s")
+
+    lines = frontmatter.split("\n")
+    cleaned: list = []
+    i = 0
+    n = len(lines)
+    while i < n:
+        if key_re.match(lines[i]):
+            # Drop the key line and any block-sequence items that follow it.
+            i += 1
+            while i < n and item_re.match(lines[i]):
+                i += 1
+            continue
+        cleaned.append(lines[i])
+        i += 1
+
+    # Trim trailing blank lines left by the removal so the new block appends
+    # cleanly without accumulating whitespace across repeated calls.
+    while cleaned and cleaned[-1].strip() == "":
+        cleaned.pop()
+
+    block = [f"{key}:"] + [f"- {value}" for value in values]
+    cleaned.extend(block)
+    return "\n".join(cleaned)
 
 
 def split_frontmatter(text: str) -> Tuple[str, str, str]:

@@ -33,6 +33,8 @@ If ambiguous: generate 1-3 targeted questions (scope/entities/boundaries only, n
 
 If unambiguous: proceed directly to Step 2.
 
+**Autopilot Context**: under `AUTOPILOT_RUN` with an approved `autopilot:` spec block, do NOT emit `WAITING_FOR_AMEND_CLARIFICATION`. Resolve ambiguity with a best-judgment interpretation, record it as an assumption in the amendment record, and proceed to Step 2. If the amendment cannot be interpreted safely, load `@references/escalation.md` and run `polaris agent escalate --feature <slug> --stage amend --reason "<ambiguity>"`, then STOP.
+
 ## Step 2 - Propose Affected Sections
 
 Read `FEATURE_DIR/spec.md` fully. Identify impacted spec sections (User Scenarios, Success Criteria, Functional Requirements, Key Entities, Out of Scope) and plan artifacts (data-model.md, contracts/, plan.md, quickstart.md, research.md).

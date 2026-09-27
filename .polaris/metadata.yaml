@@ -3,12 +3,124 @@
 # DO NOT EDIT MANUALLY
 
 polaris:
-  version: 2026.5.1
+  version: 2026.9.1
   initialized_at: '2026-05-10T09:24:34.865477'
-  last_upgraded_at: null
+  last_upgraded_at: '2026-09-27T16:11:58.228076'
 environment:
   python_version: 3.14.3
   platform: darwin
   platform_version: macOS-15.6.1-arm64-arm-64bit-Mach-O
 migrations:
-  applied: []
+  applied:
+  - id: 2026.5.2_memory_files_and_agents_md
+    applied_at: '2026-09-27T16:11:56.687802'
+    result: success
+    notes: Created .polaris/memory/dev-guidelines.md; Created .polaris/memory/routing.md;
+      Synced polaris.plan.* in 2 location(s)
+  - id: 2026.5.3_helm_hook_diagnostics
+    applied_at: '2026-09-27T16:11:56.691435'
+    result: success
+    notes: Updated .polaris/skills/helm-runtime.skill.md; Synced helm hook diagnostics
+      skill/templates in 5 location(s)
+  - id: 2026.6.1_agent_working_time
+    applied_at: '2026-09-27T16:11:56.692190'
+    result: success
+    notes: Deployed updated telemetry_hook.py with agent_working_ms support
+  - id: 2026.6.1_integrate_routing_fix
+    applied_at: '2026-09-27T16:11:56.692227'
+    result: skipped
+    notes: Not applicable
+  - id: 2026.6.1_new_command_templates
+    applied_at: '2026-09-27T16:11:56.700856'
+    result: success
+    notes: Deployed ship, agent-builder, skill-builder, and comply command templates
+      in 8 location(s)
+  - id: 2026.6.2_ship_regulatory_prompt
+    applied_at: '2026-09-27T16:11:56.702600'
+    result: skipped
+    notes: Not applicable
+  - id: 2026.6.3_agent_email_event_time
+    applied_at: '2026-09-27T16:11:56.702674'
+    result: skipped
+    notes: Not applicable
+  - id: 2026.6.3_deploy_components_script
+    applied_at: '2026-09-27T16:11:56.703961'
+    result: success
+    notes: Deployed .polaris/scripts/components.py; Updated .claude/commands/polaris.agent-builder.md
+  - id: 2026.6.3_evidence_legacy_exempt
+    applied_at: '2026-09-27T16:11:56.717860'
+    result: success
+    notes: 'Stamped evidence: legacy-exempt on 36 done/for_review work package(s)
+      completed before the gate'
+  - id: 2026.6.3_swarm_to_dispatch
+    applied_at: '2026-09-27T16:11:57.945672'
+    result: success
+    notes: Deployed .polaris/skills/dispatch.md; Prepended deprecation banner to .polaris/skills/swarm.md
+      (kept in place); AgentDB export skipped - no claude-flow memory available.
+  - id: 2026.6.3_template_ssot_regen
+    applied_at: '2026-09-27T16:11:58.101485'
+    result: success
+    notes: Regenerated commands and references in .claude/commands; Mirrored packaged
+      missions into .polaris/missions
+  - id: 2026.6.4_verification_ledger
+    applied_at: '2026-09-27T16:11:58.177130'
+    result: success
+    notes: Generated verification.json for 11 feature(s) predating the ledger
+  - id: 2026.6.4_fix_event_time_hook
+    applied_at: '2026-09-27T16:11:58.177236'
+    result: skipped
+    notes: Not applicable
+  - id: 2026.6.5_fix_token_field_names
+    applied_at: '2026-09-27T16:11:58.177549'
+    result: success
+    notes: 'Redeployed telemetry_hook.py: tokens_in/tokens_out/model now match service
+      /tokens/batch schema so data appears in the database'
+  - id: 2026.6.6_persist_agent_email
+    applied_at: '2026-09-27T16:11:58.177827'
+    result: skipped
+    notes: Not applicable
+  - id: 2026.7.2_code_graph_db
+    applied_at: '2026-09-27T16:11:58.178529'
+    result: success
+    notes: Removed stale .polaris/code-graph.json; Updated .gitignore entry .polaris/code-graph.json
+      -> .polaris/code-graph.db
+  - id: 2026.7.2_direct_prompt_capture
+    applied_at: '2026-09-27T16:11:58.179218'
+    result: success
+    notes: Deployed telemetry_hook.py to .polaris/scripts/; Deployed prompt_start_hook.py
+      to .polaris/scripts/
+  - id: 2026.7.2_lowercase_identity
+    applied_at: '2026-09-27T16:11:58.179266'
+    result: skipped
+    notes: Not applicable
+  - id: 2026.8.1_add_adopt_internalapp_change
+    applied_at: '2026-09-27T16:11:58.180155'
+    result: skipped
+    notes: Not applicable
+  - id: 2026.8.1_grok_flat_commands
+    applied_at: '2026-09-27T16:11:58.180932'
+    result: skipped
+    notes: Not applicable
+  - id: 2026.9.1_adopt_app_path
+    applied_at: '2026-09-27T16:11:58.181755'
+    result: skipped
+    notes: Not applicable
+  - id: 2026.9.1_agent_routing_defaults
+    applied_at: '2026-09-27T16:11:58.184983'
+    result: success
+    notes: 'Wrote agents.routing: plan_agent=claude, impl_agent=claude'
+  - id: 2026.9.1_appcentral_typography
+    applied_at: '2026-09-27T16:11:58.185749'
+    result: success
+    notes: Removed 8 retired Suisse font file(s) from .polaris/skills/aptean-brand/fonts;
+      AppCentral stack will be written by the packaged asset sync later in this upgrade
+  - id: 2026.9.1_grok_hook_compat
+    applied_at: '2026-09-27T16:11:58.186598'
+    result: success
+    notes: Deployed telemetry_hook.py to .polaris/scripts/; Deployed prompt_start_hook.py
+      to .polaris/scripts/; Deployed subagent_stop_hook.py to .polaris/scripts/
+  - id: 2026.9.1_ignore_runtime_polaris_state
+    applied_at: '2026-09-27T16:11:58.228042'
+    result: success
+    notes: 'Added to .gitignore: .polaris/test-evidence/, .polaris/workspaces/; No
+      tracked runtime state to untrack'

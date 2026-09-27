@@ -70,7 +70,7 @@ Create four endpoints following the organization standard:
 ```json
 {
   "status": "healthy",
-  "version": "2026.02.0",
+  "version": "26.07.01",
   "uptime_seconds": 3600,
   "correlation_id": "abc-123",
   "checks": {
@@ -93,13 +93,23 @@ Add middleware/interceptor that:
 
 ### 5. Add Version Injection
 
-Read version from:
-1. `VERSION` file (CalVer, preferred)
+Read version from, in order:
+1. `VERSION` file (AppCentral CalVer `YY.MM.RR[.HH]`, canonical - preferred)
 2. `package.json` version field
 3. `pyproject.toml` version field
 4. Environment variable `APP_VERSION`
 
-Include version in `/health` and `/detailed` responses.
+Include version in `/health` and `/detailed` responses, verbatim from whichever source
+resolved - no reformatting. The `VERSION` file is the source of truth: if
+`package.json` or `pyproject.toml` disagrees with it, that is a sync gap the project
+should fix in its own manifest, not something this endpoint silently overwrites or
+reconciles at runtime.
+
+The `VERSION` file's expected shape is the AppCentral CalVer standard `YY.MM.RR[.HH]`,
+authoritatively defined by `specify_cli.core.calver` (validated/scaffolded by
+`/polaris.standards`, `/polaris.newapp`, and `/polaris.restructure`) - this endpoint only
+displays the value, it does not parse, validate, or reformat it, since the deployed
+service may be in any language.
 
 ### 6. Generate Tests
 

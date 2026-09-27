@@ -1,0 +1,88 @@
+{
+  "content_hash": "86d7bd1aff0f99b9ffefe83ad8d9ed59255b4c0c473294f2a160952561beb0fe",
+  "criteria": [
+    {
+      "criterion_hash": "1c45921ec14b757caca6e1f80d215916f06e2a8579e092677042dea5c55905e9",
+      "criterion_text": "`npx playwright test e2e/wp04-properties.spec.ts` \u2192 6/6 pass",
+      "evidence_path": null,
+      "id": "WP01-C1",
+      "passes": false,
+      "verification_steps": [
+        "Run: polaris runtests --wp WP01",
+        "Confirm the criterion holds: `npx playwright test e2e/wp04-properties.spec.ts` \u2192 6/6 pass"
+      ],
+      "waived": {
+        "by": "polaris-upgrade",
+        "reason": "legacy-exempt: feature finalized before the verification ledger existed"
+      },
+      "wp_id": "WP01"
+    },
+    {
+      "criterion_hash": "2e9a6f3e57b420cc061eaf33ec0aeb13d7681dd4d0033bdb84279d6294c90829",
+      "criterion_text": "Each test is independent (no shared state, no ordering dependency)",
+      "evidence_path": null,
+      "id": "WP01-C2",
+      "passes": false,
+      "verification_steps": [
+        "Run: polaris runtests --wp WP01",
+        "Confirm the criterion holds: Each test is independent (no shared state, no ordering dependency)"
+      ],
+      "waived": {
+        "by": "polaris-upgrade",
+        "reason": "legacy-exempt: feature finalized before the verification ledger existed"
+      },
+      "wp_id": "WP01"
+    },
+    {
+      "criterion_hash": "5c87f9d7f37b568b1d65d02bdfe52bc38c0999f23bdc0fb5a73a9e5c11b24262",
+      "criterion_text": "No new helpers added (uses only existing `setup.ts` exports)",
+      "evidence_path": null,
+      "id": "WP01-C3",
+      "passes": false,
+      "verification_steps": [
+        "Run: polaris runtests --wp WP01",
+        "Confirm the criterion holds: No new helpers added (uses only existing `setup.ts` exports)"
+      ],
+      "waived": {
+        "by": "polaris-upgrade",
+        "reason": "legacy-exempt: feature finalized before the verification ledger existed"
+      },
+      "wp_id": "WP01"
+    },
+    {
+      "criterion_hash": "4ff6230ac91506973055b8079e683aa35cca7b5ddfee6533ca5c97da465da20d",
+      "criterion_text": "No production code changes",
+      "evidence_path": null,
+      "id": "WP01-C4",
+      "passes": false,
+      "verification_steps": [
+        "Run: polaris runtests --wp WP01",
+        "Confirm the criterion holds: No production code changes"
+      ],
+      "waived": {
+        "by": "polaris-upgrade",
+        "reason": "legacy-exempt: feature finalized before the verification ledger existed"
+      },
+      "wp_id": "WP01"
+    },
+    {
+      "criterion_hash": "4f5e50873501d0f79df8e822fc1d9da9a7ac55d1b7ed7d218d28d8673662efbd",
+      "criterion_text": "PR reviewed and merged to main",
+      "evidence_path": null,
+      "id": "WP01-C5",
+      "passes": false,
+      "verification_steps": [
+        "Run: polaris runtests --wp WP01",
+        "Confirm the criterion holds: PR reviewed and merged to main"
+      ],
+      "waived": {
+        "by": "polaris-upgrade",
+        "reason": "legacy-exempt: feature finalized before the verification ledger existed"
+      },
+      "wp_id": "WP01"
+    }
+  ],
+  "feature": "003-e2e-properties-page",
+  "generated_at": "2026-09-27T14:11:58Z",
+  "schema_version": 1
+}

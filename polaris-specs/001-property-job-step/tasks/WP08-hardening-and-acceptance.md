@@ -12,6 +12,7 @@ domain: testing-specialist
 shell_pid: "88497"
 agent: "claude"
 assignee: "arturzrk@gmail.com"
+evidence: "legacy-exempt"
 ---
 
 # WP08 - Hardening + acceptance

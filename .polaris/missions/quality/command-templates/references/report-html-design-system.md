@@ -1,5 +1,14 @@
 # Report HTML Design System
 
+Two selectable themes, per the Aptean & AppCentral Brand Evolution 2026. Pick ONE before composing the CSS -- never mix tokens from both in the same report.
+
+| Theme | Tokens | When |
+|---|---|---|
+| **AppCentral** (default for Polaris reports) | navy `#1c3251` / teal `#33728c` / coral `#da7759` + gradient mesh header | Default for every report Polaris generates -- Polaris is itself an Aptean Intelligence product, so its reports qualify under the AppCentral carve-out. |
+| **Aptean Corporate** | monochrome: white `#ffffff` / light-gray `#eaeaea` / dark-gray `#262626`, text `#000000`, no gradient | Use instead when the request calls for a neutral/general look, when explicitly asked for the "corporate", "monochrome", or "black and gray" look, or when the report will sit alongside other Corporate-branded material. If unsure which applies, ask rather than guessing. |
+
+Both themes share the same structural CSS (layout, radii, shadow, component classes) below -- only the theme's color-token block in `:root` changes. Never reintroduce pre-2026 brand colors (`#050852`, `#54B3BE`, `#2459A9`, yellow) under either theme.
+
 ## HTML SKELETON
 
 Every report MUST follow this structure. Sections marked `[REQUIRED]` are mandatory. Sections marked `[CONDITIONAL]` are included when relevant to the report type.
@@ -27,22 +36,38 @@ Every report MUST follow this structure. Sections marked `[REQUIRED]` are mandat
 
 CSS variables and typography are defined in the Full CSS Stylesheet section below. Use ONLY those variables -- no ad-hoc hex colors.
 
+**Brand non-negotiables** (Aptean & AppCentral Brand Evolution 2026, applies to every report):
+- No yellow anywhere. No decorative arrows. No exclamation points in copy.
+- Typeface is Inter only -- Inter Bold for headlines, Inter Regular for body.
+- Buttons and pill tags: fully rounded (`--pill-radius`). Callout boxes: 17px corner radius (`--box-radius`).
+- The gradient mesh background and the navy-to-teal gradient box are an AppCentral-only visual identifier, reserved for the report header and a small number of emphasis callouts under that theme -- never use a gradient under the Corporate theme, and don't tint every box with it even under AppCentral.
+- WCAG 2.2 AA: 4.5:1 contrast for normal text, 3:1 for large text/UI, body text >= 16px on screen. Never put coral text directly on a light background at small sizes -- use it as a dot, border, or solid-fill background with white text instead.
+
 ---
 
 ## COMPONENT CATALOG
 
 Each component below is a reusable building block. Copy the HTML patterns exactly, substituting only the `{{PLACEHOLDER}}` values with actual content.
 
+### 0. Confidential Banner [CONDITIONAL -- when a distribution classification applies]
+
+Placed as the very first element in `<body>`, before the report header. Ask the user for distribution intent (Internal Only / Do Not Distribute / Customer Facing) before generating; omit entirely for Customer Facing.
+
+```html
+<div class="confidential-banner">{{CLASSIFICATION_TEXT}}</div>
+```
+
+`{{CLASSIFICATION_TEXT}}`: `COMPANY CONFIDENTIAL - INTERNAL DISTRIBUTION ONLY` or `COMPANY CONFIDENTIAL - DO NOT DISTRIBUTE`. Mirror the same text in the footer.
+
 ### 1. Report Header [REQUIRED]
 
-Navy gradient banner with project logo, report title, tag line, metadata, and optional grade circle.
+Gradient mesh banner (navy -> teal -> coral) with project logo, report title, tag line, metadata, and optional grade circle.
 
 ```html
 <header class="report-header">
   <div class="container">
     <div class="brand">
-      <!-- Project logo SVG goes here (40x38 recommended). -->
-      <!-- If no project logo, omit the SVG entirely. -->
+      <!-- Aptean wordmark logo (white), NOT the discontinued "A" icon mark. Omit if no logo asset is available. -->
       <div>
         <h1>{{REPORT_TITLE}}</h1>
         <span class="tag">{{TAG_LINE}}</span>
@@ -63,7 +88,7 @@ Navy gradient banner with project logo, report title, tag line, metadata, and op
 
 Tag lines: assessment=`ISO 25010 &middot; OWASP TOP 10 &middot; CWE/SANS TOP 25`, security=`OWASP TOP 10 &middot; CWE/SANS TOP 25 &middot; NIST CSF`, NFR=`ISO 25010 &middot; PERFORMANCE &middot; RELIABILITY`, bug=`ROOT CAUSE ANALYSIS &middot; PATTERN DETECTION`, migration=`MODERNIZATION &middot; RISK ASSESSMENT`, deps=`CVE ANALYSIS &middot; LICENSE COMPLIANCE`, general=`POLARIS ANALYSIS`.
 
-Grade colors: A=`--good`, B=`--aptean-teal`, C=`--aptean-orange`, D=`--high`, F=`--critical`.
+Grade colors: A=`--good`, B=`--aptean-teal`, C=`--aptean-coral`, D=`--high`, F=`--critical`.
 
 ### 2. Score Cards [REQUIRED for quantitative reports]
 
@@ -77,7 +102,7 @@ Grade colors: A=`--good`, B=`--aptean-teal`, C=`--aptean-orange`, D=`--high`, F=
 </div>
 ```
 
-Value colors: neutral=`--aptean-navy`, good=`--good`, warning=`--aptean-orange`, bad=`--high`/`--critical`.
+Value colors: neutral=`--aptean-navy`, good=`--good`, warning=`--aptean-coral`, bad=`--high`/`--critical`.
 
 ### 3. Score Bars [CONDITIONAL -- scored/graded reports]
 
@@ -93,7 +118,7 @@ Value colors: neutral=`--aptean-navy`, good=`--good`, warning=`--aptean-orange`,
 </div>
 ```
 
-Fill classes: >=6 `s-good` (teal), 4-5 `s-ok` (orange), <=3 `s-low` (red).
+Fill classes: >=6 `s-good` (teal), 4-5 `s-ok` (coral), <=3 `s-low` (red).
 
 ### 4. Severity Badges [REQUIRED for all findings]
 
@@ -110,6 +135,8 @@ Fill classes: >=6 `s-good` (teal), 4-5 `s-ok` (orange), <=3 `s-low` (red).
 <span class="badge badge-fail">FAIL</span>
 ```
 
+Severity colors (`critical`/`high`/`medium`/`low`/`good`) are status semantics, not brand colors -- they stay red/orange/amber/indigo/green regardless of brand palette so findings stay scannable.
+
 ### 5. Dimension Score Tags [CONDITIONAL -- inline with h2]
 
 `<h2>1. Security <span class="dim-score warn">4/10</span></h2>` -- Classes: >=8 `great`, 6-7 `good`, 4-5 `ok`, 2-3 `warn`, 0-1 `bad`.
@@ -123,7 +150,7 @@ Fill classes: >=6 `s-good` (teal), 4-5 `s-ok` (orange), <=3 `s-low` (red).
 <!-- Danger (red accent) -- for critical findings -->
 <div class="summary-box danger"><p>{{CRITICAL_NARRATIVE}}</p></div>
 
-<!-- Warning (orange accent) -->
+<!-- Warning (coral accent) -->
 <div class="summary-box warn"><p>{{WARNING_NARRATIVE}}</p></div>
 ```
 
@@ -164,12 +191,12 @@ Critical variant: add `style="background:var(--critical-bg);border-color:#ffcdd2
 </table>
 ```
 
-Tables: always `<thead>`, `class="num"` on numeric cells, `<code>` for paths, explicit `width` on narrow columns.
+Tables: always `<thead>`, `class="num"` on numeric cells, `<code>` for paths, explicit `width` on narrow columns. For business-facing reports (leadership audiences), prefer the card-grid pattern (see `.card-grid` / `.resolved-grid` below) over dense tables -- reserve tables for technical, evidence-heavy findings.
 
 ### 9. Callout Boxes [CONDITIONAL]
 
 ```html
-<!-- Warning (orange) -->
+<!-- Warning (amber) -->
 <div class="callout"><strong>{{TITLE}}:</strong> {{MESSAGE}}</div>
 
 <!-- Danger (red) -->
@@ -223,7 +250,7 @@ Tables: always `<thead>`, `class="num"` on numeric cells, `<code>` for paths, ex
 <div class="time-compare">
   <div class="time-card human">
     <div class="time-label">Human Team (Realistic)</div>
-    <div class="time-value" style="color:var(--aptean-orange)">{{HUMAN_TIME}}</div>
+    <div class="time-value" style="color:var(--aptean-coral)">{{HUMAN_TIME}}</div>
     <div class="time-sub">{{HUMAN_DETAIL}}</div>
   </div>
   <div class="time-card ai">
@@ -234,7 +261,23 @@ Tables: always `<thead>`, `class="num"` on numeric cells, `<code>` for paths, ex
 </div>
 ```
 
-### 14. Disclaimer [REQUIRED -- placed before footer]
+### 14. Card Grid [CONDITIONAL -- business-highlight / leadership reports]
+
+Prefer this over a table when the audience is leadership and the point is a handful of business highlights rather than an exhaustive technical list.
+
+```html
+<div class="card-grid">
+  <div class="card">
+    <h4>{{CARD_TITLE}}</h4>
+    <p>{{CARD_BODY}}</p>
+    <div class="impact"><strong>Business impact:</strong> {{IMPACT_STATEMENT}}</div>
+  </div>
+</div>
+```
+
+Rotate the top accent per card: default is `--aptean-navy`; add class `c-teal` or `c-coral` on alternate cards for visual rhythm. For a compact resolved-issue / status list, use `.resolved-grid` with a `.resolved-item` (colored `.dot` + heading + one sentence) instead of a table -- keeps sensitive or high-volume fix lists scannable without turning them into a change log.
+
+### 15. Disclaimer [REQUIRED -- placed before footer]
 
 ```html
 <div class="callout" style="margin-top:1.5rem;">
@@ -244,7 +287,7 @@ Tables: always `<thead>`, `class="num"` on numeric cells, `<code>` for paths, ex
 </div>
 ```
 
-### 15. Report Footer [REQUIRED]
+### 16. Report Footer [REQUIRED]
 
 ```html
 <footer class="report-footer">
@@ -263,38 +306,77 @@ Every report MUST include this exact CSS block inside `<style>` in the `<head>`.
 
 ```html
 <style>
-  /* Suisse Intl is embedded via @font-face when using report_theme.py.
-     For standalone HTML, fall back to system fonts. Do NOT use Google Fonts. */
+  /* Aptean & AppCentral Brand Evolution 2026. Typeface is Inter only.
+     For standalone HTML, fall back to system fonts. Do NOT pull Inter from Google Fonts. */
 
+  /* Base tokens -- identical under both themes. Always include this block. */
   :root {
-    --aptean-navy: #050852;
-    --aptean-navy-light: #0a2e6b;
-    --aptean-teal: #54B3BE;
-    --aptean-teal-dark: #3D8A93;
-    --aptean-teal-light: #8FD0D1;
-    --aptean-teal-bg: rgba(84,179,190,0.06);
-    --aptean-blue: #2459A9;
-    --aptean-orange: #E6612E;
-    --bg: #f8f9fb;
+    --bg: #eaeaea;
     --surface: #ffffff;
-    --surface-alt: #f1f4f8;
-    --border: #e2e7ef;
-    --border-light: #edf0f5;
-    --text: #262626;
-    --text-secondary: #5a6776;
-    --text-muted: #8694a1;
+    --surface-alt: #f1f3f5;
+    --border: #e2e5e9;
+    --border-light: #edeff1;
+    --text: #000000;
+    --text-secondary: #4a4a4a;
+    --text-muted: #767676;
     --critical: #d32f2f; --critical-bg: #fef2f2;
     --high: #e65100; --high-bg: #fff7ed;
     --medium: #f57f17; --medium-bg: #fffde7;
     --low: #5c6bc0; --low-bg: #eef0fb;
     --good: #2e7d32; --good-bg: #f0fdf4;
+    --box-radius: 17px;
+    --pill-radius: 999px;
+    --brand-shadow: 0 0 5px rgba(0,0,0,0.15);
   }
 
+  /* Theme tokens -- include ONLY ONE of the two blocks below, merged into the
+     same :root (a later declaration of the same variable wins, so do not
+     paste both into the final file -- pick the one that applies). */
+
+  /* AppCentral / Aptean Intelligence theme (default for Polaris reports) */
+  :root {
+    --aptean-navy: #1c3251;
+    --aptean-navy-light: #2c5872;
+    --aptean-teal: #33728c;
+    --aptean-teal-dark: #285a70;
+    --aptean-teal-light: #8fbdc9;
+    --aptean-teal-bg: rgba(51,114,140,0.07);
+    --aptean-coral: #da7759;
+    --aptean-coral-bg: rgba(218,119,89,0.08);
+    --aptean-gradient: linear-gradient(135deg, #1c3251 0%, #34728c 100%);
+    --aptean-mesh:
+      radial-gradient(at 15% 20%, rgba(218,119,89,0.35) 0px, transparent 55%),
+      radial-gradient(at 85% 0%, rgba(51,114,140,0.55) 0px, transparent 50%),
+      linear-gradient(135deg, #1c3251 0%, #1c3251 70%, #2c5872 100%);
+    --aptean-tag-bg: rgba(51,114,140,0.22);
+    --aptean-note-border: rgba(28,50,81,0.12);
+    --aptean-info-border: rgba(28,50,81,0.2);
+  }
+
+  /* Aptean Corporate theme (alternate -- monochrome, no gradient, no accent hue) */
+  /*
+  :root {
+    --aptean-navy: #262626;
+    --aptean-navy-light: #3a3a3a;
+    --aptean-teal: #262626;
+    --aptean-teal-dark: #000000;
+    --aptean-teal-light: #eaeaea;
+    --aptean-teal-bg: rgba(0,0,0,0.04);
+    --aptean-coral: #262626;
+    --aptean-coral-bg: rgba(0,0,0,0.05);
+    --aptean-gradient: #262626;
+    --aptean-mesh: #262626;
+    --aptean-tag-bg: rgba(255,255,255,0.14);
+    --aptean-note-border: rgba(0,0,0,0.14);
+    --aptean-info-border: rgba(0,0,0,0.2);
+  }
+  */
+
   * { margin:0; padding:0; box-sizing:border-box; }
-  h1, h2, h3 { font-family:'Suisse Intl Condensed','Barlow Condensed','Arial Narrow',sans-serif; }
+  h1, h2, h3, h4 { font-weight:700; letter-spacing:-0.01em; }
 
   body {
-    font-family:'Suisse Intl',-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;
+    font-family:'Inter',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;
     background:var(--bg);
     color:var(--text);
     line-height:1.65;
@@ -305,9 +387,15 @@ Every report MUST include this exact CSS block inside `<style>` in the `<head>`.
   .container { max-width:1140px; margin:0 auto; padding:0 2rem; }
   .content { padding:2rem 0 3rem; }
 
+  /* -- Confidential Banner -- */
+  .confidential-banner {
+    background:var(--aptean-navy); color:#ffffff; text-align:center;
+    padding:0.55rem 1rem; font-size:0.7rem; font-weight:700; letter-spacing:0.08em;
+  }
+
   /* -- Report Header -- */
   .report-header {
-    background:linear-gradient(135deg,var(--aptean-navy) 0%,var(--aptean-navy-light) 100%);
+    background:var(--aptean-mesh);
     color:white; padding:2.5rem 0;
   }
   .report-header .container {
@@ -318,8 +406,8 @@ Every report MUST include this exact CSS block inside `<style>` in the `<head>`.
   .report-header h1 { font-size:1.5rem; font-weight:700; letter-spacing:-0.02em; }
   .report-header .tag {
     display:inline-block;
-    background:rgba(38,198,218,0.2); border:1px solid rgba(38,198,218,0.4);
-    color:var(--aptean-teal-light); padding:2px 12px; border-radius:20px;
+    background:var(--aptean-tag-bg); border:1px solid rgba(255,255,255,0.35);
+    color:var(--aptean-teal-light); padding:2px 12px; border-radius:var(--pill-radius);
     font-size:0.75rem; font-weight:600; margin-top:0.3rem; letter-spacing:0.04em;
   }
   .report-header .meta {
@@ -328,7 +416,7 @@ Every report MUST include this exact CSS block inside `<style>` in the `<head>`.
   .report-header .grade {
     display:flex; align-items:center; justify-content:center;
     width:64px; height:64px; border-radius:50%;
-    font-size:1.75rem; font-weight:800; background:var(--aptean-orange);
+    font-size:1.75rem; font-weight:800; background:var(--aptean-navy);
     color:white; flex-shrink:0;
   }
 
@@ -345,8 +433,8 @@ Every report MUST include this exact CSS block inside `<style>` in the `<head>`.
 
   /* -- Framework Note -- */
   .framework-note {
-    background:var(--aptean-teal-bg); border:1px solid rgba(30,105,120,0.15);
-    border-radius:12px; padding:1.5rem; margin:1.25rem 0;
+    background:var(--aptean-teal-bg); border:1px solid var(--aptean-note-border);
+    border-radius:var(--box-radius); padding:1.5rem; margin:1.25rem 0;
   }
   .framework-note h3 { margin-top:0; font-size:0.95rem; }
   .framework-note p { color:var(--text-secondary); font-size:0.88rem; margin-top:0.35rem; }
@@ -360,10 +448,9 @@ Every report MUST include this exact CSS block inside `<style>` in the `<head>`.
   }
   .score-card {
     background:var(--surface); border:1px solid var(--border);
-    border-radius:10px; padding:1rem 1.25rem; text-align:center;
-    transition:box-shadow 0.15s;
+    border-radius:var(--box-radius); padding:1rem 1.25rem; text-align:center;
+    box-shadow:var(--brand-shadow);
   }
-  .score-card:hover { box-shadow:0 2px 12px rgba(0,31,84,0.07); }
   .score-card .label {
     font-size:0.7rem; font-weight:600; text-transform:uppercase;
     letter-spacing:0.06em; color:var(--text-muted); margin-bottom:0.25rem;
@@ -384,13 +471,13 @@ Every report MUST include this exact CSS block inside `<style>` in the `<head>`.
     transition:width 0.4s;
   }
   .score-bar-fill.s-good { background:var(--aptean-teal); }
-  .score-bar-fill.s-ok   { background:var(--aptean-orange); }
+  .score-bar-fill.s-ok   { background:var(--aptean-coral); }
   .score-bar-fill.s-low  { background:var(--critical); }
   .score-bar-weight { min-width:45px; font-size:0.72rem; color:var(--text-muted); text-align:right; }
 
   /* -- Badges -- */
   .badge {
-    display:inline-block; padding:2px 10px; border-radius:10px;
+    display:inline-block; padding:2px 10px; border-radius:var(--pill-radius);
     font-size:0.7rem; font-weight:700; letter-spacing:0.04em; text-transform:uppercase;
   }
   .badge-critical { background:var(--critical-bg); color:var(--critical); border:1px solid #ffcdd2; }
@@ -405,9 +492,9 @@ Every report MUST include this exact CSS block inside `<style>` in the `<head>`.
   .badge-fail     { background:#b71c1c;            color:white;           border:1px solid #b71c1c; }
 
   /* -- Dimension Scores (inline with h2) -- */
-  .dim-score { font-size:0.85rem; font-weight:700; padding:3px 12px; border-radius:8px; }
+  .dim-score { font-size:0.85rem; font-weight:700; padding:3px 12px; border-radius:var(--pill-radius); }
   .dim-score.great { background:var(--good-bg);     color:var(--good); }
-  .dim-score.good  { background:#e0f7fa;            color:var(--aptean-teal); }
+  .dim-score.good  { background:var(--aptean-teal-bg); color:var(--aptean-teal); }
   .dim-score.ok    { background:var(--medium-bg);   color:var(--medium); }
   .dim-score.warn  { background:var(--high-bg);     color:var(--high); }
   .dim-score.bad   { background:var(--critical-bg); color:var(--critical); }
@@ -415,17 +502,17 @@ Every report MUST include this exact CSS block inside `<style>` in the `<head>`.
   /* -- Summary Box -- */
   .summary-box {
     background:var(--surface); border:1px solid var(--border);
-    border-left:4px solid var(--aptean-teal);
-    border-radius:0 10px 10px 0; padding:1.25rem 1.5rem; margin:0.75rem 0;
+    border-left:4px solid var(--aptean-teal); box-shadow:var(--brand-shadow);
+    border-radius:0 var(--box-radius) var(--box-radius) 0; padding:1.25rem 1.5rem; margin:0.75rem 0;
   }
   .summary-box p { color:var(--text-secondary); font-size:0.9rem; }
   .summary-box.danger { border-left-color:var(--critical); }
-  .summary-box.warn   { border-left-color:var(--high); }
+  .summary-box.warn   { border-left-color:var(--aptean-coral); }
 
   /* -- Evidence Block -- */
   .evidence {
-    background:var(--aptean-teal-bg); border:1px solid rgba(30,105,120,0.15);
-    border-radius:8px; padding:1rem 1.25rem; margin:0.75rem 0;
+    background:var(--aptean-teal-bg); border:1px solid var(--aptean-note-border);
+    border-radius:var(--box-radius); padding:1rem 1.25rem; margin:0.75rem 0;
     font-size:0.85rem; color:var(--text-secondary);
   }
   .evidence strong { color:var(--aptean-teal); }
@@ -445,13 +532,13 @@ Every report MUST include this exact CSS block inside `<style>` in the `<head>`.
 
   /* -- Callout -- */
   .callout {
-    background:#fff3e0; border:1px solid #ffe0b2; border-radius:10px;
-    padding:1rem 1.25rem; margin:1rem 0; font-size:0.88rem; color:#bf360c;
+    background:#fff3e0; border:1px solid #ffe0b2; border-radius:var(--box-radius);
+    padding:1rem 1.25rem; margin:1rem 0; font-size:0.88rem; color:#8a4a1f;
   }
-  .callout strong { color:#e65100; }
+  .callout strong { color:#a8571f; }
   .callout.danger { background:var(--critical-bg); border-color:#ffcdd2; color:#b71c1c; }
   .callout.danger strong { color:var(--critical); }
-  .callout.info { background:var(--aptean-teal-bg); border-color:rgba(30,105,120,0.25); color:var(--aptean-teal); }
+  .callout.info { background:var(--aptean-teal-bg); border-color:var(--aptean-info-border); color:var(--aptean-teal-dark); }
   .callout.info strong { color:var(--aptean-navy); }
 
   /* -- Severity Strip -- */
@@ -470,7 +557,7 @@ Every report MUST include this exact CSS block inside `<style>` in the `<head>`.
   tr:hover td { background:var(--surface-alt); }
   td code {
     background:var(--surface-alt); padding:1px 6px; border-radius:4px;
-    font-size:0.8rem; color:var(--aptean-teal); border:1px solid var(--border);
+    font-size:0.8rem; color:var(--aptean-teal-dark); border:1px solid var(--border);
     word-break:break-all;
   }
   .text-right { text-align:right; }
@@ -483,9 +570,9 @@ Every report MUST include this exact CSS block inside `<style>` in the `<head>`.
   .time-compare { display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; margin:1rem 0; }
   .time-card {
     background:var(--surface); border:1px solid var(--border);
-    border-radius:12px; padding:1.5rem; text-align:center;
+    border-radius:var(--box-radius); padding:1.5rem; text-align:center; box-shadow:var(--brand-shadow);
   }
-  .time-card.human { border-top:4px solid var(--aptean-orange); }
+  .time-card.human { border-top:4px solid var(--aptean-coral); }
   .time-card.ai    { border-top:4px solid var(--aptean-teal); }
   .time-card .time-label {
     font-size:0.75rem; font-weight:600; text-transform:uppercase;
@@ -495,6 +582,31 @@ Every report MUST include this exact CSS block inside `<style>` in the `<head>`.
   .time-card .time-sub { font-size:0.78rem; color:var(--text-secondary); margin-top:0.25rem; }
   .time-detail { font-size:0.82rem; color:var(--text-secondary); text-align:left; margin-top:1rem; }
   .time-detail li { margin:0.3rem 0; }
+
+  /* -- Card Grid (business highlights) -- */
+  .card-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1.1rem; margin-top:0.5rem; }
+  .card {
+    background:var(--surface); border-radius:var(--box-radius); box-shadow:var(--brand-shadow);
+    padding:1.4rem 1.5rem; border-top:4px solid var(--aptean-navy);
+  }
+  .card.c-teal  { border-top-color:var(--aptean-teal); }
+  .card.c-coral { border-top-color:var(--aptean-coral); }
+  .card h4 { color:var(--aptean-navy); margin-bottom:0.5rem; }
+  .card p { font-size:0.88rem; color:var(--text-muted); line-height:1.55; }
+  .card .impact { margin-top:0.75rem; font-size:0.85rem; color:var(--text); }
+  .card .impact strong { color:var(--aptean-teal-dark); }
+
+  /* -- Resolved / Status Grid -- */
+  .resolved-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:0.9rem; margin-top:0.5rem; }
+  .resolved-item {
+    background:var(--surface); border-radius:var(--box-radius); box-shadow:var(--brand-shadow);
+    padding:1.1rem 1.3rem; display:flex; gap:0.75rem; align-items:flex-start;
+  }
+  .dot { width:10px; height:10px; border-radius:50%; margin-top:6px; flex-shrink:0; }
+  .dot.teal  { background:var(--aptean-teal); }
+  .dot.coral { background:var(--aptean-coral); }
+  .resolved-item h4 { font-size:0.92rem; margin-bottom:0.25rem; }
+  .resolved-item p { font-size:0.85rem; color:var(--text-muted); line-height:1.5; }
 
   /* -- Hotspot Bars -- */
   .hotspot-bar { display:flex; align-items:center; gap:0.5rem; margin:0.35rem 0; font-size:0.82rem; }
@@ -506,6 +618,8 @@ Every report MUST include this exact CSS block inside `<style>` in the `<head>`.
   }
   .report-footer strong { color:rgba(255,255,255,0.9); }
 
+  :focus-visible { outline:2px solid var(--aptean-navy); outline-offset:2px; }
+
   /* -- Print & Responsive -- */
   @media print {
     body { background:white; }
@@ -515,6 +629,8 @@ Every report MUST include this exact CSS block inside `<style>` in the `<head>`.
     .container { padding:0 1rem; }
     .score-grid { grid-template-columns:repeat(2,1fr); }
     .time-compare { grid-template-columns:1fr; }
+    .card-grid { grid-template-columns:1fr; }
+    .resolved-grid { grid-template-columns:1fr; }
   }
 </style>
 ```
@@ -525,11 +641,15 @@ Every report MUST include this exact CSS block inside `<style>` in the `<head>`.
 
 **Writing**: Evidence-based (cite files+lines in `<code>`), actionable (recommendation+effort), quantified (exact counts, no "many"/"several"), bold key terms (`<strong>`), narrative `summary-box` before each table.
 
-**Severity**: CRITICAL=security/data-loss/production-breaking, HIGH=significant debt/missing critical tests, MEDIUM=quality/moderate debt, LOW=style/cosmetic.
+**Brand copy rules**: no exclamation points, no em dashes, no all-caps body copy (small uppercase labels/eyebrows are fine, used sparingly), AP-style title case for headings (capitalize words of four-plus letters and the first/last word).
+
+**Severity**: CRITICAL=security/data-loss/production-breaking, HIGH=significant debt/missing critical tests, MEDIUM=quality/moderate debt, LOW=style/cosmetic. These stay semantic colors regardless of brand palette.
 
 **Grades**: A(8-10)=excellent, B(6-7.9)=good, C(4-5.9)=fair, D(2-3.9)=poor, F(0-1.9)=critical.
 
-**Encoding**: UTF-8 only. Use HTML entities: `&mdash;`, `&ndash;`, `&middot;`, `&copy;`, `&lt;`/`&gt;`. No smart quotes or Office-pasted characters.
+**Sensitive or unreleased content**: if the report describes work that has not shipped, or surfaces details about internal telemetry/data collection, keep that section to a short narrative paragraph rather than an itemized technical breakdown -- do not enumerate specific bug mechanics in a leadership-facing document.
+
+**Encoding**: UTF-8 only. Use HTML entities: `&ndash;`, `&middot;`, `&copy;`, `&lt;`/`&gt;`. No smart quotes or Office-pasted characters. Avoid `&mdash;` (em dash) per brand copy rules above.
 
 ---
 
@@ -539,8 +659,8 @@ Every report MUST include this exact CSS block inside `<style>` in the `<head>`.
 
 **Step 2: Gather Data** -- Use Grep/Glob/Bash to collect evidence with specific file paths and line numbers.
 
-**Step 3: Compose HTML** -- Assembly: DOCTYPE+head with full CSS -> header -> container.content -> framework-note -> executive summary (score cards, bars, strip) -> summary-box -> priority actions table -> h2 per dimension with findings -> recommendations -> methodology/grading -> disclaimer callout -> close container -> footer.
+**Step 3: Compose HTML** -- Assembly: DOCTYPE+head with full CSS -> header -> container.content -> framework-note -> executive summary (score cards, bars, strip) -> summary-box -> priority actions table or card-grid -> h2 per dimension with findings -> recommendations -> methodology/grading -> disclaimer callout -> close container -> footer.
 
 **Step 4: Save** -- `.polaris/reports/{project-slug}-{report-slug}-{YYYY-MM-DD}.html`
 
-**HTML Checklist**: Only CSS variables (no inline hex), report-header, framework-note, score-grid, summary-box per section, priority table, severity badges on findings, file paths in `<code>`, disclaimer callout, report-footer, HTML entities for special chars, print+responsive styles.
+**HTML Checklist**: Only CSS variables (no inline hex), report-header, framework-note, score-grid, summary-box per section, priority table or card-grid, severity badges on findings, file paths in `<code>`, disclaimer callout, report-footer, HTML entities for special chars, print+responsive styles, no yellow/arrows/exclamation points.

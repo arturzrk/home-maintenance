@@ -9,6 +9,7 @@ test_file: backend/tests/HomeMaintenance.UnitTests/Infrastructure/ResendEmailSen
 domain: backend-logic
 reviewed_by: "Artur Żurek"
 review_status: "approved"
+evidence: "legacy-exempt"
 ---
 
 # WP02 - Email delivery

@@ -42,3 +42,5 @@ commands:
     prompt: "Set up CI/CD pipelines and deployment configuration"
   healthcheck:
     prompt: "Add standardized health endpoints to a service"
+  adopt-internalapp-change:
+    prompt: "Adopt the IAM Internal App token change - migrate token-claim access checks to the User Available Apps API"

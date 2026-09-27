@@ -13,6 +13,7 @@ domain: documentation
 shell_pid: "34039"
 reviewed_by: "Artur Żurek"
 review_status: "approved"
+evidence: "legacy-exempt"
 ---
 
 # WP03 - Go-live runbook + docs

@@ -2,6 +2,10 @@
 description: Implement documentation work packages using Divio templates and generators.
 ---
 
+## Advanced Command Gate
+
+Load `.claude/commands/references/advanced-gate.md` and apply it before proceeding: gate on `advanced_commands` in `.polaris/config.yaml`, bypassing for autopilot or NL routing invocations.
+
 # Command Template: /polaris.implement (Documentation Mission)
 
 **Phase**: Generate
@@ -326,7 +330,7 @@ Co-Authored-By: Aptean Polaris <polaris@aptean.com>"
 
 **Then move to review:**
 ```bash
-polaris agent tasks move-task WP## --to for_review --note "Ready for review: <summary>"
+polaris agent tasks move-task WP## --to for_review --no-test-reason "documentation mission: no automated tests" --note "Ready for review: <summary>"
 ```
 
 **Why this matters:**

@@ -1,0 +1,264 @@
+{
+  "content_hash": "b66a6d9231d08f830222fb6c357dd6f4c592783fa3d8f7dd48370289f59a38a5",
+  "criteria": [
+    {
+      "criterion_hash": "5e5b2b25b65b330b124cf5eb7045df544382fa56e1e26a22f641b411611c5401",
+      "criterion_text": "`dotnet test` green (new unit + integration tests included)",
+      "evidence_path": null,
+      "id": "WP01-C1",
+      "passes": false,
+      "verification_steps": [
+        "Run: polaris runtests --wp WP01",
+        "Confirm the criterion holds: `dotnet test` green (new unit + integration tests included)"
+      ],
+      "waived": {
+        "by": "polaris-upgrade",
+        "reason": "legacy-exempt: feature finalized before the verification ledger existed"
+      },
+      "wp_id": "WP01"
+    },
+    {
+      "criterion_hash": "fe46a67bd5fd3f65d81b25d04912ddab5574149ebd9d5c0278c8285a6593fa6b",
+      "criterion_text": "`/api/assets` CRUD verified by integration tests; no DELETE route",
+      "evidence_path": null,
+      "id": "WP01-C2",
+      "passes": false,
+      "verification_steps": [
+        "Run: polaris runtests --wp WP01",
+        "Confirm the criterion holds: `/api/assets` CRUD verified by integration tests; no DELETE route"
+      ],
+      "waived": {
+        "by": "polaris-upgrade",
+        "reason": "legacy-exempt: feature finalized before the verification ledger existed"
+      },
+      "wp_id": "WP01"
+    },
+    {
+      "criterion_hash": "bc8bc56fa0af63adf5877619f75a3ead8b62c2e2332ac3dc215850ed60c227df",
+      "criterion_text": "Handlers/repository registered; API boots (existing tests prove it)",
+      "evidence_path": null,
+      "id": "WP01-C3",
+      "passes": false,
+      "verification_steps": [
+        "Run: polaris runtests --wp WP01",
+        "Confirm the criterion holds: Handlers/repository registered; API boots (existing tests prove it)"
+      ],
+      "waived": {
+        "by": "polaris-upgrade",
+        "reason": "legacy-exempt: feature finalized before the verification ledger existed"
+      },
+      "wp_id": "WP01"
+    },
+    {
+      "criterion_hash": "c5aab5112fd66e28499b4d944fb02d19046aa7938a8a272e3b916fcacbf20aec",
+      "criterion_text": "No Job/JobDefinition changes",
+      "evidence_path": null,
+      "id": "WP01-C4",
+      "passes": false,
+      "verification_steps": [
+        "Run: polaris runtests --wp WP01",
+        "Confirm the criterion holds: No Job/JobDefinition changes"
+      ],
+      "waived": {
+        "by": "polaris-upgrade",
+        "reason": "legacy-exempt: feature finalized before the verification ledger existed"
+      },
+      "wp_id": "WP01"
+    },
+    {
+      "criterion_hash": "af0cc1fa9c941bab9d3a0aef304e4121c95d4b85347653d3e75affa18205244f",
+      "criterion_text": "`dotnet test` green",
+      "evidence_path": null,
+      "id": "WP02-C1",
+      "passes": false,
+      "verification_steps": [
+        "Run: polaris runtests --wp WP02",
+        "Confirm the criterion holds: `dotnet test` green"
+      ],
+      "waived": {
+        "by": "polaris-upgrade",
+        "reason": "legacy-exempt: feature finalized before the verification ledger existed"
+      },
+      "wp_id": "WP02"
+    },
+    {
+      "criterion_hash": "075f1eec1a0aed1fdbd46f493f006ebaa0732329c78703c10826fb66d4673955",
+      "criterion_text": "Full validation matrix covered by integration tests",
+      "evidence_path": null,
+      "id": "WP02-C2",
+      "passes": false,
+      "verification_steps": [
+        "Run: polaris runtests --wp WP02",
+        "Confirm the criterion holds: Full validation matrix covered by integration tests"
+      ],
+      "waived": {
+        "by": "polaris-upgrade",
+        "reason": "legacy-exempt: feature finalized before the verification ledger existed"
+      },
+      "wp_id": "WP02"
+    },
+    {
+      "criterion_hash": "0207ab92b2986568dec1fbc5984152cc8f29ed51b36e426f9ba4a13ed7263b56",
+      "criterion_text": "Existing e2e suites still pass locally (no observable change)",
+      "evidence_path": null,
+      "id": "WP02-C3",
+      "passes": false,
+      "verification_steps": [
+        "Run: polaris runtests --wp WP02",
+        "Confirm the criterion holds: Existing e2e suites still pass locally (no observable change)"
+      ],
+      "waived": {
+        "by": "polaris-upgrade",
+        "reason": "legacy-exempt: feature finalized before the verification ledger existed"
+      },
+      "wp_id": "WP02"
+    },
+    {
+      "criterion_hash": "aff863000e6c93f1c491b29154ed76964e1dce29ba3e2e5fcbb3a62c8d9f699a",
+      "criterion_text": "DTO additions are nullable/optional -- no breaking API change",
+      "evidence_path": null,
+      "id": "WP02-C4",
+      "passes": false,
+      "verification_steps": [
+        "Run: polaris runtests --wp WP02",
+        "Confirm the criterion holds: DTO additions are nullable/optional -- no breaking API change"
+      ],
+      "waived": {
+        "by": "polaris-upgrade",
+        "reason": "legacy-exempt: feature finalized before the verification ledger existed"
+      },
+      "wp_id": "WP02"
+    },
+    {
+      "criterion_hash": "10076dd210376f9b815a8c109413c23d5e1fbaefb485a136ed0e719122907bae",
+      "criterion_text": "`npm run lint`, `npm test`, `npm run build` green",
+      "evidence_path": null,
+      "id": "WP03-C1",
+      "passes": false,
+      "verification_steps": [
+        "Run: polaris runtests --wp WP03",
+        "Confirm the criterion holds: `npm run lint`, `npm test`, `npm run build` green"
+      ],
+      "waived": {
+        "by": "polaris-upgrade",
+        "reason": "legacy-exempt: feature finalized before the verification ledger existed"
+      },
+      "wp_id": "WP03"
+    },
+    {
+      "criterion_hash": "510aed5430f4a36c71e1f508a8af154c6d1d7b3ddf7b494f6cfde756eb7b371e",
+      "criterion_text": "All five control-map flows demonstrable against the local stack",
+      "evidence_path": null,
+      "id": "WP03-C2",
+      "passes": false,
+      "verification_steps": [
+        "Run: polaris runtests --wp WP03",
+        "Confirm the criterion holds: All five control-map flows demonstrable against the local stack"
+      ],
+      "waived": {
+        "by": "polaris-upgrade",
+        "reason": "legacy-exempt: feature finalized before the verification ledger existed"
+      },
+      "wp_id": "WP03"
+    },
+    {
+      "criterion_hash": "168605cd9332cb5e8760abf6fd6c6237e45f3ef2939a08048cff96f8c91db524",
+      "criterion_text": "Existing Playwright suites still pass locally (27/27)",
+      "evidence_path": null,
+      "id": "WP03-C3",
+      "passes": false,
+      "verification_steps": [
+        "Run: polaris runtests --wp WP03",
+        "Confirm the criterion holds: Existing Playwright suites still pass locally (27/27)"
+      ],
+      "waived": {
+        "by": "polaris-upgrade",
+        "reason": "legacy-exempt: feature finalized before the verification ledger existed"
+      },
+      "wp_id": "WP03"
+    },
+    {
+      "criterion_hash": "b18911b9641109f6654c4093054a59560fa4fb045b9583d4592dd80763b249ef",
+      "criterion_text": "Dropdowns hide obsolete assets; lists show them with a badge",
+      "evidence_path": null,
+      "id": "WP03-C4",
+      "passes": false,
+      "verification_steps": [
+        "Run: polaris runtests --wp WP03",
+        "Confirm the criterion holds: Dropdowns hide obsolete assets; lists show them with a badge"
+      ],
+      "waived": {
+        "by": "polaris-upgrade",
+        "reason": "legacy-exempt: feature finalized before the verification ledger existed"
+      },
+      "wp_id": "WP03"
+    },
+    {
+      "criterion_hash": "48671247b97c962d8085d74a9b383bba8b193e029be88c27521e0193c231a6bf",
+      "criterion_text": "`npx playwright test e2e/wp08-assets.spec.ts` -> 6/6 pass",
+      "evidence_path": null,
+      "id": "WP04-C1",
+      "passes": false,
+      "verification_steps": [
+        "Run: polaris runtests --wp WP04",
+        "Confirm the criterion holds: `npx playwright test e2e/wp08-assets.spec.ts` -> 6/6 pass"
+      ],
+      "waived": {
+        "by": "polaris-upgrade",
+        "reason": "legacy-exempt: feature finalized before the verification ledger existed"
+      },
+      "wp_id": "WP04"
+    },
+    {
+      "criterion_hash": "b3ff20b4e0998a4e922aeea47f67ad1cb658b88ad5f16fca5e327bff27ca7bf4",
+      "criterion_text": "Full suite passes locally and in the CI e2e job (33 tests)",
+      "evidence_path": null,
+      "id": "WP04-C2",
+      "passes": false,
+      "verification_steps": [
+        "Run: polaris runtests --wp WP04",
+        "Confirm the criterion holds: Full suite passes locally and in the CI e2e job (33 tests)"
+      ],
+      "waived": {
+        "by": "polaris-upgrade",
+        "reason": "legacy-exempt: feature finalized before the verification ledger existed"
+      },
+      "wp_id": "WP04"
+    },
+    {
+      "criterion_hash": "c8f3c3d5ad0074f9603958391785799fc59368846a76258c88031a7e9ad3f9fb",
+      "criterion_text": "Helper(s) added to e2e/helpers/setup.ts",
+      "evidence_path": null,
+      "id": "WP04-C3",
+      "passes": false,
+      "verification_steps": [
+        "Run: polaris runtests --wp WP04",
+        "Confirm the criterion holds: Helper(s) added to e2e/helpers/setup.ts"
+      ],
+      "waived": {
+        "by": "polaris-upgrade",
+        "reason": "legacy-exempt: feature finalized before the verification ledger existed"
+      },
+      "wp_id": "WP04"
+    },
+    {
+      "criterion_hash": "18b353046a5510f03fb4427e79bc8445908296c86bd61369bdccf28c9a411663",
+      "criterion_text": "Each test isolated; no production code changes",
+      "evidence_path": null,
+      "id": "WP04-C4",
+      "passes": false,
+      "verification_steps": [
+        "Run: polaris runtests --wp WP04",
+        "Confirm the criterion holds: Each test isolated; no production code changes"
+      ],
+      "waived": {
+        "by": "polaris-upgrade",
+        "reason": "legacy-exempt: feature finalized before the verification ledger existed"
+      },
+      "wp_id": "WP04"
+    }
+  ],
+  "feature": "008-assets",
+  "generated_at": "2026-09-27T14:11:58Z",
+  "schema_version": 1
+}

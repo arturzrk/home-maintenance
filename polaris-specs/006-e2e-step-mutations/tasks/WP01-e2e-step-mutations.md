@@ -13,6 +13,7 @@ domain: testing-specialist
 shell_pid: "85964"
 reviewed_by: "Artur Żurek"
 review_status: "approved"
+evidence: "legacy-exempt"
 ---
 
 # WP01 - E2E: Step mutations & job rename test suite

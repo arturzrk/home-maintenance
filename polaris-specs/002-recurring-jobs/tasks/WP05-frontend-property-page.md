@@ -14,6 +14,7 @@ test_status: required
 test_file: tests/e2e/WP05-frontend-jobdefinition-createlist-on-property-page.e2e.js
 review_status: ''
 reviewed_by: ''
+evidence: "legacy-exempt"
 history:
 - timestamp: '2026-05-29T00:00:00Z'
   lane: planned

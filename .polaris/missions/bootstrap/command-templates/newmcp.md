@@ -33,11 +33,19 @@ Ask the user:
 **Online mode** (preferred): Clone the MCP template:
 
 ```bash
-git clone --depth 1 -b tool-list-require-headers https://github.com/Shared-Technology-Group/next-ai-mcp-tools.git <domain>-mcp-server
+git clone --depth 1 -b develop https://github.com/Shared-Technology-Group/next-ai-mcp-tools.git <domain>-mcp-server
 cd <domain>-mcp-server
 python -c "import shutil; shutil.rmtree('.git')"
 git init --initial-branch main
 ```
+
+If this clone fails for any reason (branch renamed/deleted upstream, network unavailable, repo access denied), do NOT continue silently. Print the following warning, then proceed to Offline mode below:
+
+```
+Warning: live template unreachable - scaffolded from bundled offline template, may be outdated.
+```
+
+Run: `polaris telemetry record newmcp --feature <slug> --phase fallback-used --agent {{AGENT_NAME}}`
 
 **Offline mode** (fallback): Generate the standard MCP structure:
 

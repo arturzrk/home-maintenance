@@ -5,15 +5,15 @@ description: Create an isolated workspace (worktree) for implementing a specific
 
 ## Advanced Command Gate
 
-Load `.claude/commands/references/advanced-gate.md` and apply it before proceeding.
+Load `references/advanced-gate.md` and apply the `advanced_commands` gate (bypassed for autopilot or NL routing).
 
 ## Model Guidance
 
-Use **claude-sonnet-4-6**. Unexpected complexity: stop and emit `REPLAN NEEDED: [what was unexpected]` - re-enter Opus before continuing.
+Model: impl tier (see references/model-selection.md); routing is enforced by the launcher.
 
 ## Output Style
 
-One line per action: `Written: <path>`, command result. No preamble, no narration, no code explanation. Two lines max on failure. No extended thinking for code/test/commit steps.
+One line per action (`Written: <path>` or the command result); no preamble, narration, or code explanation; two lines max on failure; no extended thinking on code/test/commit steps.
 
 ---
 
@@ -29,8 +29,8 @@ Read WP frontmatter before starting. Load `@references/implement-domain-subagent
 
 Two modes:
 
-- **Default (worktree)**: `polaris implement WP##` creates `.worktrees/###-feature-WP##/`. After running it, `cd` into that directory for all file operations.
-- **In-place**: `polaris implement WP## --in-place` skips the worktree. Use when worktrees cause issues or only one WP is in flight.
+- **Default (worktree)**: `polaris implement WP##` creates `.worktrees/###-feature-WP##/`; `cd` into it for all file operations.
+- **In-place**: `polaris implement WP## --in-place` skips the worktree (use when worktrees cause issues or only one WP is in flight).
 
 ---
 
@@ -55,22 +55,28 @@ Skip if neither `.polaris/memory/decisions-summary.md` nor `.polaris/memory/fail
 
 ## Pre-Implementation Context
 
-If NOT WP01 and `control-map.md` exists: read it and the relevant shared dependency files for consistency. Otherwise skip.
+If NOT WP01 and `control-map.md` exists, read it and the relevant shared dependency files for consistency.
+
+## Code Intelligence Graph
+
+Query the local code graph instead of grepping blind (each verb prints JSON, exit 2 if unavailable): `polaris graph symbol <name>` (definition), `who-imports <file>` (callers), `impact <file>` (blast radius), `tests-for <file>` (covering tests).
 
 ## Commit Workflow
 
-**BEFORE moving to for_review**, commit your implementation. Then:
+**BEFORE moving to for_review**, commit your implementation. Then run:
 
 ```bash
 polaris runtests --feature <slug>
 ```
 
-On pass: moves to `for_review` automatically. On fail: fix regressions first.
+The CLI owns the transition: a passing run moves the WP to `for_review`; a failing run keeps it in `doing`. Do not edit lane status by hand or pass human-override flags.
 
-**Fallback** (only if `test_status: "skipped"`):
+**Docs-only WP** (`test_status: "skipped"`) - submit with the verdict emitted as JSON:
 ```bash
-polaris agent tasks move-task WP## --to for_review --note "No tests: docs-only WP"
+polaris agent tasks move-task WP## --to for_review --no-test-reason "docs-only WP" --json
 ```
+
+On `allowed: false`, follow each result's `remediation`, fix the cause, and retry once.
 
 ---
 

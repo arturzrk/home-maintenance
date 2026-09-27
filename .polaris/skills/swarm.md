@@ -1,3 +1,15 @@
+<!-- polaris:swarm-deprecated -->
+> **DEPRECATED - replaced by the native dispatch skill.**
+>
+> This swarm guardrail invoked `@claude-flow/cli` via `npx` on the critical path of
+> every command (health check, memory searches, swarm init, memory stores), adding
+> roughly 18-21s of latency per interaction and requiring Node.js. It is no longer
+> wired into your agent context files.
+>
+> The active guardrail is now `@.polaris/skills/dispatch.md` (zero subprocess, no
+> Node). This file is kept only as a reference / explicit escape hatch
+> (`polaris skill apply swarm-legacy`) and will be removed in a future release.
+
 # Polaris Swarm & Memory Guardrail
 
 This guardrail adds swarm orchestration and persistent cross-session memory to every

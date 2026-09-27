@@ -44,6 +44,7 @@ from acceptance_support import (  # noqa: E402
     normalize_feature_encoding,
     perform_acceptance,
 )
+from specify_cli.text_sanitization import write_markdown  # noqa: E402
 
 
 def stage_update(
@@ -72,7 +73,7 @@ def stage_update(
     new_body = append_activity_log(wp.body, log_entry)
 
     new_content = build_document(wp.frontmatter, new_body, wp.padding)
-    wp.path.write_text(new_content, encoding="utf-8")
+    write_markdown(wp.path, new_content)
 
     run_git(["add", str(wp.path.relative_to(repo_root))], cwd=repo_root, check=True)
 
@@ -235,7 +236,7 @@ def history_command(args: argparse.Namespace) -> None:
         return
 
     new_content = build_document(wp.frontmatter, updated_body, wp.padding)
-    wp.path.write_text(new_content, encoding="utf-8")
+    write_markdown(wp.path, new_content)
     run_git(["add", str(wp.path.relative_to(repo_root))], cwd=repo_root, check=True)
 
     print(f"[OK] Appended activity for {wp.work_package_id or wp.path.name}")

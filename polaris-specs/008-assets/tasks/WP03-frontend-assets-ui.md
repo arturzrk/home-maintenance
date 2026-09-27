@@ -11,6 +11,7 @@ domain: frontend-craft
 shell_pid: "26194"
 reviewed_by: "Artur Żurek"
 review_status: "approved"
+evidence: "legacy-exempt"
 ---
 
 # WP03 - Frontend: assets UI

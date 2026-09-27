@@ -55,6 +55,10 @@ Ask for: `app_code` (lowercase alpha, 2-12 chars, not "simpleapp", regex `^[a-z]
 
 Replace `simpleapp` with `<app_code>` in: `nginx/nginx.conf`, `Dockerfile`, `docker-entrypoint.sh`, `infra/main.bicep`, `.github/workflows/deploy-container.yml`, `.github/workflows/deploy-all.yml`, `Manifest/MainManifest.yml`.
 
+This substitution is **identity only** - it renames the app, it does not set the
+route. Step 2A.5g sets the route separately, because `simpleapp` appears in both
+roles and prefixing all of them would corrupt resource names.
+
 Also update `Manifest/MainManifest.yml`: set `name`, `description`, repo `url`, deployment name.
 
 Verify with `git grep -n "simpleapp" -- nginx/ Dockerfile docker-entrypoint.sh infra/main.bicep .github/workflows/deploy-container.yml .github/workflows/deploy-all.yml Manifest/MainManifest.yml || echo "OK"`. STOP if any matches remain.
@@ -97,6 +101,52 @@ Notes to surface to user:
 - Prerequisite: the `AZURE_CREDENTIAL_AUTOMATION` service principal must have Contributor (or equivalent) RBAC on `rg-eastus2-rnd-labs` in subscription `1280894a-27b3-42ad-9cd7-ef71d1cd663f`. If a downstream deploy step returns 403, request access from Labs platform owners (this step cannot grant RBAC).
 - `Labs/prd-a.json` is currently incomplete upstream (carries GWC values plus `TODO-REPLACE-WITH-SHARED-KV-NAME` and `TODO-REPLACE-WITH-SHARED-APPCONFIG-NAME` placeholders). Shipping to `dev` and `tst` is safe; `prd-a` will fail until the upstream file is fixed.
 
+## Step 2A.5f - nginx HTTPS redirect hardening (SHARED by ACR FIRST_TIME, ACR REDEPLOY, and Kubernetes paths)
+
+If `nginx/map.conf` exists in the working tree, patch the `$redirect_scheme` map. Without this, Kong forwards `X-Forwarded-Proto: http` to nginx on HTTPS requests, nginx 301-redirects `/<app>` -> `http://.../<app>/`, and AppCentral blocks the iframe as mixed content.
+
+Idempotent: skips if file missing or `host_default_scheme` already present.
+
+1. Detect state: `python -c "import pathlib,sys; p=pathlib.Path('nginx/map.conf'); sys.exit(0) if not p.exists() else (sys.exit(0) if 'host_default_scheme' in p.read_text(encoding='utf-8') else print('NEEDS_PATCH'))"`.
+2. If `NEEDS_PATCH`: run the heredoc patch script defined in Step 2A.5f of `ship.md`. It strips any existing `$redirect_scheme` map and appends two hardened maps (host-based fallback + `X-Forwarded-Proto: https`-only).
+3. Verify: `git grep -n "host_default_scheme" -- nginx/map.conf` must return 2 matches.
+4. Do NOT commit here; the parent step's `git add -A` handles staging.
+
+Also invoked unconditionally by Step 2A.8a (REDEPLOY prelude) and Step 2K.0 (Kubernetes prelude).
+
+## Step 2A.5g - Set the AppCentral `/app/` base path (FIRST_TIME)
+
+AppCentral serves deployed applications under an `/app/` prefix. The public URL
+is `https://appcentral.<env>.apteancloud.dev/app/<app_code>/`, so the app must be
+served from `/app/<app_code>/` and not from `/<app_code>/`.
+
+Apply the prefix ONLY where the value is a route or a URL. Leave every place
+`<app_code>` is an identifier - container names, image names, resource names,
+Key Vault names - exactly as Step 2A.5b left it.
+
+| File | What carries the route |
+|---|---|
+| `nginx/nginx.conf` | `location` blocks, plus any `sub_filter`, `rewrite`, `proxy_pass` or `try_files` that embeds the prefix |
+| `docker-entrypoint.sh` | the base path substituted into the built frontend assets |
+| `Dockerfile` | any `ENV`/`ARG` carrying the base path (e.g. `BASE_PATH`, `NEXT_PUBLIC_BASE_PATH`, `PUBLIC_URL`) |
+| `infra/main.bicep` | the ingress route / path mapping |
+| `.github/workflows/deploy-container.yml`, `deploy-all.yml` | the route registered with AppCentral and any printed URL |
+| `Manifest/MainManifest.yml` | the route/path entry |
+
+Also set the frontend build's own base path (Next.js `basePath` and
+`assetPrefix`, Vite `base`, or the router `basename`) to `/app/<app_code>`. An
+ingress route that moved without the build's base path moving builds cleanly and
+then 404s every asset at runtime, so a successful build is NOT evidence this
+worked.
+
+Verify no route still points at the un-prefixed path:
+
+`git grep -n "/<app_code>" -- nginx/ Dockerfile docker-entrypoint.sh infra/main.bicep .github/workflows/ Manifest/ | grep -v "/app/<app_code>" || echo OK`
+
+Any remaining hit is either a route that was missed or an identifier that
+correctly has no prefix - classify each one rather than blanket-editing. Never
+produce `/app/app/<app_code>`.
+
 ## Step 2A.6 - Commit and push (FIRST_TIME)
 
 `git add -A && git commit -m "scaffold: adopt simple-app template"`
@@ -127,13 +177,17 @@ Watch: `gh run watch <run-id>`. On failure: enter 2A.6b loop.
 
 After success: `git pull origin <default-branch>`
 
+> **Skip gate (FIRST_TIME path) - `/polaris.ship` stops here.** All deployment artifacts have been generated and committed. Do NOT proceed to Step 2A.9. Display the completion message, run IAM Validation (Check 1: `.polaris/skills/iam.md` exists; Check 2: `src/auth/` or `.env.iam.example` present; Check 3: IAM env vars in env files), then STOP. If any check fails display: "⚠️ IAM validation failed. IAM is not integrated or a valid IAM registration was not found for this application. Integrate IAM and complete IAM registration before deploying to AppCentral."
+
 ## Step 2A.8 - Re-deploy prep (REDEPLOY)
 
 Run `powershell -ExecutionPolicy Bypass -File scripts/PrepareForDeployment.ps1` (Windows) or `pwsh scripts/PrepareForDeployment.ps1` (macOS/Linux).
 
 If no changes: skip commit. If changes: commit and push (same ON_DEFAULT branch/PR logic as 2A.6).
 
-## Step 2A.9 - Trigger Deploy All
+> **Skip gate (REDEPLOY path) - `/polaris.ship` stops here.** All deployment artifacts and migration files have been committed. Do NOT proceed to Step 2A.9. Display the completion message, run IAM Validation (same 3 checks as FIRST_TIME gate above), then STOP. If any check fails display the IAM warning.
+
+## Step 2A.9 - Trigger Deploy All *(SKIPPED when run via `/polaris.ship`)*
 
 `gh workflow run deploy-all.yml -f environment=dev`
 
@@ -149,6 +203,6 @@ Dev MUST complete before tst.
 
 ## Step 2A.11 - Summary
 
-AppCentral URL map: dev -> `appcentral.dev.apteancloud.dev/<app_code>/`, tst -> `appcentral.qa.apteancloud.dev/<app_code>/`, prod -> `appcentral.aptean.com/<app_code>/`. For unknown envs, print "see GitHub Actions run summary".
+AppCentral URL map: dev -> `appcentral.dev.apteancloud.dev/app/<app_code>/`, tst -> `appcentral.qa.apteancloud.dev/app/<app_code>/`, prod -> `appcentral.aptean.com/app/<app_code>/`. For unknown envs, print "see GitHub Actions run summary".
 
 Print SHIP SUMMARY with: repo, default branch, mode, app_code, scaffold run, per-env deploy run + public URL.

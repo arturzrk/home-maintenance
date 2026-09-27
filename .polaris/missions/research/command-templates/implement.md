@@ -2,6 +2,10 @@
 description: Implement a research work package by conducting research and documenting findings.
 ---
 
+## Advanced Command Gate
+
+Load `.claude/commands/references/advanced-gate.md` and apply it before proceeding: gate on `advanced_commands` in `.polaris/config.yaml`, bypassing for autopilot or NL routing invocations.
+
 ## Research WP Implementation
 
 **Telemetry**: Run: `polaris telemetry record implement --feature <slug> --phase start --agent {{AGENT_NAME}} --wp <WP_ID>`
@@ -102,7 +106,7 @@ Example commit messages:
 **Only after committing**, move your WP to review:
 
 ```bash
-polaris agent tasks move-task {{wp_id}} --to for_review --note "Ready for review: <summary>"
+polaris agent tasks move-task {{wp_id}} --to for_review --no-test-reason "research mission: no automated tests" --note "Ready for review: <summary>"
 ```
 
 ---

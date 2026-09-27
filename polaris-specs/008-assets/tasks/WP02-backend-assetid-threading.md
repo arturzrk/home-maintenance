@@ -11,6 +11,7 @@ domain: backend-logic
 shell_pid: "8313"
 reviewed_by: "Artur Żurek"
 review_status: "approved"
+evidence: "legacy-exempt"
 ---
 
 # WP02 - Backend: assetId on Jobs and JobDefinitions

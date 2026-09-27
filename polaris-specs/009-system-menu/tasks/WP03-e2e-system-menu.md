@@ -10,6 +10,7 @@ domain: testing-specialist
 shell_pid: "54431"
 reviewed_by: "Artur Żurek"
 review_status: "approved"
+evidence: "legacy-exempt"
 ---
 
 # WP03 - E2E: system menu suite

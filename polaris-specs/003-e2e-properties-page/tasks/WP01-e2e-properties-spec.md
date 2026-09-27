@@ -10,6 +10,7 @@ test_status: required
 test_file: frontend/e2e/wp04-properties.spec.ts
 reviewed_by: "Artur Żurek"
 review_status: "approved"
+evidence: "legacy-exempt"
 ---
 
 # WP01 - E2E: Properties page test suite

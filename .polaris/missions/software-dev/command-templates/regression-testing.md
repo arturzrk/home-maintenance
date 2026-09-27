@@ -1,6 +1,13 @@
+---
+description: Regression Testing
+---
 # Regression Testing
 
 Run the project's existing regression test suite and handle failures intelligently.
+
+## Model Guidance
+
+Model: impl tier (see references/model-selection.md); routing is enforced by the launcher.
 
 ## Steps
 
@@ -8,7 +15,7 @@ Run the project's existing regression test suite and handle failures intelligent
 
 
 1. **Discover test files** using `git ls-files` or the agent's search tools.
-   Look for files matching common patterns: `*.spec.js`, `*.spec.ts`,
+   Look for files matching common patterns: `*.e2e.js`, `*.spec.js`, `*.spec.ts`,
    `*_test.py`, `test_*.py`, `*.test.js`, `*.test.ts`.
 
 2. **Execute the test suite** with the project's configured runner
@@ -65,15 +72,7 @@ At the end of the test run, include a **Self-Healing Summary** section that
 lists every selector that was automatically repaired:
 
 | Test | Original Selector | New Selector | Confidence | Method |
-|----## Model Guidance
-
-This command does implementation work. Use **claude-sonnet-4-6** for this session.
-
-Execution against a defined plan - this is where call volume lives and where savings compound.
-
----
-
---|-------------------|--------------|------------|--------|
+|------|-------------------|--------------|------------|--------|
 | ... | ... | ... | ... | ... |
 
 If any selectors were below the 80% threshold, list them separately under

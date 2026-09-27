@@ -13,6 +13,7 @@ domain: backend-logic
 shell_pid: "28599"
 reviewed_by: "Artur Żurek"
 review_status: "approved"
+evidence: "legacy-exempt"
 ---
 
 # WP01 - Backend: Asset aggregate end-to-end

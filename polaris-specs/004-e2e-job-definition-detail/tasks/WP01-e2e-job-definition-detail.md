@@ -13,6 +13,7 @@ domain: testing-specialist
 shell_pid: "69665"
 reviewed_by: "Artur Żurek"
 review_status: "approved"
+evidence: "legacy-exempt"
 ---
 
 # WP01 - E2E: JobDefinition detail page test suite

@@ -1,0 +1,360 @@
+{
+  "content_hash": "597190614fe6de32afa0c799b9e535a0cf6d95f7513a961e18fcd967a5044589",
+  "criteria": [
+    {
+      "criterion_hash": "ef4f30c5c772bb200a800bab24f53bce77079d9fb749213da0a12a54544152ff",
+      "criterion_text": "`OwnerProfile` domain + repository + Mongo index implemented",
+      "evidence_path": null,
+      "id": "WP01-C1",
+      "passes": false,
+      "verification_steps": [
+        "Run: polaris runtests --wp WP01",
+        "Confirm the criterion holds: `OwnerProfile` domain + repository + Mongo index implemented"
+      ],
+      "waived": {
+        "by": "polaris-upgrade",
+        "reason": "legacy-exempt: feature finalized before the verification ledger existed"
+      },
+      "wp_id": "WP01"
+    },
+    {
+      "criterion_hash": "dd1ce9aaaef14cd4d45572e7dded5a69dcfc82a9be989a233a44d3e26d25c1c8",
+      "criterion_text": "Email captured automatically on authenticated requests, no frontend change required",
+      "evidence_path": null,
+      "id": "WP01-C2",
+      "passes": false,
+      "verification_steps": [
+        "Run: polaris runtests --wp WP01",
+        "Confirm the criterion holds: Email captured automatically on authenticated requests, no frontend change required"
+      ],
+      "waived": {
+        "by": "polaris-upgrade",
+        "reason": "legacy-exempt: feature finalized before the verification ledger existed"
+      },
+      "wp_id": "WP01"
+    },
+    {
+      "criterion_hash": "5ce1b646c31507ae0d7908c21c7f5f67dafdee0675cc0e7fd07de4b133ae72f6",
+      "criterion_text": "`GET`/`PATCH /api/account/notification-preferences` implemented and tested",
+      "evidence_path": null,
+      "id": "WP01-C3",
+      "passes": false,
+      "verification_steps": [
+        "Run: polaris runtests --wp WP01",
+        "Confirm the criterion holds: `GET`/`PATCH /api/account/notification-preferences` implemented and tested"
+      ],
+      "waived": {
+        "by": "polaris-upgrade",
+        "reason": "legacy-exempt: feature finalized before the verification ledger existed"
+      },
+      "wp_id": "WP01"
+    },
+    {
+      "criterion_hash": "6b1b346ad890fe902b7091efbd1b6319592ad6a09f7ab9b9d71aa19e0a54336f",
+      "criterion_text": "Unit + integration tests green",
+      "evidence_path": null,
+      "id": "WP01-C4",
+      "passes": false,
+      "verification_steps": [
+        "Run: polaris runtests --wp WP01",
+        "Confirm the criterion holds: Unit + integration tests green"
+      ],
+      "waived": {
+        "by": "polaris-upgrade",
+        "reason": "legacy-exempt: feature finalized before the verification ledger existed"
+      },
+      "wp_id": "WP01"
+    },
+    {
+      "criterion_hash": "544db39e6851b299b8615aad1f4425aca9f13b5e0511cf84f9f3481003d6d702",
+      "criterion_text": "No production code outside backend touched",
+      "evidence_path": null,
+      "id": "WP01-C5",
+      "passes": false,
+      "verification_steps": [
+        "Run: polaris runtests --wp WP01",
+        "Confirm the criterion holds: No production code outside backend touched"
+      ],
+      "waived": {
+        "by": "polaris-upgrade",
+        "reason": "legacy-exempt: feature finalized before the verification ledger existed"
+      },
+      "wp_id": "WP01"
+    },
+    {
+      "criterion_hash": "42e64ea0bc31896a089ceea7e5c6f275c6380c924c0e54a80c4910c5738bf17c",
+      "criterion_text": "`IEmailSender`, `ResendEmailSender`, `LoggingEmailSender` implemented",
+      "evidence_path": null,
+      "id": "WP02-C1",
+      "passes": false,
+      "verification_steps": [
+        "Run: polaris runtests --wp WP02",
+        "Confirm the criterion holds: `IEmailSender`, `ResendEmailSender`, `LoggingEmailSender` implemented"
+      ],
+      "waived": {
+        "by": "polaris-upgrade",
+        "reason": "legacy-exempt: feature finalized before the verification ledger existed"
+      },
+      "wp_id": "WP02"
+    },
+    {
+      "criterion_hash": "2037d537ec677d06ae0b3228e3a37282d3ae73f62cc4157224383433079da9e6",
+      "criterion_text": "`Email:Provider=Log` remains the Development/CI default - no test ever calls the real Resend API",
+      "evidence_path": null,
+      "id": "WP02-C2",
+      "passes": false,
+      "verification_steps": [
+        "Run: polaris runtests --wp WP02",
+        "Confirm the criterion holds: `Email:Provider=Log` remains the Development/CI default - no test ever calls the real Resend API"
+      ],
+      "waived": {
+        "by": "polaris-upgrade",
+        "reason": "legacy-exempt: feature finalized before the verification ledger existed"
+      },
+      "wp_id": "WP02"
+    },
+    {
+      "criterion_hash": "88c9bb4eac94254b79f230e57a21797aa583089a8ca1da0736d4f2f489cc0248",
+      "criterion_text": "Startup fails fast on `Email:Provider=Resend` with no API key",
+      "evidence_path": null,
+      "id": "WP02-C3",
+      "passes": false,
+      "verification_steps": [
+        "Run: polaris runtests --wp WP02",
+        "Confirm the criterion holds: Startup fails fast on `Email:Provider=Resend` with no API key"
+      ],
+      "waived": {
+        "by": "polaris-upgrade",
+        "reason": "legacy-exempt: feature finalized before the verification ledger existed"
+      },
+      "wp_id": "WP02"
+    },
+    {
+      "criterion_hash": "8a611c6feb13fb89fc8ac3de089ee5c43ca94462cbefe2981e026add5be39a4c",
+      "criterion_text": "Unit tests green",
+      "evidence_path": null,
+      "id": "WP02-C4",
+      "passes": false,
+      "verification_steps": [
+        "Run: polaris runtests --wp WP02",
+        "Confirm the criterion holds: Unit tests green"
+      ],
+      "waived": {
+        "by": "polaris-upgrade",
+        "reason": "legacy-exempt: feature finalized before the verification ledger existed"
+      },
+      "wp_id": "WP02"
+    },
+    {
+      "criterion_hash": "d4a9705df735642d8f6fd0af286aac1812f7a7b60effe3fbc4c6b0bb7dc067a4",
+      "criterion_text": "`ListDueOrOverdueAsync` implemented and tested",
+      "evidence_path": null,
+      "id": "WP03-C1",
+      "passes": false,
+      "verification_steps": [
+        "Run: polaris runtests --wp WP03",
+        "Confirm the criterion holds: `ListDueOrOverdueAsync` implemented and tested"
+      ],
+      "waived": {
+        "by": "polaris-upgrade",
+        "reason": "legacy-exempt: feature finalized before the verification ledger existed"
+      },
+      "wp_id": "WP03"
+    },
+    {
+      "criterion_hash": "6109ddda25ae6870b99182c58e4b45d5f5bec9eee24ef977d6a85065de5c7248",
+      "criterion_text": "`ReminderDigestService` mirrors `JobGeneratorService`'s shape (startup pass + 24h timer + public run method)",
+      "evidence_path": null,
+      "id": "WP03-C2",
+      "passes": false,
+      "verification_steps": [
+        "Run: polaris runtests --wp WP03",
+        "Confirm the criterion holds: `ReminderDigestService` mirrors `JobGeneratorService`'s shape (startup pass + 24h timer + public run method)"
+      ],
+      "waived": {
+        "by": "polaris-upgrade",
+        "reason": "legacy-exempt: feature finalized before the verification ledger existed"
+      },
+      "wp_id": "WP03"
+    },
+    {
+      "criterion_hash": "c8deefd6c0f20f622fc9cda073d5debd15fe21b563384dee3665ccf5a0dd2b33",
+      "criterion_text": "One owner's delivery failure never blocks another owner's digest (FR-09)",
+      "evidence_path": null,
+      "id": "WP03-C3",
+      "passes": false,
+      "verification_steps": [
+        "Run: polaris runtests --wp WP03",
+        "Confirm the criterion holds: One owner's delivery failure never blocks another owner's digest (FR-09)"
+      ],
+      "waived": {
+        "by": "polaris-upgrade",
+        "reason": "legacy-exempt: feature finalized before the verification ledger existed"
+      },
+      "wp_id": "WP03"
+    },
+    {
+      "criterion_hash": "9ae8cc7bdc2dae715072a9bca6410d9849db4c5105a01af568e91fe2fa316505",
+      "criterion_text": "A digest reflects state at send time only (FR-08) - no retroactive updates, nothing stored beyond the pass itself",
+      "evidence_path": null,
+      "id": "WP03-C4",
+      "passes": false,
+      "verification_steps": [
+        "Run: polaris runtests --wp WP03",
+        "Confirm the criterion holds: A digest reflects state at send time only (FR-08) - no retroactive updates, nothing stored beyond the pass itself"
+      ],
+      "waived": {
+        "by": "polaris-upgrade",
+        "reason": "legacy-exempt: feature finalized before the verification ledger existed"
+      },
+      "wp_id": "WP03"
+    },
+    {
+      "criterion_hash": "6b1b346ad890fe902b7091efbd1b6319592ad6a09f7ab9b9d71aa19e0a54336f",
+      "criterion_text": "Unit + integration tests green",
+      "evidence_path": null,
+      "id": "WP03-C5",
+      "passes": false,
+      "verification_steps": [
+        "Run: polaris runtests --wp WP03",
+        "Confirm the criterion holds: Unit + integration tests green"
+      ],
+      "waived": {
+        "by": "polaris-upgrade",
+        "reason": "legacy-exempt: feature finalized before the verification ledger existed"
+      },
+      "wp_id": "WP03"
+    },
+    {
+      "criterion_hash": "d29d358cd1b7c30cfa4160d9f4b2bdb2ed1b55cb5defd2b415bebb3a6c48b361",
+      "criterion_text": "Settings page reachable only when signed in (`/settings/:path*` protected)",
+      "evidence_path": null,
+      "id": "WP04-C1",
+      "passes": false,
+      "verification_steps": [
+        "Run: polaris runtests --wp WP04",
+        "Confirm the criterion holds: Settings page reachable only when signed in (`/settings/:path*` protected)"
+      ],
+      "waived": {
+        "by": "polaris-upgrade",
+        "reason": "legacy-exempt: feature finalized before the verification ledger existed"
+      },
+      "wp_id": "WP04"
+    },
+    {
+      "criterion_hash": "b5d9a3ae281cac01ba103d1a07d0225a27111ca2d66443edc06b197a134ab581",
+      "criterion_text": "Toggle reflects and persists `RemindersEnabled` via WP01's API",
+      "evidence_path": null,
+      "id": "WP04-C2",
+      "passes": false,
+      "verification_steps": [
+        "Run: polaris runtests --wp WP04",
+        "Confirm the criterion holds: Toggle reflects and persists `RemindersEnabled` via WP01's API"
+      ],
+      "waived": {
+        "by": "polaris-upgrade",
+        "reason": "legacy-exempt: feature finalized before the verification ledger existed"
+      },
+      "wp_id": "WP04"
+    },
+    {
+      "criterion_hash": "7aef8fa20e3a1b09fb7028f2e3183dc85e6f62919c854c5a9dd0acd84267089e",
+      "criterion_text": "System menu has a working \"Notification settings\" link",
+      "evidence_path": null,
+      "id": "WP04-C3",
+      "passes": false,
+      "verification_steps": [
+        "Run: polaris runtests --wp WP04",
+        "Confirm the criterion holds: System menu has a working \"Notification settings\" link"
+      ],
+      "waived": {
+        "by": "polaris-upgrade",
+        "reason": "legacy-exempt: feature finalized before the verification ledger existed"
+      },
+      "wp_id": "WP04"
+    },
+    {
+      "criterion_hash": "a1d1136b559b710f026ae4c70eb11461afc17d3df1d0da96f2e1367c31dfce95",
+      "criterion_text": "User manual documents reminders (FR-10)",
+      "evidence_path": null,
+      "id": "WP04-C4",
+      "passes": false,
+      "verification_steps": [
+        "Run: polaris runtests --wp WP04",
+        "Confirm the criterion holds: User manual documents reminders (FR-10)"
+      ],
+      "waived": {
+        "by": "polaris-upgrade",
+        "reason": "legacy-exempt: feature finalized before the verification ledger existed"
+      },
+      "wp_id": "WP04"
+    },
+    {
+      "criterion_hash": "ce6b71391f05b9e61250fe71445d920527a06c9a82ecfbf135a82bd4d5af066d",
+      "criterion_text": "Jest tests green",
+      "evidence_path": null,
+      "id": "WP04-C5",
+      "passes": false,
+      "verification_steps": [
+        "Run: polaris runtests --wp WP04",
+        "Confirm the criterion holds: Jest tests green"
+      ],
+      "waived": {
+        "by": "polaris-upgrade",
+        "reason": "legacy-exempt: feature finalized before the verification ledger existed"
+      },
+      "wp_id": "WP04"
+    },
+    {
+      "criterion_hash": "d64bf67d1496c4de17f7c5309420fa5a20f2af40888c40a8478060557f2fee4a",
+      "criterion_text": "`npx playwright test e2e/wp11-reminders.spec.ts` -> 3/3",
+      "evidence_path": null,
+      "id": "WP05-C1",
+      "passes": false,
+      "verification_steps": [
+        "Run: polaris runtests --wp WP05",
+        "Confirm the criterion holds: `npx playwright test e2e/wp11-reminders.spec.ts` -> 3/3"
+      ],
+      "waived": {
+        "by": "polaris-upgrade",
+        "reason": "legacy-exempt: feature finalized before the verification ledger existed"
+      },
+      "wp_id": "WP05"
+    },
+    {
+      "criterion_hash": "b56223d9d16c1b56d3af54354268d5d649dc5812cd430e4371dc5a440b7e06a3",
+      "criterion_text": "Full suite passes locally and in CI",
+      "evidence_path": null,
+      "id": "WP05-C2",
+      "passes": false,
+      "verification_steps": [
+        "Run: polaris runtests --wp WP05",
+        "Confirm the criterion holds: Full suite passes locally and in CI"
+      ],
+      "waived": {
+        "by": "polaris-upgrade",
+        "reason": "legacy-exempt: feature finalized before the verification ledger existed"
+      },
+      "wp_id": "WP05"
+    },
+    {
+      "criterion_hash": "4ff6230ac91506973055b8079e683aa35cca7b5ddfee6533ca5c97da465da20d",
+      "criterion_text": "No production code changes",
+      "evidence_path": null,
+      "id": "WP05-C3",
+      "passes": false,
+      "verification_steps": [
+        "Run: polaris runtests --wp WP05",
+        "Confirm the criterion holds: No production code changes"
+      ],
+      "waived": {
+        "by": "polaris-upgrade",
+        "reason": "legacy-exempt: feature finalized before the verification ledger existed"
+      },
+      "wp_id": "WP05"
+    }
+  ],
+  "feature": "011-reminders",
+  "generated_at": "2026-09-27T14:11:58Z",
+  "schema_version": 1
+}

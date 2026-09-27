@@ -39,6 +39,7 @@ try:
         TaskCliError,
         WorkPackage,
         activity_entries,
+        extract_scalar,
         get_lane_from_frontmatter,
         git_status_lines,
         is_legacy_format,
@@ -53,12 +54,27 @@ except ImportError:
         TaskCliError,
         WorkPackage,
         activity_entries,
+        extract_scalar,
         get_lane_from_frontmatter,
         git_status_lines,
         is_legacy_format,
         run_git,
         split_frontmatter,
     )
+
+# Evidence verification is optional: in the standalone script context the
+# testing package may not be importable. When unavailable, evidence checks are
+# skipped rather than blocking acceptance.
+try:
+    from specify_cli.testing.evidence import (
+        verify_evidence_for_wp as _verify_evidence_for_wp,
+    )
+except Exception:  # pragma: no cover - optional dependency in standalone context
+    _verify_evidence_for_wp = None  # type: ignore[assignment]
+
+# Frontmatter marker that exempts a work package from the evidence requirement
+# (stamped by the upgrade migration onto WPs completed before the gate existed).
+EVIDENCE_EXEMPT_MARKER = "legacy-exempt"
 
 # ---------------------------------------------------------------------------
 # Type aliases
@@ -130,12 +146,15 @@ class AcceptanceSummary:
     git_dirty: List[str]
     path_violations: List[str] = field(default_factory=list)
     warnings: List[str] = field(default_factory=list)
+    evidence_issues: List[str] = field(default_factory=list)
+    verification_issues: List[str] = field(default_factory=list)
 
     @property
     def all_done(self) -> bool:
         return not (
             self.lanes.get("planned")
             or self.lanes.get("doing")
+            or self.lanes.get("testing")
             or self.lanes.get("for_review")
         )
 
@@ -150,6 +169,8 @@ class AcceptanceSummary:
             and not self.missing_artifacts
             and not self.git_dirty
             and not self.path_violations
+            and not self.evidence_issues
+            and not self.verification_issues
         )
 
     def outstanding(self) -> Dict[str, List[str]]:
@@ -157,6 +178,7 @@ class AcceptanceSummary:
             "not_done": [
                 *self.lanes.get("planned", []),
                 *self.lanes.get("doing", []),
+                *self.lanes.get("testing", []),
                 *self.lanes.get("for_review", []),
             ],
             "metadata": self.metadata_issues,
@@ -166,6 +188,8 @@ class AcceptanceSummary:
             "missing_artifacts": self.missing_artifacts,
             "git_dirty": self.git_dirty,
             "path_violations": self.path_violations,
+            "evidence": self.evidence_issues,
+            "verification": self.verification_issues,
         }
         return {key: value for key, value in buckets.items() if value}
 
@@ -199,6 +223,8 @@ class AcceptanceSummary:
             "optional_missing": self.optional_missing,
             "git_dirty": self.git_dirty,
             "path_violations": self.path_violations,
+            "evidence_issues": self.evidence_issues,
+            "verification_issues": self.verification_issues,
             "warnings": self.warnings,
             "all_done": self.all_done,
             "ok": self.ok,
@@ -330,6 +356,52 @@ def _check_needs_clarification(files: Sequence[Path]) -> List[str]:
     return results
 
 
+def _work_package_evidence_issue(
+    candidate_roots: Sequence[Path],
+    feature: str,
+    wp_id: str,
+) -> Optional[str]:
+    """Return an issue string when a done/for_review WP lacks passing evidence.
+
+    Searches each candidate root's ``.polaris/test-evidence`` for the WP's
+    latest artifact. Returns ``None`` when a passing, hash-valid record is found
+    (or when evidence verification is unavailable in this context).
+    """
+    if _verify_evidence_for_wp is None:
+        return None
+
+    problem: Optional[str] = None
+    for root in candidate_roots:
+        try:
+            check = _verify_evidence_for_wp(
+                root, feature, wp_id, require_result="passed"
+            )
+        except Exception:
+            continue
+        if not check.found:
+            continue
+        if check.hash_ok and check.result == "passed":
+            return None
+        if problem is None:
+            if not check.hash_ok:
+                problem = (
+                    f"{wp_id}: test evidence failed its content-hash check "
+                    f"(possible tampering)"
+                )
+            else:
+                problem = (
+                    f"{wp_id}: latest test evidence result is "
+                    f"'{check.result}', not 'passed'"
+                )
+    if problem is not None:
+        return problem
+    return (
+        f"{wp_id}: no passing test evidence found under .polaris/test-evidence/. "
+        f"Run 'polaris runtests', or (for docs-only work) set a no_test_reason, "
+        f"or stamp 'evidence: legacy-exempt' for pre-gate work packages"
+    )
+
+
 def _missing_artifacts(feature_dir: Path) -> Tuple[List[str], List[str]]:
     """Return lists of missing required and optional artifacts."""
     required = [
@@ -421,6 +493,7 @@ def collect_feature_summary(
     work_packages: List[WorkPackageState] = []
     metadata_issues: List[str] = []
     activity_issues: List[str] = []
+    evidence_issues: List[str] = []
 
     use_legacy = is_legacy_format(feature_dir)
 
@@ -473,6 +546,26 @@ def collect_feature_summary(
                     f"{wp_id}: latest Activity Log entry not lane=done"
                 )
 
+        # Evidence re-verification: every done/for_review WP must have passing,
+        # hash-valid evidence OR an explicit exemption (legacy-exempt marker or
+        # a docs-only no_test_reason).
+        if wp.current_lane in {"done", "for_review"}:
+            evidence_marker = (extract_scalar(wp.frontmatter, "evidence") or "").strip()
+            no_test_reason = (extract_scalar(wp.frontmatter, "no_test_reason") or "").strip()
+            if evidence_marker == EVIDENCE_EXEMPT_MARKER or no_test_reason:
+                pass  # explicitly exempt
+            else:
+                candidate_roots: List[Path] = []
+                worktree = primary_repo_root / ".worktrees" / f"{feature}-{wp_id}"
+                if worktree.is_dir():
+                    candidate_roots.append(worktree)
+                for root in (repo_root, primary_repo_root):
+                    if root not in candidate_roots:
+                        candidate_roots.append(root)
+                issue = _work_package_evidence_issue(candidate_roots, feature, wp_id)
+                if issue:
+                    evidence_issues.append(issue)
+
         work_packages.append(
             WorkPackageState(
                 work_package_id=wp_id,
@@ -509,6 +602,22 @@ def collect_feature_summary(
             "Optional artifacts missing: " + ", ".join(missing_optional)
         )
 
+    # verification.json gate: every acceptance criterion must be verified
+    # (passes=true) or waived, and the ledger must not have been tampered with.
+    # Features predating the ledger fall back to evidence-only mode with a
+    # one-line warning (no hard block).
+    verification_issues: List[str] = []
+    try:
+        from specify_cli.verification import check_feature_verification
+
+        vcheck = check_feature_verification(feature_dir, feature=feature)
+        if not vcheck.present and vcheck.warning:
+            warnings.append(vcheck.warning)
+        elif vcheck.present and not vcheck.ok:
+            verification_issues.extend(vcheck.issues)
+    except Exception:  # pragma: no cover - optional in standalone script context
+        pass
+
     return AcceptanceSummary(
         feature=feature,
         repo_root=repo_root,
@@ -527,6 +636,8 @@ def collect_feature_summary(
         optional_missing=missing_optional,
         git_dirty=git_dirty,
         warnings=warnings,
+        evidence_issues=evidence_issues,
+        verification_issues=verification_issues,
     )
 
 

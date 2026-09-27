@@ -22,7 +22,7 @@ Do NOT proceed until both files are loaded and all rules are internalized.
 
 ## ABSOLUTE RULES
 
-These rules apply to every step. No exceptions.
+These rules apply to every step in Path A. No exceptions.
 
 - MUST NOT create `templates/service` in the target repository
 - MUST copy ONLY explicitly listed files from the reference repository
@@ -112,21 +112,22 @@ CRITICAL: ServiceName is used consistently everywhere. Lowercase in file names, 
 
 State explicitly: "Rules from devops-pipeline.skill.md and helm-runtime.skill.md are loaded and will be enforced throughout execution."
 
-**Step 4 - Check Azure CLI**
+**Step 4 - Verify GitHub authentication**
 
-Run: `az --version`
+Run: `gh auth status`
 
-- If success: continue (do NOT reinstall)
-- If failure: install Azure CLI using the OS-appropriate method
+- If success: continue.
+- If failure: STOP with "GitHub CLI not authenticated. Run `gh auth login` first."
 
-**Step 5 - Check Azure login**
+The agent does NOT check for or use Azure CLI. All Azure work for this
+flow is performed by the central Polaris Bootstrap workflow at
+`Aptean-Labs/polaris-devops`. The developer never needs `az login` or
+any personal Azure access.
 
-Run: `az account show`
+**Step 5 - (reserved)**
 
-- If success: user is already authenticated, continue (do NOT re-run az login)
-- If failure: run `az login` and allow interactive authentication
-
-If login fails or is cancelled: STOP with clear error. Do NOT proceed.
+This step is intentionally a no-op. It used to verify Azure login.
+That responsibility moved to the Polaris Bootstrap workflow.
 
 **Step 6 - Clone reference repository**
 
@@ -168,21 +169,51 @@ Create branch `feature-<ServiceName>-devops` in the target repository.
 The agent MUST locate and read ALL Dockerfiles in the target repo BEFORE any file creation or copy operations begin. Discovery rules are defined in the DevOps Pipeline Skill (DOCKERFILE DISCOVERY & BUILD CONTEXT RESOLUTION section).
 
 Repositories may have:
-- A SINGLE Dockerfile at root level serving ONE service
-- A SINGLE Dockerfile at root level serving MULTIPLE services (multi-stage builds)
-- MULTIPLE Dockerfiles in different directories (e.g., frontend/Dockerfile, backend/Dockerfile)
+- A SINGLE Dockerfile at root level serving ONE service (e.g., just backend or just frontend)
+- A SINGLE Dockerfile at root level serving MULTIPLE services (e.g., multi-stage builds producing both frontend and backend images, or build args selecting which app to build)
+- MULTIPLE Dockerfiles in different directories (e.g., frontend/Dockerfile, backend/Dockerfile) - each serving a different component
 
-The agent MUST discover ALL Dockerfiles, inspect their contents, and determine the scenario before proceeding. If NO Dockerfile is found: STOP with clear error.
+The agent MUST discover ALL Dockerfiles, inspect their contents, and determine the scenario (single-service, multi-service single Dockerfile, or multi-Dockerfile) before proceeding. If NO Dockerfile is found: STOP with clear error.
+
+PURPOSE: Validate that ALL Dockerfiles are correct and will build successfully when pipelines are triggered. Catch errors BEFORE creating CI/CD files.
 
 The agent MUST validate EACH discovered Dockerfile:
 
-1. Syntax and Structure: valid syntax, valid FROM base images, correct multi-stage references, consistent WORKDIR, no duplicate EXPOSE
-2. File and Dependency References: all COPY/ADD source paths exist, dependency files present, entry point scripts exist, .dockerignore not excluding needed files
-3. Build Correctness: EXPOSE port matches app port, final stage has CMD/ENTRYPOINT, RUN instructions match present dependency files, correct build context, `COPY --from=<stage>` source paths exist (add `RUN mkdir -p <dir>` if needed)
-4. Micro-services Specific: all build targets exist as directories, build args properly defined
-5. Multi-Dockerfile Consistency: no overlapping build contexts, clear component mapping
+1. Syntax and Structure:
+   - Dockerfile has valid syntax (no malformed instructions)
+   - All FROM instructions reference valid base images
+   - Multi-stage builds have correct stage references (COPY --from= targets exist)
+   - WORKDIR paths are consistent across instructions
+   - No duplicate or conflicting EXPOSE statements
 
-If ANY validation issue would cause a guaranteed build failure: fix before proceeding. This step is BLOCKING.
+2. File and Dependency References:
+   - All COPY and ADD source paths reference files/directories that ACTUALLY EXIST in the repository (relative to that Dockerfile's build context)
+   - package.json, requirements.txt, *.csproj, or equivalent dependency files referenced in COPY instructions are present
+   - Entry point scripts referenced in CMD or ENTRYPOINT exist
+   - .dockerignore is not excluding files needed by the build
+
+3. Build Correctness:
+   - EXPOSE port matches the application's configured port
+   - If multi-stage: final stage has a valid CMD or ENTRYPOINT
+   - RUN instructions that install dependencies match the dependency files present (e.g., npm install after copying package.json)
+   - Build context is correctly set (Dockerfile location relative to files it copies)
+   - For every `COPY --from=<stage>` instruction, verify the source path EXISTS in that build stage. If the source directory may not be created by the build (e.g., `COPY --from=builder /app/public ./public` but `public/` is not guaranteed to exist), add `RUN mkdir -p <dir>` before the build step or use a fallback pattern. This is common with Next.js standalone builds where `public/` may be empty.
+
+4. Micro-services Specific (if applicable):
+   - All application build targets referenced in the Dockerfile exist as directories in the repository
+   - Build arguments used for selecting apps are properly defined
+
+5. Multi-Dockerfile Consistency (when multiple Dockerfiles are found):
+   - Each Dockerfile's build context does not overlap with another's in ways that would cause conflicts
+   - Component mapping is clear (which Dockerfile serves which deployment)
+   - If purpose of any Dockerfile cannot be determined: ask the user
+
+If ANY validation issue is found:
+- Log the specific issue with file path and line number
+- Fix it first
+- If the issue would cause a guaranteed build failure: Fix the Dockerfile before proceeding to file creation
+
+This step is BLOCKING. No file operations may begin before it completes.
 
 ---
 
@@ -190,32 +221,46 @@ If ANY validation issue would cause a guaranteed build failure: fix before proce
 
 **Step 9 - Copy whitelisted files only**
 
-Verify each source file exists before copying. Log the full source path. STOP if any source file is missing.
+Verify each source file exists before copying. Log the full source path for each file. STOP if any source file is missing.
 
-From `<ref-repo>/templates/service/.github/workflows/` to `.github/workflows/`:
-- `bgm.{{ .ServiceName }}.lwr.deploy.yml`, `bgm.{{ .ServiceName }}.lwr.swap.yml`
-- `bgm.{{ .ServiceName }}.upr.deploy.yml`, `bgm.{{ .ServiceName }}.upr.swap.yml`
-- `bgm.helm.lwr.{{ .ServiceName }}.deploy.yml`, `bgm.helm.step.{{ .ServiceName }}.deploy.yml`
-- `bgm.helm.upr.{{ .ServiceName }}.deploy.yml`, `bgm.step.template.yml`
-- `docker-build-push-{{ .ServiceName }}.yml`, `docker.acr-images.promote-{{ .ServiceName }}.yml`
-- `docker.step.build-push-{{ .ServiceName }}.yml`, `helm.{{ .ServiceName }}.deploy.yml`
-- `helm.step.{{ .ServiceName }}.deploy.yml`, `helm.upr.{{ .ServiceName }}.deploy.yml`
-- `terraform-{{ .ServiceName }}.deploy.yml`, `terraform.step.{{ .ServiceName }}.deploy.yml`
-- `infra.{{ .ServiceName }}.deploy.yml`, `infra.step.{{ .ServiceName }}.deploy.yml`
+From `<ref-repo>/templates/service/.github/workflows/` to `.github/workflows/` in target:
+- `bgm.{{ .ServiceName }}.lwr.deploy.yml`
+- `bgm.{{ .ServiceName }}.lwr.swap.yml`
+- `bgm.{{ .ServiceName }}.upr.deploy.yml`
+- `bgm.{{ .ServiceName }}.upr.swap.yml`
+- `bgm.helm.lwr.{{ .ServiceName }}.deploy.yml`
+- `bgm.helm.step.{{ .ServiceName }}.deploy.yml`
+- `bgm.helm.upr.{{ .ServiceName }}.deploy.yml`
+- `bgm.step.template.yml`
+- `docker-build-push-{{ .ServiceName }}.yml`
+- `docker.acr-images.promote-{{ .ServiceName }}.yml`
+- `docker.step.build-push-{{ .ServiceName }}.yml`
+- `helm.{{ .ServiceName }}.deploy.yml`
+- `helm.step.{{ .ServiceName }}.deploy.yml`
+- `helm.upr.{{ .ServiceName }}.deploy.yml`
+- `terraform-{{ .ServiceName }}.deploy.yml`
+- `terraform.step.{{ .ServiceName }}.deploy.yml`
+- `infra.{{ .ServiceName }}.deploy.yml`
+- `infra.step.{{ .ServiceName }}.deploy.yml`
 
 From `<ref-repo>/templates/service/helm/<ServiceName>/` to `helm/<ServiceName>/`:
 - `values-{{ .ServiceName }}.yml`
 
 From `<ref-repo>/templates/service/infrastructure/<ServiceName>/` to `infrastructure/<ServiceName>/`:
-- `main.tf`, `variables.tf`, `versions.tf`
+- `main.tf`
+- `variables.tf`
+- `versions.tf`
 
 From `<ref-repo>/templates/service/manage-appConfig-secrets/` to `manage-appConfig-secrets/`:
-- `manage-azureConfig.ps1`, `README.md`, `azureConfig/**`, `bgmConfig/**`
+- `manage-azureConfig.ps1`
+- `README.md`
+- `azureConfig/**` (entire directory)
+- `bgmConfig/**` (entire directory)
 
 Config (generated, not copied):
 - `config/MainManifest.yml` (created by agent using example + schema as reference, only if not already present)
 
-After copy, verify: all 18 workflow files exist, all 3 terraform files exist, azureConfig and bgmConfig directories are present, config/MainManifest.yml exists.
+After copy, verify: all 18 workflow files exist, all 3 terraform files exist, azureConfig and bgmConfig directories are present, config/MainManifest.yml exists (pre-existing or newly generated).
 
 ---
 
@@ -226,130 +271,309 @@ After copy, verify: all 18 workflow files exist, all 3 terraform files exist, az
 Follow `devops-pipeline.skill.md` TOKEN REPLACEMENT rules exactly.
 
 Replace in ALL copied files (BOTH `{{ .Token }}` with spaces AND `{{.Token}}` without spaces):
-- `{{ .ServiceName }}`, `{{ .Namespace }}`, `{{ .ReleaseName }}`, `{{ .ReleaseNameTwo }}`
-- `{{ .RepoName }}`, `{{ .OrgName }}`, `{{ .DeploymentName }}`
-- `{{ .ServiceName | replace "-" "_" | upper }}` and `{{ .ServiceName | replace "-" "_" | lower }}` transforms
+- `{{ .ServiceName }}` / `{{.ServiceName}}` with derived ServiceName
+- `{{ .Namespace }}` / `{{.Namespace}}` with derived Namespace
+- `{{ .ReleaseName }}` / `{{.ReleaseName}}` with generated ReleaseName
+- `{{ .ReleaseNameTwo }}` / `{{.ReleaseNameTwo}}` with secondary ReleaseName (BGM only)
+- `{{ .RepoName }}` / `{{.RepoName}}` with the target repository name (used in infra workflow files)
+- `{{ .OrgName }}` / `{{.OrgName}}` with the GitHub organization name of the target repo (used in infra workflow files)
+- `{{ .DeploymentName }}` / `{{.DeploymentName}}` with the deployment name from `config/MainManifest.yml` `deployments[].name` (e.g., "api"). For migration jobs and envFrom references, this is the backend/api deployment name. Read the manifest (or use the scanning result from Step 10a if manifest is being generated) to determine the correct deployment name.
+- `{{ .ServiceName | replace "-" "_" | upper }}` transform
+- `{{ .ServiceName | replace "-" "_" | lower }}` transform
 
-Use regex `\{\{\s*\.TokenName\s*\}\}` to match both spacing variants.
+Use a regex like `\{\{\s*\.TokenName\s*\}\}` to match both spacing variants in one pass.
 
-Helm values placeholder normalization: `{{{ .ServiceName | replace "-" "_" | upper }}_IMAGE_TAG}` -> `#{SERVICE_NAME_IMAGE_TAG}#`
+Helm values placeholder normalization per `helm-runtime.skill.md`:
+- `{{{ .ServiceName | replace "-" "_" | upper }}_IMAGE_TAG}` -> `#{SERVICE_NAME_IMAGE_TAG}#`
 
 Token replacement is MANDATORY for: all workflow files, all Helm values files, all azureConfig files, all bgmConfig files, `manage-azureConfig.ps1`.
 
-DO NOT modify YAML structure, jobs, steps, comments, ACR placeholders, or PowerShell variables.
+DO NOT modify YAML structure, jobs, steps, comments, ACR placeholders, or PowerShell variables (`$Environment`, `$Name`).
 
-After replacement: verify no remaining `{{ .* }}` or `{{.* }}` tokens in any file. If any remain: STOP with file path and line number.
+After replacement: verify no remaining `{{ .ServiceName }}`, `{{.ServiceName}}`, `{{ .Namespace }}`, `{{.Namespace}}`, `{{ .ReleaseName }}`, `{{.ReleaseName}}`, `{{ .ReleaseNameTwo }}`, `{{.ReleaseNameTwo}}`, `{{ .RepoName }}`, `{{.RepoName}}`, `{{ .OrgName }}`, `{{.OrgName}}`, or `{{ .DeploymentName }}`, `{{.DeploymentName}}` tokens exist in any file. If any remain: STOP with the file path and line number.
 
 **Step 10a - Generate config/MainManifest.yml (if not already present)**
 
-If file exists: do NOT modify it. If it does NOT exist: read `MainManifest.example.yml` and `manifest-schema.json` from reference repo, scan target repo, CREATE new file with: manifestVersion 1.0, product.name, product.iamDetails.code (ServiceName UPPERCASE, max 12 chars), cloud azure, detected deployments with ports/healthCheck/capacity/configuration, infrastructure (databases - postgres only), empty storage/caching/messaging, routing, dependencies. Validate against schema. If databases/infrastructure unclear: ask user.
+- If the file already exists in the target repo: do NOT modify it
+- If the file does NOT exist:
+  * Read `templates/service/config/MainManifest.example.yml` from the cloned reference repo
+  * Read `templates/service/config/manifest-schema.json` from the cloned reference repo
+  * Scan the entire target repository structure
+  * CREATE a new `config/MainManifest.yml` following the schema structure:
+    - Set `manifestVersion: "1.0"`
+    - Set `product.name` to the repository name
+    - Set `product.iamDetails.code` to ServiceName in ALL UPPERCASE (e.g., PERSASST, CUSTMGMT). Max 12 chars, alphabetic only. Key Vault will be named kv-{region}-{lower(iamDetails.code)}-{env}
+    - Set `product.cloud` to "azure"
+    - Add detected deployments (ui, api, workers, microfrontend apps) with ports, capacity, and configuration. For each deployment, ask "Has this deployment implemented a health endpoint? (Yes/No)" - only add `healthCheck: { path, port, initialDelaySeconds, periodSeconds }` if Yes. Omit it entirely if No; probing a missing endpoint causes `connection refused` and pods will never start.
+    - Add required configuration for each deployment: IAM_CLIENT_ID, IAM_CLIENT_SECRET, IAM_POID, API_URL, API_KEY
+    - Add detected infrastructure (databases - postgres only currently)
+    - Set storage, caching, messaging as empty arrays (FUTURE)
+    - Add routing with domain patterns and path-based routes
+    - Add dependencies (internal/external)
+  * Validate the generated file against manifest-schema.json structure
+  * If databases/infrastructure cannot be detected: ask the user
 
 **Step 10b - Cross-Organization Repository Access (conditional)**
 
-If target repo is OUTSIDE Shared-Technology-Group: scan all workflow files for references to Shared-Technology-Group repos. For each workflow file that references such repos, add a checkout step using REPO_ACCESS_TOKEN before any step that uses those files. Only add to files that actually need it.
+- Determine if target repository is OUTSIDE the "Shared-Technology-Group" organization
+- If the target repo IS inside Shared-Technology-Group: SKIP this step
+- If the target repo is OUTSIDE Shared-Technology-Group:
+  * Scan ALL copied workflow files (.github/workflows/*.yml) for references to Shared-Technology-Group repositories (e.g., reusable workflow calls, action definitions)
+  * For EACH workflow file that references a Shared-Technology-Group repository:
+    - Add a checkout step using REPO_ACCESS_TOKEN (org-level secret):
+      ```yaml
+      - name: Checkout {referenced-repo}
+        uses: actions/checkout@v4
+        with:
+          repository: Shared-Technology-Group/{referenced-repo}
+          token: ${{ secrets.REPO_ACCESS_TOKEN }}
+          path: .github/.external/{referenced-repo}
+          ref: main
+      ```
+    - Place this checkout step BEFORE any step that uses files from the referenced repository
+    - Update subsequent path references to use the checkout path (.github/.external/{referenced-repo}/...)
+  * Only add checkout to files that ACTUALLY reference Shared-Technology-Group paths - do NOT add to files that don't need it
+  * Do NOT modify the org-level REPO_ACCESS_TOKEN secret (it already exists)
+  * The detailed rules are defined in the DevOps Pipeline Skill
 
 **Step 11 - Inspect Dockerfile**
 
-Use classification and build context from Step 8a.
+Use the Dockerfile discovery results from Step 8a. The Dockerfiles were already located, validated, and classified during the PRE-SCAN PHASE. Apply the classification and build context information determined earlier.
 
 **Step 12 - Classify service**
 
-Determine: Micro-Frontend or Standard Service. FINAL and AUTHORITATIVE.
+Determine classification: Micro-Frontend or Standard Service. This decision is FINAL and AUTHORITATIVE. All subsequent steps must reflect it.
 
 **Step 13 - Resolve build targets**
 
-Micro-Frontend: multiple build units (one per app). Standard: single build unit.
+Based on the classification from Step 12, determine the build targets. Micro-Frontend: multiple build units (one per app). Standard: single build unit.
 
 **Step 14 - Apply Dockerfile-aware augmentation (additive only)**
 
-Follow `devops-pipeline.skill.md` DOCKERFILE-AWARE AUGMENTATION rules. Micro-Frontend: add additional container repository entries. Standard: extract exposed port, update ONLY port values in Helm values. Inject resolved Dockerfile path into docker workflow files. No deletions. No reformatting.
+Follow `devops-pipeline.skill.md` DOCKERFILE-AWARE AUGMENTATION rules.
+
+- Micro-Frontend: add additional container repository entries
+- Standard: extract exposed port, update ONLY port values in Helm values file
+
+Inject resolved Dockerfile path into `docker-build-push-{{ .ServiceName }}.yml` and `docker.step.build-push-{{ .ServiceName }}.yml`.
+
+No deletions. No reformatting.
 
 **Step 15 - Apply Helm runtime configuration**
 
-Follow `helm-runtime.skill.md` HELM RUNTIME CONFIGURATION RULES: exactly ONE `envFrom` block per Helm release, use `nameOverride` by default, no duplicate secrets/AppConfig references.
+Follow `helm-runtime.skill.md` HELM RUNTIME CONFIGURATION RULES:
+- Exactly ONE `envFrom` block per Helm release
+- Use `nameOverride` (not `fullnameOverride`) by default
+- Secrets and AppConfig references MUST NOT be duplicated per container
 
 **Step 16 - Configure ingress paths**
 
-Follow `helm-runtime.skill.md` INGRESS PATH STRUCTURE RULES: backend=`/<ServiceName>/api`, frontend=`/<ServiceName>/<frontend-segment>`, Micro-Frontend=discover all paths from Dockerfile.
+Follow `helm-runtime.skill.md` INGRESS PATH STRUCTURE RULES. AppCentral serves
+deployed applications under an `/app/` prefix, so every ingress path carries it:
+- Backend service: `/app/<ServiceName>/api`
+- Frontend service: `/app/<ServiceName>/<frontend-segment>`
+- Micro-Frontend: discover all paths from Dockerfile, validate each path independently per its type (frontend or backend rule) - every one gets the `/app/` prefix, not only the first
+- Frontend services must also set the build's own base path (`basePath`/`assetPrefix`, Vite `base`, or router `basename`) to the same value; an ingress path that moved without it builds cleanly and 404s at runtime
+
+Follow `helm-runtime.skill.md` INGRESS CLASS NAME RULES:
+- In `helm/{{ .ServiceName }}/values-{{ .ServiceName }}.yml`: `ingressClassName` MUST be `#{ingress_class_name}#` (token, never hardcoded)
+- In `helm.{{ .ServiceName }}.deploy.yml`: patch `ingress_class_name` in the matrix to:
+  - dev: `kong-dev`
+  - tst: `kong-tst`
+- In `helm.upr.{{ .ServiceName }}.deploy.yml`: patch `ingress_class_name` in the matrix to:
+  - uat-A: `kong-shr`
+  - prd-A: `kong-prda`
+
+Follow `helm-runtime.skill.md` HELM DEPLOY FAILURE DIAGNOSTICS RULES (only when a migration job is present per Step 17):
+- Append the `if: failure()` "Capture Helm hook job logs on failure" step to the deploy job in both `helm.{{ .ServiceName }}.deploy.yml` and `helm.upr.{{ .ServiceName }}.deploy.yml`, after the helm deploy step.
+- Bind `NS` to the same per-env namespace the helm deploy step targets. This makes a failed pre-upgrade migration job print its pod logs in CI instead of only `BackoffLimitExceeded`.
 
 **Step 17 - Detect database usage and determine migration inclusion (AUTOMATIC)**
 
-Scan for database usage (see MIGRATION JOB AUTOMATIC DETECTION above). MUST NOT ask user.
+This step is MANDATORY and MUST NOT be skipped.
+The agent MUST scan the repository for database usage (see MIGRATION JOB AUTOMATIC DETECTION section above). The agent MUST NOT ask the user.
 
-If database IS detected: determine migration config, IMMEDIATELY add Helm hook annotations to azureConfig and bgmConfig files. If annotations NOT found after processing: ADD them immediately.
+If database IS detected:
+- Determine migration configuration (tool, workingDir, command)
+- IMMEDIATELY add Helm hook annotations to azureConfig and bgmConfig files:
+  - Scan manage-appConfig-secrets/azureConfig/appconfig-*.yml
+  - Scan manage-appConfig-secrets/azureConfig/keyvault-secrets-*.yml
+  - Scan manage-appConfig-secrets/bgmConfig/appconfig-*.yml
+  - Add annotations to configs[], secrets[], containerRegistries[] sections
+  - Verify annotations were added successfully
+- If annotations are NOT found after processing: ADD them immediately
+- Rules are mentioned in the DevOps Pipeline Skill
 
-If NO database: note to exclude migration job, keep azureConfig annotations as `annotations: {}`.
+If NO database detected:
+- Note to exclude migration job section
+- Keep azureConfig annotations as empty objects: `annotations: {}`
 
 Store detection result for Step 28.
 
 **Step 18 - Generate two BGM release names**
 
-Per `devops-pipeline.skill.md` BGM CONFIGURATION RELEASE NAMES rules: Primary ReleaseName (e.g. `brave-eagle`), Secondary ReleaseNameTwo (e.g. `swift-falcon`). Both deterministic, both different. Apply to bgmConfig: setName `one` uses ReleaseName, setName `two` uses ReleaseNameTwo.
+Per `devops-pipeline.skill.md` BGM CONFIGURATION RELEASE NAMES rules:
+- Primary ReleaseName: adjective-noun (e.g. `brave-eagle`)
+- Secondary ReleaseNameTwo: different adjective-noun (e.g. `swift-falcon`)
+- Both deterministic, both different from each other
+
+Apply to bgmConfig files: setName `one` uses ReleaseName, setName `two` uses ReleaseNameTwo.
 
 **Step 19 - Update azureConfig values**
 
-Inspect target repo for environment variables and known config keys. Add missing keys to appconfig and keyvault files. NEVER remove or rename existing keys. Additive only.
+Inspect the target repository for environment variables and known config keys. Add missing keys to appconfig and keyvault files. NEVER remove or rename existing keys. This is additive only.
 
 **Step 20 - Micro-Frontend conditional build logic (if applicable)**
 
-Only if Micro-Frontend. Read `.polaris/skills/devops-microfrontend.skill.md` first, then follow its rules: add path-based `detect-changes` job, per-app conditional build jobs, update promote/build-push/helm-step workflows, update Helm values with separate deployments/services/ingress for EACH container, update ALL BGM workflow files.
+Only if service is classified as Micro-Frontend. Read `.polaris/skills/devops-microfrontend.skill.md` first, then follow its MICRO-FRONTEND DEPLOYMENT STRUCTURE and MICRO-FRONTEND MULTI-IMAGE WORKFLOW HANDLING rules:
+
+- Add path-based `detect-changes` job to docker workflow
+- Each build job executes only when its folder has changes OR `force_build_all` is triggered
+- Update `docker.acr-images.promote` with steps for ALL images
+- Update `docker.step.build-push` with build steps for ALL images
+- Update `helm.step` deploy with image tag handling for ALL images
+- Update Helm values with separate `deployments[]`, `services[]`, `ingress[]` for EACH container
+- Update ALL BGM workflow files (`bgm.helm.step`, `bgm.helm.lwr`, `bgm.helm.upr`) with ALL image handling
 
 ---
 
 **--- ENVIRONMENT SETUP PHASE (BLOCKING, SEQUENTIAL) ---**
 
-FORBIDDEN during this phase: `Start-Sleep`, polling loops, repeated environment listing, status checks between scripts.
+In this phase the agent triggers the central Polaris Bootstrap workflow
+at `Aptean-Labs/polaris-devops` to populate per-environment Azure SPN
+credentials and configuration variables in the target app repo. The
+agent does NOT execute any local PowerShell, does NOT call `az`, and
+does NOT read Key Vault or App Configuration directly.
+
+FORBIDDEN during this phase: `Start-Sleep` between trigger and watch,
+local execution of `set-env-secrets.ps1` or `set-env-vars.ps1`, any `az`
+command, retrying the bootstrap workflow more than once.
 
 **Step 21 - Verify all files are saved**
 
 Confirm all generated and modified files are written to disk.
 
-**Step 22 - Verify environment scripts exist**
+**Step 22 - TRIGGER POLARIS BOOTSTRAP WORKFLOW**
 
-Check both scripts exist in reference repo: `set-env-secrets.ps1` and `set-env-vars.ps1`. STOP with exact expected path if missing.
+Determine the target repo's owner and name:
+```
+gh repo view --json owner,name --jq "\(.owner.login) \(.name)"
+```
+Store as `<owner>` and `<repo>`.
 
-**Step 23 - CREATE ENVIRONMENTS AND SECRETS**
+Trigger the central bootstrap workflow:
+```
+gh workflow run bootstrap.yml \
+  -R Aptean-Labs/polaris-devops \
+  -f target_owner=<owner> \
+  -f target_repo=<repo> \
+  -f environments=dev,tst,devops-build,prd-a
+```
+Default environments are `dev,tst,devops-build,prd-a`. The `devops-build`
+env is required by the docker-build-push pipeline; it reuses the `DEV_*`
+source values (build ACR is the dev ACR per Aptean convention). Remove
+`prd-a` from this list only if the PRDA org secret or PRDA repo-level
+variables in `polaris-devops` are not yet populated for your tenant.
 
-CRITICAL: Before executing set-env-secrets.ps1, verify the script uses stdin piping (`$value | gh secret set $name -e $env`) NOT the `-b"$value"` flag. Fix if needed.
+Wait 5 seconds, then resolve the run ID:
+```
+gh run list --workflow bootstrap.yml \
+  --repo Aptean-Labs/polaris-devops \
+  --limit 1 --json databaseId --jq ".[0].databaseId"
+```
+If no run ID is returned, retry up to 3 times with 5-second intervals
+(GitHub needs a moment to register the dispatch).
 
-Execute with FULL ABSOLUTE PATH: `<ref-repo>/templates/service/scripts/github/environments/set-env-secrets.ps1 -env all`
+Watch until completion:
+```
+gh run watch <run-id> --repo Aptean-Labs/polaris-devops
+```
 
-Wait for COMPLETE execution. Do NOT proceed until finished. Do NOT add sleep.
+If `gh run watch` exits non-zero: fetch logs and surface them:
+```
+gh run view <run-id> --log-failed --repo Aptean-Labs/polaris-devops
+```
+Then STOP with: "Bootstrap workflow failed. Run URL printed above. Common
+causes: missing org secret in Aptean-Labs (DEV/TST/PRDA_AZURE_CREDENTIAL_AUTOMATION
+or POLARIS_DEVOPS_PAT), this repo not in 'Selected repositories' for those
+secrets, PAT lacks write on target repo. Contact the platform team."
+Do NOT retry the bootstrap workflow automatically.
 
-Log each environment and secret created. If script fails: STOP.
+If success: log "Bootstrap workflow completed for <owner>/<repo>."
 
-**Step 24 - CREATE VARIABLES**
+**Step 23 - VERIFY SECRETS AND VARIABLES IN TARGET REPO (single check)**
 
-IMMEDIATELY after Step 23, with NO delay.
+List environments ONCE:
+```
+gh api repos/<owner>/<repo>/environments --jq ".environments[].name"
+```
 
-Execute: `<ref-repo>/templates/service/scripts/github/environments/set-env-vars.ps1 -env all`
+For EACH environment that was requested in Step 22 (e.g. dev, tst):
+- Verify `AZURE_CREDENTIAL_AUTOMATION` secret exists:
+  ```
+  gh secret list --env <env> --repo <owner>/<repo> --json name --jq ".[] | select(.name==\"AZURE_CREDENTIAL_AUTOMATION\") | .name"
+  ```
+- Verify the expected variables exist:
+  ```
+  gh variable list --env <env> --repo <owner>/<repo> --json name --jq ".[].name"
+  ```
+  Expected: at minimum `CLUSTER_NAME`, `CLUSTER_RG_NAME`, `ACR_NAME`, `ACR_HOSTNAME`, `OCI_REGISTRY_URL`. Other variables (DB_RG_NAME, APTEANONE_PGSQL_SERVER_NAME, REMOTE_BACKEND_STORAGE_ACCOUNT, TF_RG_NAME) are also written by the bootstrap workflow when their source values are present in `Aptean-Labs/polaris-devops` repo variables.
 
-Do NOT add `Start-Sleep`. Do NOT poll. If script fails: STOP.
+If ANY required entry is missing for an environment that was bootstrapped
+successfully: STOP with "Bootstrap workflow reported success but secret/
+variable not found in target repo. Run URL: <run-id>. Possible cause:
+source value missing in `polaris-devops` (variable named `<PFX>_<NAME>`
+not set on that repo)."
 
-**Step 25 - VERIFY SECRETS AND VARIABLES (single check only)**
+Do NOT add sleep. Do NOT poll repeatedly. Do NOT re-trigger the bootstrap
+workflow.
 
-List environments ONCE. For EACH environment: verify secrets exist (single check), verify variables exist (single check). If missing: retry creation ONCE. If still missing: STOP.
+Log: "All required secrets and variables verified for <owner>/<repo>."
 
 **Step 26 - ADD REQUIRED REVIEWERS**
 
-Follow `devops-pipeline.skill.md` ENVIRONMENT REQUIRED REVIEWERS rules.
+Follow `devops-pipeline.skill.md` ENVIRONMENT REQUIRED REVIEWERS rules exactly.
 
+Reviewer resolution (automatic, no user input):
 1. Get authenticated username: `gh api user --jq .login`
 2. Get numeric user ID: `gh api "users/{username}" --jq .id`
-3. Add svc-GitHub_aptean as collaborator with admin access (MANDATORY). If fails: retry once with write permission. If all fail: log WARNING, continue.
-4. Get svc-GitHub_aptean numeric ID. If fails: log WARNING.
+3. Add svc-GitHub_aptean as repository collaborator with admin access (MANDATORY):
+   - Execute: `gh api "repos/{owner}/{repo}/collaborators/svc-GitHub_aptean" -X PUT -f permission=admin`
+   - If fails: retry ONCE, then try with write permission
+   - If ALL attempts fail: log WARNING, continue execution, mark svc-GitHub_aptean as unavailable
+4. Get svc-GitHub_aptean numeric user ID:
+   - Execute: `gh api "users/svc-GitHub_aptean" --jq .id`
+   - If fails: retry ONCE, log WARNING if still fails, mark as unavailable
+5. If authenticated user resolution fails: try repo owner as fallback
+6. If all methods fail for authenticated user: STOP with clear error
 
-For EACH environment EXCEPT `devops-build`, `dev`, `tst`:
+For EACH environment EXCEPT `devops-build`, `dev`, and `tst` (`prd-wus2`, `prd-eus`, `prd-gwc`, `prd-gen`, `uat`, `uat-a`, `dmo`, `prd-a`):
 
-If svc-GitHub_aptean available, add BOTH reviewers (authenticated user + svc-GitHub_aptean).
-If not available, add authenticated user only.
+If svc-GitHub_aptean is available, add BOTH reviewers:
+```powershell
+$json = "{`"reviewers`":[{`"type`":`"User`",`"id`":$userId},{`"type`":`"User`",`"id`":$svcUserId}]}"
+$json | gh api "repos/{owner}/{repo}/environments/{env}" -X PUT --input -
+```
 
-- `type` MUST be `"User"`, `id` MUST be numeric. No sleep between assignments.
-- Verify reviewers were added. Retry ONCE if failed. If retry fails: log WARNING, continue.
+If svc-GitHub_aptean is NOT available, add authenticated user only:
+```powershell
+$json = "{`"reviewers`":[{`"type`":`"User`",`"id`":$userId}]}"
+$json | gh api "repos/{owner}/{repo}/environments/{env}" -X PUT --input -
+```
+
+- `type` MUST be `"User"`
+- `id` MUST be the NUMERIC user ID (not username string)
+- No sleep between assignments
+- Verify reviewers were added. Retry ONCE if failed.
+- If retry fails: log WARNING, continue to next environment (DO NOT STOP)
+
+Log: "Reviewers assignment completed"
 
 **Step 27 - FINAL REVIEWER VERIFICATION**
 
-Check each environment (except `devops-build`, `dev`, `tst`) ONCE. Log missing ones for manual addition. Do NOT retry repeatedly.
+Check each environment (except `devops-build`, `dev`, and `tst`) ONCE. If missing: log which environment and reviewer is missing for manual addition. Do NOT retry repeatedly.
+
+Log: "Reviewer verification completed"
 
 ---
 
@@ -357,31 +581,45 @@ Check each environment (except `devops-build`, `dev`, `tst`) ONCE. Log missing o
 
 **Step 28 - Apply migration job decision to Helm values**
 
-Using decision from Step 17: YES=include migration job section with detected config; NO=exclude `jobs:` section, keep as `jobs: []`.
+Using the decision stored in Step 17:
+- YES: include migration job section with detected config (`workingDir`, command, args)
+- NO: exclude `jobs:` section, keep as `jobs: []`
 
 **Step 29 - FAST MODE RECONCILIATION (single pass, non-recursive)**
 
-Scope: only whitelisted files, Dockerfile, Helm values, workflow files.
+Scope: only files listed in the whitelist, Dockerfile, Helm values, and workflow files. Do NOT traverse unrelated files. Do NOT re-classify service type.
 
-Validate:
-- Dockerfile classification consistency across all generated files
-- No remaining `{{ .* }}` or `{{.* }}` tokens, no malformed GitHub expressions, no escaped Helm placeholders
-- No `TO_BE_CONFIGURED` placeholders remain
-- GitHub Actions version consistency: `actions/checkout@v4`, `Azure/login@v2.1.1`, `docker/setup-buildx-action@v3`, `azure/CLI@v2`
-- Environment name casing: all lowercase (e.g., `uat-a` not `uat-A`)
-- Variable names: `vars.CLUSTER_RG_NAME` (not `vars.RG_CLUSTER`)
-- Secrets handling: prefer `secrets: inherit` over explicit listing
-- Helm invariants: exactly one release, exactly one `envFrom`, no multi-container for micro-frontends
-
-If violation found: fix ONCE. Do NOT restart reconciliation.
+- Validate Dockerfile classification consistency across all generated files
+- Validate token replacement: no remaining `{{ .ServiceName }}`, `{{.ServiceName}}`, `{{ .DeploymentName }}`, `{{.DeploymentName}}`, `{{ .OrgName }}`, `{{.OrgName}}`, or any other `{{ .* }}` / `{{.* }}` tokens. No malformed GitHub expressions, no escaped Helm placeholders, no extra backtick-wrapped braces
+- Validate NO `TO_BE_CONFIGURED` placeholders remain in any generated file. If found, resolve them using the derived values (e.g., Helm values paths should use `helm/<ServiceName>/values-<ServiceName>.yml`)
+- Validate GitHub Actions version consistency across ALL workflow files:
+  - `actions/checkout` MUST be `@v4` (not v2 or v3)
+  - `Azure/login` MUST be `@v2.1.1` (not v1)
+  - `docker/setup-buildx-action` MUST be `@v3` (not v1)
+  - `azure/CLI` MUST be `@v2` (not v1)
+  If the reference template has outdated versions, update them during reconciliation.
+- Validate environment name casing: all environment references MUST be lowercase (e.g., `uat-a` not `uat-A`). GitHub environments are case-sensitive.
+- Validate variable names in workflow files: `vars.CLUSTER_RG_NAME` (not `vars.RG_CLUSTER`). The expected names are written by the Polaris Bootstrap workflow at `Aptean-Labs/polaris-devops` and are: `CLUSTER_NAME`, `CLUSTER_RG_NAME`, `ACR_NAME`, `ACR_HOSTNAME`, `OCI_REGISTRY_URL`, `DB_RG_NAME`, `APTEANONE_PGSQL_SERVER_NAME`, `REMOTE_BACKEND_STORAGE_ACCOUNT`, `TF_RG_NAME`.
+- Validate secrets handling consistency: prefer `secrets: inherit` over explicit secret listing in reusable workflow calls. Standardize across all workflow files.
+- Validate Helm invariants: exactly one Helm release, exactly one `envFrom`, no multi-container deployments for micro-frontends (per `helm-runtime.skill.md`)
+- Validate all required files exist. STOP if any are missing. Do NOT attempt regeneration.
+- Validate required reviewers per environment. Log missing ones for manual addition.
+- If a violation is found: fix it ONCE. Do NOT restart reconciliation. Do NOT perform additional scans.
 
 **Step 30 - Verify all required files exist**
 
-Verify all files required for the classified service type are present.
+Verify that all files required for the classified service type (Micro-Frontend or Standard) are present.
 
 **Step 31 - Micro-Frontend multi-container verification (if applicable)**
 
-Verify: promote workflow has steps for ALL images, build workflow has jobs for ALL images, `helm.step` has `--set` commands for ALL images, Helm values has deployments/services/ingress for ALL images, BGM workflows handle ALL images.
+Only if service is classified as Micro-Frontend with multiple containers. Verify:
+- Promote workflow has steps for ALL images
+- Build workflow has jobs for ALL images
+- `helm.step` workflow has `--set` commands for ALL images
+- Helm values file has `deployments[]`, `services[]`, `ingress[]` for ALL images
+- BGM workflows (`bgm.helm.step`, `bgm.helm.lwr`, `bgm.helm.upr`) handle ALL images
+
+If any are missing: fix them.
 
 **Step 32 - Enforce final newline rules**
 
@@ -395,27 +633,33 @@ Ensure all generated files end with a single newline character.
 
 ```
 FILES CREATED:
-  .github/workflows/ - list each .yml with purpose (BGM/Docker/Helm/Terraform)
-  helm/<ServiceName>/values-<ServiceName>.yml
-  infrastructure/<ServiceName>/main.tf, variables.tf, versions.tf
-  manage-appConfig-secrets/azureConfig/*, bgmConfig/*
-  config/MainManifest.yml
+  .github/workflows/ - list each .yml file with its purpose (BGM/Docker/Helm/Terraform)
+  helm/<ServiceName>/values-<ServiceName>.yml - Kubernetes deployment configuration
+  infrastructure/<ServiceName>/main.tf - Terraform configuration
+  infrastructure/<ServiceName>/variables.tf
+  infrastructure/<ServiceName>/versions.tf
+  manage-appConfig-secrets/azureConfig/* - Azure App Configuration and Key Vault
+  manage-appConfig-secrets/bgmConfig/* - Blue-Green deployment configuration
+  config/MainManifest.yml - Service manifest with deployments, infrastructure, routing, and environment configuration
 
 REQUIRED REVIEWERS:
   <env-name>: Added / Missing
-  (for envs except devops-build, dev, tst)
+  (for each environment except devops-build, dev, and tst)
+  (if any missing: instructions to add manually via GitHub Settings -> Environments)
 
 NEXT STEP:
   Run /polaris.deploy to merge the PR and trigger all pipelines automatically.
+  The deploy command will handle: PR merge, Docker build, infrastructure provisioning,
+  DATABASE_URL configuration, and Helm deployment for dev (and optionally tst).
 
 DOCUMENTATION: See manage-appConfig-secrets/README.md
 
-WARNINGS/MANUAL ACTIONS: (list any issues)
+WARNINGS/MANUAL ACTIONS: (list any issues encountered or manual steps needed)
 ```
 
 **Step 34 - Commit all changes**
 
-Commit all created and modified files to `feature-<ServiceName>-devops` branch.
+Commit all created and modified files to the `feature-<ServiceName>-devops` branch.
 
 **Step 35 - Open PR to main branch**
 
@@ -425,12 +669,20 @@ Open a pull request from `feature-<ServiceName>-devops` to the default branch.
 
 ## FAILURE HANDLING
 
-On any violation: DO NOT partially apply changes. DO NOT open a PR. Exit with a clear error message.
+On any violation: DO NOT partially apply changes. DO NOT open a PR. Exit with a clear error message identifying the violation and what needs to be fixed.
 
-**Exception**: Reviewer assignment failure MUST NOT fail the agent. Log and continue.
+**Exception**: Reviewer assignment failure MUST NOT fail the agent. Log reviewer failures and continue.
 
 ---
 
 ## CONTEXTUAL UPDATE MODE (POST-SCAFFOLDING CHANGES)
 
-When user requests changes after initial scaffolding (e.g., "add migrations", "fix helm values"), follow the Contextual Update Skill (`.polaris/skills/contextual-update.skill.md`). The agent MUST NOT re-run the entire scaffolding process.
+When the user requests changes to specific sections after the initial scaffolding run (e.g., "add migrations", "fix helm values", "update bgm config"), the agent MUST follow the Contextual Update Skill (`.polaris/skills/contextual-update.skill.md`).
+
+The skill defines:
+- The 5-step procedure (re-read agent definition, load skills, inspect state, apply changes, verify)
+- Common scenario-to-step mappings (migrations, helm, bgm, workflows, MainManifest, annotations)
+- Critical rules for contextual mode execution
+
+The agent MUST NOT re-run the entire scaffolding process.
+The agent MUST load and follow the Contextual Update Skill for every post-scaffolding request.

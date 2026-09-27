@@ -12,6 +12,7 @@ domain: backend-logic
 shell_pid: "16074"
 agent: "claude"
 assignee: "arturzrk@gmail.com"
+evidence: "legacy-exempt"
 ---
 
 # WP07 - Step mutation + Property/Job rename (US6, US7)

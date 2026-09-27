@@ -4,15 +4,11 @@ description: Perform structured code review and kanban transitions for completed
 
 ## Advanced Command Gate
 
-Load `.claude/commands/references/advanced-gate.md` and apply it before proceeding.
+Load `references/advanced-gate.md` and apply the `advanced_commands` gate (bypassed for autopilot or NL routing).
 
 ## Model Guidance
 
-This command does planning work. Use **claude-opus-4-6** for this session.
-
-Deep reasoning, synthesis, and decision-making here propagate to all downstream work. Opus-level reasoning is insurance, not indulgence.
-
-If you are currently on Sonnet: switch to Opus before proceeding (`/model claude-opus-4-6`).
+Model: plan tier (see references/model-selection.md); routing is enforced by the launcher.
 
 ---
 
@@ -22,43 +18,48 @@ If you are currently on Sonnet: switch to Opus before proceeding (`/model claude
 polaris agent workflow review $ARGUMENTS --agent <your-name>
 ```
 
-If no WP ID provided, auto-finds first `lane: "for_review"` WP and moves it to doing.
+No WP ID: auto-finds the first `for_review` WP and moves it to doing.
 
 ## Step 2: Separation of Duties Check
 
 **Telemetry**: Run: `polaris telemetry record review --feature <slug> --phase start --agent {{AGENT_NAME}} --wp <WP_ID>`
 
-1. `git config user.email` -> your identity
-2. Check `.polaris/audit-trail/<feature-slug>.jsonl` for this WP's implementer.
-3. If your email matches:
-   - `quality.sod_enforcement` enabled in config: STOP with "Reviewer must differ from implementer"
-   - Disabled (default): warn but proceed
-   - Override: `--self-review "<justification>"` (recorded in audit trail)
+Compare `git config user.email` against this WP's implementer in `.polaris/audit-trail/<feature-slug>.jsonl`. If they match: STOP when `quality.sod_enforcement` is enabled, otherwise warn and proceed. Override: `--self-review "<justification>"` (recorded in the audit trail).
 
 ## Step 3: Dependency checks
 
 <!-- dependency_check -->
-- Confirm each dep WP is merged to main before reviewing this WP.
+- Confirm each dependency WP is merged into the feature branch first (deps merge into the feature branch; it merges to main later via `/polaris.merge` or a PR).
 <!-- dependent_check -->
-- Note any WPs depending on this one and their current lanes.
+- Note any WPs depending on this one and their lanes.
 <!-- rebase_warning -->
-- If requesting changes with dependents: warn those agents to rebase.
+- If requesting changes with dependents, warn them to rebase.
 <!-- verify_instruction -->
 - Verify dep declarations match actual code coupling.
 
 ## Step 4: Read implementation
 
-Switch to WP branch. Read ALL changed files via `git diff`.
+Switch to the WP branch and read ALL changed files via `git diff`. Assess blast radius with the local code graph (JSON output, exit 2 if unavailable): `polaris graph impact <file>` (dependents), `who-imports <file>` (callers), `tests-for <file>` (covering tests).
 
 ## Step 5: Multi-Persona Review Passes
 
-Load `@references/review-passes.md` for full criteria. Perform all 3 passes sequentially with separate headings and verdicts. Check `.polaris/config.yaml` for `review_passes` section (enabled/required per pass); default: all 3 enabled and required.
-
-Do NOT skip or combine passes.
+Load `@references/review-passes.md` for full criteria. Perform all 4 passes in order, each with its own heading and verdict; do NOT skip or combine them. The `review_passes` config gates which passes are required (default: all 4).
 
 ## Step 6: Complete the review
 
-- **APPROVED**: `polaris agent tasks move-task WP## --to done --note "Review passed: <summary>"`
-- **REJECTED**: write feedback to temp file, then `polaris agent tasks move-task WP## --to planned --review-feedback-file <temp-file-path>`
+Run move-task with `--json` and read the verdict; on `allowed: false` follow each `remediation`, fix, and retry once. Never pass human-override flags.
+
+- **APPROVED**: `polaris agent tasks move-task WP## --to done --note "Review passed: <summary>" --json`. The CLI runs the done-gate (subtasks, clean and synced worktree, an implementation commit, review and tests gates); an unmerged WP without fresh passing evidence is denied. This mirrors autopilot Stage 3 ordering: the WP branch is merged into the feature branch and evidence is recorded on the rebased HEAD before the move to done.
+- **REJECTED**: write feedback to a temp file, then `polaris agent tasks move-task WP## --to planned --review-feedback-file <path> --json`.
 
 **Telemetry**: Run: `polaris telemetry record review --feature <slug> --phase complete --agent {{AGENT_NAME}} --wp <WP_ID>`
+
+## Step 7: Emit the machine-readable verdict
+
+End with EXACTLY ONE fenced JSON block and no prose after it - the only signal the quality gate reads; a missing, malformed, or duplicated block counts as REJECTED.
+
+```json
+{"verdict": "APPROVED", "reasons": ["all required passes PASS"], "evidence_checked": true}
+```
+
+Use `"verdict": "REJECTED"` with blocking items in `reasons` when any required pass fails. Set `evidence_checked` true only if you ran the tests and inspected the diff.

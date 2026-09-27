@@ -9,6 +9,7 @@ test_file: frontend/src/components/__tests__/notification-settings-toggle.test.t
 domain: frontend-craft
 reviewed_by: "Artur Żurek"
 review_status: "approved"
+evidence: "legacy-exempt"
 ---
 
 # WP04 - Frontend settings + menu link
