@@ -47,12 +47,31 @@ public sealed class FileAuditLog : IAuditLog
 }
 
 /// <summary>
-/// Bound from configuration section <c>AuditLog</c>. Defaults to
-/// <c>audit-trail/property-job-step.jsonl</c> relative to the host's
-/// content root, which the constitution declares gitignored.
+/// Bound from configuration section <c>AuditLog</c>.
+///
+/// <list type="bullet">
+/// <item><description>
+/// <c>Provider</c>: selects the <see cref="Application.Common.Interfaces.IAuditLog"/>
+/// implementation — <c>"File"</c> (default, local dev only) or
+/// <c>"Mongo"</c> (staging and production). Unknown values fail startup.
+/// The <c>Production</c> environment refuses to start with the
+/// <c>"File"</c> provider.
+/// </description></item>
+/// <item><description>
+/// <c>SinkPath</c>: path used by the <c>File</c> provider only.
+/// Defaults to <c>audit-trail/property-job-step.jsonl</c> relative to
+/// the host's content root, which the constitution declares gitignored.
+/// </description></item>
+/// </list>
 /// </summary>
 public sealed class AuditLogOptions
 {
     public const string SectionName = "AuditLog";
+
+    /// <summary>
+    /// "File" (default, local dev) or "Mongo" (staging/production).
+    /// </summary>
+    public string Provider { get; set; } = "File";
+
     public string SinkPath { get; set; } = "audit-trail/property-job-step.jsonl";
 }

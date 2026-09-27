@@ -8,6 +8,7 @@ using HomeMaintenance.Infrastructure.Scheduling;
 using HomeMaintenance.Infrastructure.Time;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 
@@ -21,7 +22,8 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(
         this IServiceCollection services,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        IHostEnvironment env)
     {
         services.Configure<MongoDbSettings>(
             configuration.GetSection(MongoDbSettings.SectionName));
@@ -43,9 +45,7 @@ public static class DependencyInjection
         services.AddScoped<ICorrelationContext, HttpContextCorrelationContext>();
         services.AddSingleton<IDateTimeProvider, SystemDateTimeProvider>();
 
-        services.Configure<AuditLogOptions>(
-            configuration.GetSection(AuditLogOptions.SectionName));
-        services.AddSingleton<IAuditLog, FileAuditLog>();
+        services.AddAuditLogging(configuration, env);
 
         services.AddEmailSending(configuration);
 

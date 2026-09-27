@@ -77,10 +77,16 @@ Production values used throughout:
    production client from phase 6), `MongoDB__ConnectionString` (the
    Atlas URI), `Cors__AllowedOrigins=https://maintained.house`.
    `Auth__UseStub` stays unset - production startup refuses the stub.
-3. **Audit-log sink**: per the constitution, production audit records
-   must not live on the ephemeral container filesystem - point the
-   audit sink at a persistent store (the Atlas database is
-   acceptable) per oidc-setup.md "Going to production".
+3. **Audit-log sink**: The audit trail is persisted to the MongoDB
+   Atlas database (`auditEvents` collection). Set
+   `AuditLog__Provider=Mongo` in App Service Configuration (the
+   `appsettings.Staging.json` file already does this for Staging; add
+   the same setting for Production). The collection and its indexes
+   (`actor+timestamp`, `target+timestamp`, `eventType`,
+   `correlationId`) are created automatically by `MongoIndexInitializer`
+   on first startup. No additional resources or runbook phases are
+   required: Atlas is already a launch prerequisite, so the audit
+   trail inherits its TLS and backup posture.
 4. **Custom domain**: portal -> Custom domains -> add
    `api.maintained.house`; create the CNAME (and TXT validation
    record) at your DNS host; enable the free App Service managed

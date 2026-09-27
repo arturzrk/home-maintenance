@@ -26,6 +26,10 @@ public class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
     private readonly Dictionary<string, string?> _overrides = new()
     {
         ["Auth:UseStub"] = "true",
+        // Use the Mongo audit provider in all integration tests. This matches
+        // the staging/production configuration and exercises the real sink.
+        // MongoIndexInitializer creates the auditEvents collection on startup.
+        ["AuditLog:Provider"] = "Mongo",
     };
 
     public ApiFactory WithEnvironment(string environment)
@@ -43,14 +47,15 @@ public class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
 
     protected override IHost CreateHost(IHostBuilder builder)
     {
+        // ConfigureHostConfiguration values are converted to command-line args
+        // (--key=value) and passed to WebApplication.CreateBuilder(args), which
+        // adds them as the highest-priority config source — beating appsettings.json.
+        // This is essential for overrides that are read EAGERLY at service-registration
+        // time (e.g. AuditLog:Provider in AddAuditLogging), because
+        // ConfigureWebHost.ConfigureAppConfiguration runs AFTER service registration
+        // in the WebApplication / DeferredHostBuilder flow.
         builder.UseEnvironment(_environment);
-        return base.CreateHost(builder);
-    }
-
-    protected override void ConfigureWebHost(IWebHostBuilder builder)
-    {
-        builder.UseEnvironment(_environment);
-        builder.ConfigureAppConfiguration((_, config) =>
+        builder.ConfigureHostConfiguration(config =>
         {
             config.AddInMemoryCollection(new Dictionary<string, string?>
             {
@@ -59,6 +64,12 @@ public class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
             });
             config.AddInMemoryCollection(_overrides);
         });
+        return base.CreateHost(builder);
+    }
+
+    protected override void ConfigureWebHost(IWebHostBuilder builder)
+    {
+        builder.UseEnvironment(_environment);
     }
 
     public async Task InitializeAsync() => await _mongoContainer.StartAsync();

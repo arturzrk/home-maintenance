@@ -1,3 +1,4 @@
+using HomeMaintenance.Infrastructure.AuditLog;
 using HomeMaintenance.Infrastructure.Persistence.Documents;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -28,6 +29,7 @@ internal sealed class MongoIndexInitializer : IHostedService
         await EnsureJobIndexes(cancellationToken);
         await EnsureJobDefinitionIndexes(cancellationToken);
         await EnsureOwnerProfileIndexes(cancellationToken);
+        await EnsureAuditLogIndexes(cancellationToken);
         _logger.LogInformation("MongoDB indexes ensured.");
     }
 
@@ -127,5 +129,44 @@ internal sealed class MongoIndexInitializer : IHostedService
                 Builders<OwnerProfileDocument>.IndexKeys.Ascending(d => d.OwnerId),
                 new CreateIndexOptions { Name = "owner_idx", Unique = true }),
             cancellationToken: ct);
+    }
+
+    private Task EnsureAuditLogIndexes(CancellationToken ct)
+    {
+        var collection = _db.GetCollection<AuditLogDocument>(MongoAuditLog.CollectionName);
+
+        // Partial filter for Target indexes: skip documents where Target is null
+        // (auth events carry no target) so the index stays compact.
+        var targetExists = Builders<AuditLogDocument>.Filter.Type(
+            d => d.Target, MongoDB.Bson.BsonType.String);
+
+        return collection.Indexes.CreateManyAsync(
+            new[]
+            {
+                new CreateIndexModel<AuditLogDocument>(
+                    Builders<AuditLogDocument>.IndexKeys
+                        .Ascending(d => d.Actor)
+                        .Descending(d => d.Timestamp),
+                    new CreateIndexOptions { Name = "actor_timestamp_idx" }),
+
+                new CreateIndexModel<AuditLogDocument>(
+                    Builders<AuditLogDocument>.IndexKeys
+                        .Ascending(d => d.Target)
+                        .Descending(d => d.Timestamp),
+                    new CreateIndexOptions<AuditLogDocument>
+                    {
+                        Name = "target_timestamp_idx",
+                        PartialFilterExpression = targetExists,
+                    }),
+
+                new CreateIndexModel<AuditLogDocument>(
+                    Builders<AuditLogDocument>.IndexKeys.Ascending(d => d.EventType),
+                    new CreateIndexOptions { Name = "event_type_idx" }),
+
+                new CreateIndexModel<AuditLogDocument>(
+                    Builders<AuditLogDocument>.IndexKeys.Ascending(d => d.CorrelationId),
+                    new CreateIndexOptions { Name = "correlation_id_idx" }),
+            },
+            ct);
     }
 }
