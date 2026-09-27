@@ -10,6 +10,7 @@ domain: frontend-craft
 shell_pid: "26698"
 reviewed_by: "Artur Żurek"
 review_status: "approved"
+evidence: "legacy-exempt"
 ---
 
 # WP02 - Landing switch + dashboard page

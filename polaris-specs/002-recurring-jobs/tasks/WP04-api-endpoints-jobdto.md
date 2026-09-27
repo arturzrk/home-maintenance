@@ -11,6 +11,7 @@ test_status: required
 test_file: tests/e2e/WP04-api-endpoints-jobdto-update.e2e.js
 review_status: ''
 reviewed_by: ''
+evidence: "legacy-exempt"
 history:
 - timestamp: '2026-05-29T00:00:00Z'
   lane: planned

@@ -2,6 +2,10 @@
 description: Generate research work packages with subtasks aligned to methodology phases.
 ---
 
+## Advanced Command Gate
+
+Load `.claude/commands/references/advanced-gate.md` and apply it before proceeding: gate on `advanced_commands` in `.polaris/config.yaml`, bypassing for autopilot or NL routing invocations.
+
 # Command Template: /polaris.tasks (Research Mission)
 
 **Phase**: Design (finalizing work breakdown)

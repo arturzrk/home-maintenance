@@ -9,6 +9,7 @@ test_file: backend/tests/HomeMaintenance.UnitTests/Scheduling/ReminderDigestServ
 domain: backend-logic
 reviewed_by: "Artur Żurek"
 review_status: "approved"
+evidence: "legacy-exempt"
 ---
 
 # WP03 - Reminder digest scheduler

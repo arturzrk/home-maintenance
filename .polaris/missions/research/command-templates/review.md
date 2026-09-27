@@ -2,6 +2,10 @@
 description: Perform structured research review with citation validation.
 ---
 
+## Advanced Command Gate
+
+Load `.claude/commands/references/advanced-gate.md` and apply it before proceeding: gate on `advanced_commands` in `.polaris/config.yaml`, bypassing for autopilot or NL routing invocations.
+
 ## Research Review Overview
 
 **Telemetry**: Run: `polaris telemetry record review --feature <slug> --phase start --agent {{AGENT_NAME}} --wp <WP_ID>`

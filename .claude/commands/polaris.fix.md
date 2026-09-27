@@ -4,24 +4,14 @@ description: Fix a bug from an Azure DevOps work item with full traceability, ka
 
 ## Model Guidance
 
-This command does planning work. Use **claude-opus-4-6** for this session.
-
-Deep reasoning, synthesis, and decision-making here propagate to all downstream work. Opus-level reasoning is insurance, not indulgence.
-
-If you are currently on Sonnet: switch to Opus before proceeding (`/model claude-opus-4-6`).
+Model: impl tier (see references/model-selection.md); routing is enforced by the launcher.
 
 ---
 
 
 # /polaris.fix - Bug Fix from Azure DevOps Work Item
 
-**Version**: 2026.3.0+
-**Purpose**: Fix a bug sourced from Azure DevOps, with full traceability through polaris-specs.
-
 ## User Input
-
-**Telemetry**: Run: `polaris telemetry record fix --feature <slug> --phase start --agent claude`
-
 
 ```text
 $ARGUMENTS
@@ -29,12 +19,16 @@ $ARGUMENTS
 
 You **MUST** consider the user input before proceeding (if not empty).
 
+## Autopilot Context
+
+Under `AUTOPILOT_RUN` with an approved `autopilot:` spec, do NOT emit `WAITING_FOR_FIX_INPUT`. Missing bug ID / tracker token / tracker config: escalate via `polaris agent escalate --feature <slug> --stage fix` (see `references/escalation.md`) and STOP. Root-cause approval (Step 3.7): when `autopilot.fix.auto_rca` is true, auto-proceed and RECORD the RCA into the WP file instead of waiting; if the item lacks detail to diagnose, escalate. Human invocation is unchanged.
+
 ## Quick Mode
 
 If user passes `--quick` or arguments contain "quick":
 1. Parse the bug ID from arguments (same formats as below)
 2. Fetch the ADO/Jira work item details (title, description, repro steps, acceptance criteria)
-3. If the work item has sufficient detail (title + description or repro steps): skip extended discovery and proceed directly to implementation using work item fields as the specification source
+3. If the work item has enough detail (title + description or repro steps): skip discovery and implement directly from work item fields.
 4. If the work item is missing key fields (no description AND no repro steps): fall back to normal discovery flow
 5. All other phases (implementation, testing, kanban tracking, write-back) run normally
 
@@ -55,16 +49,9 @@ End with `WAITING_FOR_FIX_INPUT` and wait for a response.
 
 ## Failure Awareness (only if memory file exists)
 
-Skip this section entirely if `.polaris/memory/failures-summary.md` does not exist.
-
-If the file exists, check it for the error signature you're investigating before debugging. If a known fix exists, apply it first. After resolving a new bug, record the fix:
+Skip if `.polaris/memory/failures-summary.md` does not exist. If it exists, check for the error signature before debugging and apply any known fix first. After resolving, record:
 ```bash
 polaris memory resolve-failure --signature <first-8-chars> --resolution "<what fixed it>"
-```
-
-If the bug required an architectural decision and `decisions-summary.md` exists (or this is the first such decision worth keeping), also record:
-```bash
-polaris memory record-decision --context "<bug context>" --decision "<approach chosen>" --rationale "<why>" --tags bugfix --tags <area>
 ```
 
 ---
@@ -73,84 +60,38 @@ polaris memory record-decision --context "<bug context>" --decision "<approach c
 
 ### Issue Tracker Token Pre-flight
 
-Before fetching work items, validate that the required credentials are present. Check `.polaris/memory/constitution.md` for the configured issue tracker.
+Check `.polaris/memory/constitution.md` for the configured issue tracker and validate credentials:
 
-**Azure DevOps**: Requires `AZURE_DEVOPS_PAT` environment variable with **Work Items (Read)** scope.
-
+**Azure DevOps**: `AZURE_DEVOPS_PAT` env var with Work Items (Read) scope.
 ```python
 python -c "import os, sys; pat=os.environ.get('AZURE_DEVOPS_PAT','').strip(); sys.exit(0) if pat else (print('AZURE_DEVOPS_PAT not set. Create a PAT at https://dev.azure.com with Work Items (Read) scope:\n  export AZURE_DEVOPS_PAT=your-token-here'), sys.exit(1))"
 ```
 
-**Jira**: Requires `JIRA_API_TOKEN` and `JIRA_EMAIL` environment variables, plus Jira URL from constitution.
-
+**Jira**: `JIRA_API_TOKEN` and `JIRA_EMAIL` env vars.
 ```python
 python -c "import os, sys; t=os.environ.get('JIRA_API_TOKEN','').strip(); e=os.environ.get('JIRA_EMAIL','').strip(); sys.exit(0) if (t and e) else (print('Jira credentials missing. Set both:\n  export JIRA_API_TOKEN=your-api-token\n  export JIRA_EMAIL=your-email@company.com\nGenerate token at: https://id.atlassian.net/manage-profile/security/api-tokens'), sys.exit(1))"
 ```
 
-If the token check fails, print the guidance above, end with `WAITING_FOR_FIX_INPUT`, and wait.
+If the token check fails, print the guidance, end with `WAITING_FOR_FIX_INPUT`, and wait.
 
 ### Issue Tracker Configuration
 
-Read `.polaris/memory/constitution.md` and look for the issue tracker section:
-- **Azure DevOps**: `## Azure DevOps` section with Organization URL and Default Project
-- **Jira**: `## Jira` section with Base URL (e.g., `https://myorg.atlassian.net`) and Default Project Key
-
-If the issue tracker section is missing from the constitution:
-> "Issue tracker configuration not found in `.polaris/memory/constitution.md`.
->
-> Please either:
-> - Run `/polaris.setup` (or `/polaris.constitution`) to add issue tracker config
-> - Or provide the details now (ADO: org URL + project name; Jira: base URL + project key)"
-
-End with `WAITING_FOR_FIX_INPUT` and wait.
+Read `.polaris/memory/constitution.md` for: ADO - `## Azure DevOps` (org URL + project); Jira - `## Jira` (base URL + project key). If missing, ask the user to run `/polaris.setup` or provide the details directly. End with `WAITING_FOR_FIX_INPUT` and wait.
 
 ## Workflow
 
+Load `@references/fix-ado-workitem-integration.md` for the Azure DevOps fetch, mark-active,
+and mark-resolved operations used in Steps 1, 3.5, and 10.
+
 ### Step 1: Fetch Work Item from Azure DevOps
 
-Call the ADO REST API:
-
-```bash
-python -c "
-import json, os, sys, urllib.request, base64
-pat = os.environ['AZURE_DEVOPS_PAT']
-org_url = '{ORG_URL}'
-project = '{PROJECT}'
-work_item_id = {WORK_ITEM_ID}
-url = f'{org_url}/{project}/_apis/wit/workitems/{work_item_id}?api-version=7.0'
-auth = base64.b64encode(f':{pat}'.encode()).decode()
-req = urllib.request.Request(url, headers={'Authorization': f'Basic {auth}'})
-try:
-    resp = urllib.request.urlopen(req)
-    data = json.loads(resp.read())
-    fields = data.get('fields', {})
-    print(json.dumps({
-        'id': data['id'],
-        'title': fields.get('System.Title', ''),
-        'type': fields.get('System.WorkItemType', ''),
-        'state': fields.get('System.State', ''),
-        'description': fields.get('System.Description', ''),
-        'repro_steps': fields.get('Microsoft.VSTS.TCM.ReproSteps', ''),
-        'acceptance_criteria': fields.get('Microsoft.VSTS.Common.AcceptanceCriteria', ''),
-        'assigned_to': fields.get('System.AssignedTo', {}).get('displayName', ''),
-        'area_path': fields.get('System.AreaPath', ''),
-        'iteration_path': fields.get('System.IterationPath', ''),
-        'severity': fields.get('Microsoft.VSTS.Common.Severity', ''),
-        'priority': fields.get('Microsoft.VSTS.Common.Priority', 0)
-    }, indent=2))
-except urllib.error.HTTPError as e:
-    print(json.dumps({'error': f'HTTP {e.code}: {e.reason}', 'url': url}), file=sys.stderr)
-    sys.exit(1)
-"
-```
-
-**Error handling**:
-- **404**: "Work item {id} not found in {project}. Verify the ID and project name."
-- **401/403**: "Authentication failed. Check your AZURE_DEVOPS_PAT token."
-- **Network error**: "Cannot reach Azure DevOps. Check your network connection."
+Call the ADO REST API using the fetch operation (Operation 1 in the loaded reference),
+including its 404/401/403/network-error handling.
 
 **Non-Bug work item type**: If the work item type is not "Bug", warn:
-> "Work item {id} is a '{type}', not a Bug. Proceeding anyway - the fix workflow works for any work item type."
+> "Work item {id} is a '{type}', not a Bug. Proceeding anyway."
+
+After the fetch, seed fix context: pipe the body to `polaris graph fix-context`; paste the `## Fix Context` section into working context (exit 2 = graph unavailable/disabled, proceed to RCA).
 
 ### Step 2: Create Branch
 
@@ -181,6 +122,8 @@ polaris agent feature create-feature "fix-{id}-{kebab-title}" --json
 Where `{kebab-title}` is the work item title converted to kebab-case (max 50 chars, truncated at word boundary).
 
 Parse the JSON output for `feature` and `feature_dir`.
+
+**Telemetry**: Run: `polaris telemetry record fix --feature <slug> --phase start --agent claude`
 
 Create `spec.md` in the feature directory with the bug details:
 
@@ -224,6 +167,27 @@ Create a single-WP `tasks.md`:
 Fix the reported bug, add regression tests, verify the fix.
 ```
 
+Create the WP01 work package file at `tasks/WP01-{kebab-title}.md` with real YAML frontmatter (schema: `polaris-specs/*/tasks/README.md`), making WP01 gate-eligible:
+
+```markdown
+---
+work_package_id: "WP01"
+title: "Fix Bug AB#{id}"
+phase: "Fix"
+lane: "planned"
+test_status: ""
+history:
+  - timestamp: "<ISO-8601 UTC timestamp>"
+    lane: "planned"
+    agent: "system"
+    action: "WP created via /polaris.fix"
+---
+
+# WP01 - Fix Bug AB#{id}
+
+Fix the reported bug, add regression tests, verify the fix.
+```
+
 Create `meta.json` using `{base_branch}` captured before the branch switch:
 
 ```json
@@ -244,41 +208,59 @@ Create `meta.json` using `{base_branch}` captured before the branch switch:
 }
 ```
 
-### Step 3.5: Update Work Item Status
-
-Update the ADO work item to "Active" to signal investigation has started:
+Commit the feature scaffold now, so files `create-feature` leaves untracked (e.g. `tasks/.gitkeep`) do not later block the `planning_clean` guard:
 
 ```bash
-python -c "
-import json, os, sys, urllib.request, base64
-pat = os.environ['AZURE_DEVOPS_PAT']
-org_url = '{ORG_URL}'
-project = '{PROJECT}'
-work_item_id = {WORK_ITEM_ID}
-url = f'{org_url}/{project}/_apis/wit/workitems/{work_item_id}?api-version=7.0'
-auth = base64.b64encode(f':{pat}'.encode()).decode()
-patch = json.dumps([
-    {'op': 'add', 'path': '/fields/System.State', 'value': 'Active'},
-    {'op': 'add', 'path': '/fields/System.History', 'value': 'Polaris fix workflow started. Branch: fix/{id}-{kebab-title}'}
-]).encode()
-req = urllib.request.Request(url, data=patch, method='PATCH',
-    headers={'Authorization': f'Basic {auth}', 'Content-Type': 'application/json-patch+json'})
-try:
-    resp = urllib.request.urlopen(req)
-    print('Work item updated to Active')
-except Exception as e:
-    print(f'Warning: Could not update work item: {e}', file=sys.stderr)
-"
+git add polaris-specs/fix-{id}-{kebab-title}
+git commit -m "chore: scaffold fix-{id}-{kebab-title} planning artifacts"
 ```
 
-If the update fails (permissions, network), log a warning but continue - the fix itself is more important than the status update.
+### Step 3.5: Update Work Item Status
+
+Update the ADO work item to "Active" to signal investigation has started, using the
+mark-active operation (Operation 2 in the loaded reference).
+
+If the update fails, log a warning and continue.
+
+### Step 3.7: Root Cause Analysis - WAIT FOR APPROVAL
+
+Before writing any code, triage the bug and get explicit approval.
+
+**If the work item has no description, no repro steps, and no acceptance criteria**, stop:
+> "AB#{id} lacks enough detail to diagnose. Please provide repro steps, a description of the unexpected behaviour, or relevant logs."
+
+End with `WAITING_FOR_FIX_INPUT` and wait.
+
+Locate the fault with the code graph: `polaris graph symbol <name>` (definition), `who-imports <file>` (callers), `impact <file>` (dependents), `tests-for <file>` (tests to extend). JSON output; exit 2 = unavailable/disabled.
+
+**Otherwise**, read the relevant code and present this diagnosis - do NOT change any files yet:
+
+```
+Root Cause Analysis - AB#{id}: {title}
+
+Root cause:   {why the bug occurs}
+Affected:     {files and functions}
+Proposed fix: {what will change and how}
+Tests:        {regression test(s) to add}
+Risk:         Low / Medium / High - {one sentence}
+```
+
+> **Proceed? Reply `yes` to implement, or describe changes to the approach.**
+
+End with `WAITING_FOR_FIX_INPUT` and wait. Do NOT proceed to Step 4 until the user confirms.
 
 ### Step 4: Implement Fix
 
-1. **Locate relevant code**: Use the bug description, repro steps, and area path to find the relevant files
-2. **Understand the bug**: Read the code, understand the root cause
-3. **Implement the fix**: Make minimal, focused changes to fix the bug
-4. **Write/update tests**: Add regression tests that would have caught this bug
+Mark implementation as started:
+
+```bash
+polaris agent tasks move-task WP01 --to doing --feature fix-{id}-{kebab-title}
+```
+
+1. **Locate relevant code**: Already identified in Step 3.7
+2. **Understand the bug**: Root cause already established in Step 3.7
+3. **Implement the fix**: Make minimal, focused changes as described in the approved plan
+4. **Write/update tests**: Add regression tests as described in the approved plan, naming the file so its path contains `wp01` (e.g. `test_wp01_<bug-slug>.py`) so Step 7's WP-scoped run finds it.
 
 ### Step 5: Run Tests
 
@@ -304,13 +286,19 @@ The commit message references the ADO work item for traceability.
 
 ### Step 7: Post-Fix Regression
 
-Check for cascading breakage:
+Check for cascading breakage and record WP01's test evidence in one call:
 
-- Feature context (slug from branch or arguments):
-  `polaris runtests --feature <slug>`
-- Standalone fix (no feature context):
-  `python .polaris/scripts/tasks/run_tests.py --project-root . --json`
-- If tests fail, fix breakage before completing.
+```bash
+python .polaris/scripts/tasks/run_tests.py --project-root . --feature fix-{id}-{kebab-title} --wp WP01 --json
+```
+
+This writes a `WP01-<ts>.json` evidence artifact under `.polaris/test-evidence/fix-{id}-{kebab-title}/`. Parse `success`:
+
+- `true`: the runner never touches WP frontmatter, so record the pass:
+  ```bash
+  polaris agent tasks set-test-status WP01 --status passed --feature fix-{id}-{kebab-title}
+  ```
+- `false`: fix the breakage (repeat Step 5) before completing.
 
 ### Step 8: Show Progress
 
@@ -329,34 +317,9 @@ polaris agent tasks move-task WP01 --to for_review --feature fix-{id}-{kebab-tit
 
 ### Step 10: Update Work Item - Fix Complete
 
-Update the ADO work item with fix details:
-
-```bash
-python -c "
-import json, os, sys, urllib.request, base64
-pat = os.environ.get('AZURE_DEVOPS_PAT', '')
-if not pat:
-    print('Skipping ADO update: AZURE_DEVOPS_PAT not set')
-    sys.exit(0)
-org_url = '{ORG_URL}'
-project = '{PROJECT}'
-work_item_id = {WORK_ITEM_ID}
-url = f'{org_url}/{project}/_apis/wit/workitems/{work_item_id}?api-version=7.0'
-auth = base64.b64encode(f':{pat}'.encode()).decode()
-patch = json.dumps([
-    {'op': 'add', 'path': '/fields/System.State', 'value': 'Resolved'},
-    {'op': 'add', 'path': '/fields/System.History',
-     'value': 'Fix implemented and tests passing. Branch: fix/{id}-{kebab-title}. Awaiting review.'}
-]).encode()
-req = urllib.request.Request(url, data=patch, method='PATCH',
-    headers={'Authorization': f'Basic {auth}', 'Content-Type': 'application/json-patch+json'})
-try:
-    resp = urllib.request.urlopen(req)
-    print('Work item updated to Resolved')
-except Exception as e:
-    print(f'Warning: Could not update work item: {e}', file=sys.stderr)
-"
-```
+Update the ADO work item with fix details, using the mark-resolved operation (Operation 3 in
+the loaded reference). Skipped entirely if `AZURE_DEVOPS_PAT` is unset. If the update fails,
+log a warning and continue.
 
 ### Step 11: Summary
 
@@ -374,14 +337,5 @@ Next steps:
   2. Create a PR: gh pr create --title "fix: {title} (AB#{id})"
   3. Or use /polaris.ship to review, accept, and merge
 ```
-
-**Files to commit vs gitignore**: If untracked `.polaris/` files exist after the fix:
-- **Commit**: polaris-specs/ entries, .polaris/config.yaml, .polaris/memory/, .polaris/workspaces/
-- **Gitignore**: .polaris/.dashboard, .polaris/telemetry/, .polaris/autopilot-state.json
-
-## Cross-Platform Notes
-
-All commands used here are Polaris CLI commands, Python one-liners, or git operations that work on Windows, macOS, and Linux. No shell-specific commands are used.
-
 
 **Telemetry**: Run: `polaris telemetry record fix --feature <slug> --phase complete --agent claude`

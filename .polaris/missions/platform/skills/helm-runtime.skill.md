@@ -127,17 +127,22 @@ description: |
 
   Ingress path MUST be deterministic and consistent with service type.
 
+  AppCentral serves deployed applications under an `/app/` prefix, so every
+  ingress path below begins with `/app/`. A path missing that prefix routes
+  nowhere: `https://appcentral.<env>.apteancloud.dev/app/<ServiceName>/...`
+  is the address AppCentral publishes.
+
   1️⃣ Backend Service Ingress Rule:
 
   If application is classified as Backend Service:
   Ingress path MUST follow:
-    /{{ .ServiceName }}/api
+    /app/{{ .ServiceName }}/api
 
 
   Examples:
 
-  /<service-name>/api
-  /<another-service>/api
+  /app/<service-name>/api
+  /app/<another-service>/api
 
   Rules:
   - `/api` suffix is mandatory
@@ -150,14 +155,14 @@ description: |
 
   If application is classified as Frontend Service:
   Ingress path MUST follow:
-    /{{ .ServiceName }}/<frontend-segment>
+    /app/{{ .ServiceName }}/<frontend-segment>
 
 
   Examples:
 
-  /<service-name>/admin
-  /<service-name>/employee
-  /<service-name>/dashboard
+  /app/<service-name>/admin
+  /app/<service-name>/employee
+  /app/<service-name>/dashboard
 
 
   Rules:
@@ -166,6 +171,11 @@ description: |
   - Lowercase only
   - No underscores
   - Must match Helm ingress exactly
+  - The frontend build MUST be told the same base path: Next.js `basePath`
+    (and `assetPrefix`), Vite `base`, or the router `basename`, plus any
+    `BASE_PATH` / `NEXT_PUBLIC_BASE_PATH` / `PUBLIC_URL` env the app reads.
+    An ingress path that moved without the build's base path moving builds
+    cleanly and then 404s every asset at runtime, so this is not optional.
 
   3️⃣ Micro-Frontend Ingress Rule
 
@@ -186,6 +196,38 @@ description: |
 
   If ingress path violates structure rules:
   → STOP with clear error
+
+  ----------------------------------------------------------------------
+  ✔ INGRESS CLASS NAME RULES (MANDATORY)
+  ----------------------------------------------------------------------
+
+  The `ingressClassName` field in the Helm values file MUST be a token,
+  never hardcoded. The reference template generates `kong-shr` for all
+  environments by default. The agent MUST patch this after scaffolding.
+
+  CANONICAL MAPPING (authoritative):
+    dev   -> kong-dev
+    tst   -> kong-tst
+    uat-A -> kong-shr
+    prd-A -> kong-prda
+
+  VALUES FILE RULE:
+  - `ingressClassName` MUST be `#{ingress_class_name}#` in
+    `helm/{{ .ServiceName }}/values-{{ .ServiceName }}.yml`
+  - NEVER hardcode `kong-shr` or any other class name directly
+
+  WORKFLOW FILE RULE (applied post-copy, during Step 16):
+  - `helm.{{ .ServiceName }}.deploy.yml`:
+    - dev matrix entry:   set `ingress_class_name: 'kong-dev'`
+    - tst matrix entry:   set `ingress_class_name: 'kong-tst'`
+  - `helm.upr.{{ .ServiceName }}.deploy.yml`:
+    - uat-A matrix entry: set `ingress_class_name: 'kong-shr'`
+    - prd-A matrix entry: set `ingress_class_name: 'kong-prda'`
+
+  VERIFICATION:
+  - After patching, confirm no matrix entry in either workflow file
+    still reads `kong-shr` for dev, or `kong-shr` for prd-A
+  - Confirm values file has `#{ingress_class_name}#` not a literal class name
 
   ----------------------------------------------------------------------
   ✔ MICRO-FRONTEND BUILD JOB GATING (MANDATORY)
@@ -235,3 +277,91 @@ description: |
   Safety rules
   The agent MUST NOT introduce breaking changes to existing workflows.
   Build selection MUST be achieved via conditions, not pipeline mutation.
+
+  ----------------------------------------------------------------------
+  ✔ HELM DEPLOY FAILURE DIAGNOSTICS (MANDATORY WHEN MIGRATION JOB PRESENT)
+  ----------------------------------------------------------------------
+
+  Problem this solves:
+  A Helm pre-install / pre-upgrade hook Job (the migration job) that fails
+  only ever reports `BackoffLimitExceeded` to `helm upgrade`. That string is
+  ALL that reaches the workflow log and `gh run view --log-failed`. The
+  migration pod's real stdout/stderr (the actual error) is never surfaced,
+  so every migrate failure looks identical and is undebuggable from CI.
+
+  Rule:
+  When the deployment INCLUDES a migration job (database detected), the agent
+  MUST append a failure-diagnostics step to the deploy job in BOTH:
+    - helm.{{ .ServiceName }}.deploy.yml
+    - helm.upr.{{ .ServiceName }}.deploy.yml
+
+  The step MUST be the LAST step of the job that runs the helm deploy action,
+  placed AFTER the `helm.deploy.from-chart-url` (or equivalent helm upgrade)
+  step, and MUST be gated on failure so it never runs on success.
+
+  The kubeconfig is already on the runner from the earlier
+  `az aks get-credentials` step, so the diagnostics step reuses it directly.
+
+  Required step (Linux runner, bash is correct here - this is generated CI
+  YAML that runs on the GitHub-hosted runner, NOT an agent command template):
+
+  ```yaml
+  - name: Capture Helm hook job logs on failure
+    if: failure()
+    continue-on-error: true
+    shell: bash
+    run: |
+      # NS MUST be the SAME namespace value the helm deploy step uses
+      # (the per-env namespace, e.g. from the matrix entry). Reuse that
+      # expression here - do NOT hardcode a namespace.
+      NS="${NAMESPACE}"
+      echo "=== Jobs in $NS ==="
+      kubectl -n "$NS" get jobs -o wide || true
+      echo "=== Failed-job describe + pod logs ==="
+      FAILED=$(kubectl -n "$NS" get jobs \
+        -o jsonpath='{range .items[?(@.status.failed)]}{.metadata.name}{"\n"}{end}')
+      if [ -z "$FAILED" ]; then
+        echo "No jobs in failed state; dumping all job pods for context."
+        FAILED=$(kubectl -n "$NS" get jobs -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}')
+      fi
+      for j in $FAILED; do
+        echo "----- describe job/$j -----"
+        kubectl -n "$NS" describe job "$j" || true
+        echo "----- logs job/$j (all containers, full) -----"
+        kubectl -n "$NS" logs -l job-name="$j" --all-containers --tail=-1 || true
+      done
+      echo "=== Recent namespace events ==="
+      kubectl -n "$NS" get events --sort-by=.lastTimestamp | tail -40 || true
+  ```
+
+  Rules:
+  - The step MUST use `if: failure()` so it is a no-op on success.
+  - The step MUST use `continue-on-error: true` so diagnostics never mask the
+    original failure or change the job's final conclusion.
+  - `NS` MUST resolve to the SAME namespace the helm deploy step targets.
+    Bind it to the matrix/env namespace variable the workflow already defines.
+  - This step is ADDITIVE and non-breaking. It MUST NOT alter the helm deploy
+    step, the chart, the matrix, or any existing step.
+  - If NO migration job is present (no database detected), this step is NOT
+    required (no pre-upgrade hook can fail this way).
+
+  CRITICAL - hook-delete-policy interaction (READ THIS):
+  A Helm hook Job whose `helm.sh/hook-delete-policy` includes `hook-failed` is
+  DELETED by Helm the instant it fails - synchronously, before `helm upgrade`
+  returns its error. The pod (and its logs) are then GONE by the time this
+  post-failure step runs, so the diagnostics step captures NOTHING. This is the
+  single most common reason a migrate failure is undebuggable.
+
+  Therefore, for the migration Job in the helm values file
+  (`helm/{{ .ServiceName }}/values-{{ .ServiceName }}.yml`, the
+  `nextApplication.jobs[]` entry):
+  - The migration Job's `helm.sh/hook-delete-policy` MUST NOT include
+    `hook-failed`. Use `before-hook-creation` (optionally with
+    `hook-succeeded`) ONLY. `before-hook-creation` still cleans up the prior
+    failed Job at the next deploy, so nothing leaks - but a failed Job SURVIVES
+    long enough for this diagnostics step (and `kubectl logs`) to read it.
+  - Recommended migration-job policy:
+    `helm.sh/hook-delete-policy: before-hook-creation`
+  - If the values file ships `hook-failed` in that policy, the agent MUST
+    remove `hook-failed` from the migration Job's delete-policy during
+    scaffolding so failures stay inspectable.

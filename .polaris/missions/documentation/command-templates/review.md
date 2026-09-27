@@ -2,6 +2,10 @@
 description: Review documentation work packages for Divio compliance and quality.
 ---
 
+## Advanced Command Gate
+
+Load `.claude/commands/references/advanced-gate.md` and apply it before proceeding: gate on `advanced_commands` in `.polaris/config.yaml`, bypassing for autopilot or NL routing invocations.
+
 # Command Template: /polaris.review (Documentation Mission)
 
 **Phase**: Validate

@@ -7,9 +7,7 @@ scripts:
 
 ## Model Guidance
 
-This command does planning work. Use **claude-opus-4-6** for this session.
-
-Architecture decisions and technical plans made here define implementation scope for every WP that follows. If you are on Sonnet: switch to Opus (`/model claude-opus-4-6`).
+Model: plan tier (see references/model-selection.md); routing is enforced by the launcher.
 
 ---
 
@@ -56,11 +54,22 @@ Read the spec and ask at most 1-2 questions, only for tech choices the spec leav
 
 If you do ask, end with `WAITING_FOR_PLANNING_INPUT`. Do not maintain a question table; do not require an "Engineering Alignment" confirmation step.
 
+## Code Graph Consultation
+
+If the `{SCRIPT}` JSON output includes a `code_intelligence` block (module names, test coverage, dependency density, orphaned symbols), read it before exploring the tree by hand - it is scoped to the modules this spec names.
+
+For Technical Context and the file inventory, prefer these `polaris graph` verbs over manual directory exploration:
+- `polaris graph symbol <name> --json` - find where a symbol is defined.
+- `polaris graph who-imports <file> --json` - list direct importers of a file.
+- `polaris graph impact <file> --json` - transitive dependents and exports (blast radius) of a file.
+
+Fall back to manual exploration only when the block is absent (code intelligence disabled, or no graph data for a file).
+
 ## Outline
 
 1. **Setup**: Run `{SCRIPT}` from repo root and parse JSON for FEATURE_SPEC, IMPL_PLAN, SPECS_DIR.
 
-2. **Load context**: Read FEATURE_SPEC and `.polaris/memory/constitution.md` if it exists.
+2. **Load context**: Read FEATURE_SPEC and `.polaris/memory/constitution.md` if it exists. Use the Code Graph Consultation guidance above for Technical Context and the file inventory instead of manual exploration.
 
 3. **Execute plan workflow**: Follow the structure in IMPL_PLAN template:
    - Phase 0: Generate research.md

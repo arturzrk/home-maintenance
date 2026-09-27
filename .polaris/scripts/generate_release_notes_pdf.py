@@ -38,17 +38,17 @@ except ImportError:
     sys.exit(1)
 
 # ---------------------------------------------------------------------------
-# Aptean brand colors
+# Aptean brand colors (AppCentral / Aptean Intelligence theme, Brand Evolution 2026)
 # ---------------------------------------------------------------------------
-APTEAN_TEAL = HexColor("#54B3BE")
-APTEAN_TEAL_DARK = HexColor("#3D8A93")
-APTEAN_NAVY = HexColor("#050852")
-APTEAN_BLUE = HexColor("#2459A9")
-APTEAN_ORANGE = HexColor("#E6612E")
+APTEAN_TEAL = HexColor("#33728C")
+APTEAN_TEAL_DARK = HexColor("#285A70")
+APTEAN_NAVY = HexColor("#1C3251")
+APTEAN_NAVY_LIGHT = HexColor("#2C5872")
+APTEAN_CORAL = HexColor("#DA7759")
 APTEAN_SUCCESS = HexColor("#2E7D32")
-APTEAN_TEXT = HexColor("#1A2332")
-APTEAN_TEXT_SEC = HexColor("#546E7A")
-APTEAN_BANNER_BG = HexColor("#3D8A93")  # Teal dark for confidential banner
+APTEAN_TEXT = HexColor("#000000")
+APTEAN_TEXT_SEC = HexColor("#4A4A4A")
+APTEAN_BANNER_BG = APTEAN_TEAL_DARK  # Teal dark for confidential banner
 WHITE = HexColor("#FFFFFF")
 LIGHT_GRAY = HexColor("#F5F5F5")
 BORDER_GRAY = HexColor("#E0E0E0")
@@ -66,36 +66,36 @@ PYPROJECT_PATH = REPO_ROOT / "pyproject.toml"
 CHANGELOG_PATH = REPO_ROOT / "CHANGELOG.md"
 
 # ---------------------------------------------------------------------------
-# Register Suisse Intl TTF fonts (converted from OTF via otf2ttf)
+# Register Inter TTF fonts (Aptean & AppCentral Brand Evolution 2026 typeface).
+# Falls back to Helvetica when the TTF files are not present -- no separate
+# condensed face, Inter Bold covers both title and heading roles.
 # ---------------------------------------------------------------------------
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont as _TTFont
 
 _FONT_DIR = REPO_ROOT / ".polaris" / "reports" / "fonts"
 _FONT_MAP = {
-    "SuisseIntl": "SuisseIntl-Book.ttf",
-    "SuisseIntl-Bold": "SuisseIntl-Bold.ttf",
-    "SuisseIntl-Italic": "SuisseIntl-BookItalic.ttf",
-    "SuisseIntlCond": "SuisseIntlCond-Regular.ttf",
-    "SuisseIntlCond-Bold": "SuisseIntlCond-Bold.ttf",
+    "Inter": "Inter-Regular.ttf",
+    "Inter-Bold": "Inter-Bold.ttf",
+    "Inter-Italic": "Inter-Italic.ttf",
 }
-_suisse_ok = True
+_inter_ok = True
 for _name, _file in _FONT_MAP.items():
     _path = _FONT_DIR / _file
     if _path.exists():
         try:
             pdfmetrics.registerFont(_TTFont(_name, str(_path)))
         except Exception:
-            _suisse_ok = False
+            _inter_ok = False
     else:
-        _suisse_ok = False
+        _inter_ok = False
 
-if _suisse_ok:
-    _F_TITLE = "SuisseIntlCond-Bold"
-    _F_HEAD = "SuisseIntlCond-Bold"
-    _F_BODY = "SuisseIntl"
-    _F_BOLD = "SuisseIntl-Bold"
-    _F_ITALIC = "SuisseIntl-Italic"
+if _inter_ok:
+    _F_TITLE = "Inter-Bold"
+    _F_HEAD = "Inter-Bold"
+    _F_BODY = "Inter"
+    _F_BOLD = "Inter-Bold"
+    _F_ITALIC = "Inter-Italic"
 else:
     _F_TITLE = "Helvetica-Bold"
     _F_HEAD = "Helvetica-Bold"
@@ -108,7 +108,7 @@ MARGIN = 20 * mm
 CONTENT_WIDTH = PAGE_WIDTH - 2 * MARGIN
 
 # Alternating colors for version series headers
-SERIES_COLORS = [APTEAN_TEAL_DARK, APTEAN_BLUE, APTEAN_NAVY, APTEAN_TEAL, APTEAN_ORANGE]
+SERIES_COLORS = [APTEAN_TEAL_DARK, APTEAN_NAVY, APTEAN_TEAL, APTEAN_NAVY_LIGHT, APTEAN_CORAL]
 
 
 # ---------------------------------------------------------------------------
@@ -669,8 +669,6 @@ _footer_version: str = ""
 _release_date_display: str = ""
 
 
-LOGO_BLACK = REPO_ROOT / "media" / "aptean-logo-black.png"
-LOGO_WHITE = REPO_ROOT / "media" / "aptean-logo-white.png"
 _MARGIN = 20 * mm
 _TEXT_SEC = HexColor("#4B5563")
 
@@ -693,10 +691,10 @@ def _add_footer(canvas, doc):
     canvas.setStrokeColor(BORDER_GRAY)
     canvas.setLineWidth(0.5)
     canvas.line(_MARGIN, 12 * mm, PAGE_WIDTH - _MARGIN, 12 * mm)
-    if LOGO_BLACK.exists():
-        canvas.drawImage(str(LOGO_BLACK), _MARGIN, 4 * mm,
-                         width=18 * mm, height=5.5 * mm,
-                         preserveAspectRatio=True, mask="auto")
+    # Wordmark only -- the standalone "A" icon mark is discontinued (2026 brand evolution).
+    canvas.setFillColor(APTEAN_NAVY)
+    canvas.setFont(_F_BOLD, 8)
+    canvas.drawString(_MARGIN, 5.5 * mm, "Aptean")
     canvas.setFillColor(_TEXT_SEC)
     canvas.setFont(_F_BODY, 7)
     canvas.drawRightString(PAGE_WIDTH - _MARGIN, 5.5 * mm,
@@ -713,18 +711,19 @@ def _cover_page(canvas, doc):
         w, h = 1200, 800
         img = PILImage.new("RGB", (w, h))
         px = img.load()
-        r1, g1, b1 = 0x47, 0x75, 0x99
-        r2, g2, b2 = 0x82, 0x76, 0xAE
-        r3, g3, b3 = 0xC8, 0x78, 0xBE
+        # AppCentral gradient mesh: navy -> teal -> coral
+        r1, g1, b1 = 0x1C, 0x32, 0x51
+        r2, g2, b2 = 0x33, 0x72, 0x8C
+        r3, g3, b3 = 0xDA, 0x77, 0x59
         for x in range(w):
             t = x / (w - 1)
-            if t < 0.4:
-                s = t / 0.4
+            if t < 0.5:
+                s = t / 0.5
                 r = int(r1 + (r2 - r1) * s)
                 g = int(g1 + (g2 - g1) * s)
                 b = int(b1 + (b2 - b1) * s)
             else:
-                s = (t - 0.4) / 0.6
+                s = (t - 0.5) / 0.5
                 r = int(r2 + (r3 - r2) * s)
                 g = int(g2 + (g3 - g2) * s)
                 b = int(b2 + (b3 - b2) * s)
@@ -743,10 +742,10 @@ def _cover_page(canvas, doc):
     canvas.setFillColor(Color(0, 0, 0, alpha=0.15))
     canvas.rect(0, 0, PAGE_WIDTH, PAGE_HEIGHT, fill=1, stroke=0)
 
-    if LOGO_WHITE.exists():
-        canvas.drawImage(str(LOGO_WHITE), _MARGIN, PAGE_HEIGHT - 22 * mm,
-                         width=30 * mm, height=9 * mm,
-                         preserveAspectRatio=True, mask="auto")
+    # Wordmark only -- the standalone "A" icon mark is discontinued (2026 brand evolution).
+    canvas.setFillColor(WHITE)
+    canvas.setFont(_F_BOLD, 16)
+    canvas.drawString(_MARGIN, PAGE_HEIGHT - 19 * mm, "Aptean")
 
     mid_y = PAGE_HEIGHT * 0.52
     canvas.setFillColor(WHITE)

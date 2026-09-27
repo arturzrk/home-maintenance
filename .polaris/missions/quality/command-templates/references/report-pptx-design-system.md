@@ -2,6 +2,13 @@
 
 If the user requested PPTX output, follow this section. Steps 1 (Report Type) and 2 (Gather Data) from the HTML path still apply -- determine the report type and collect all evidence before building slides.
 
+Two selectable themes, per the Aptean & AppCentral Brand Evolution 2026 -- same rule as the HTML design system. Pick ONE before generating the script; never mix values from both.
+
+| Theme | Tokens | When |
+|---|---|---|
+| **AppCentral** (default for Polaris reports) | navy `#1C3251` / teal `#33728C` / coral `#DA7759` + navy-teal-coral gradient divider | Default for every deck Polaris generates -- Polaris is itself an Aptean Intelligence product. |
+| **Aptean Corporate** | monochrome: white / light-gray `#EAEAEA` / dark-gray `#262626`, no gradient | Use instead when explicitly asked for the "corporate", "monochrome", or "black and gray" look, or when the deck will sit alongside other Corporate-branded material. If unsure, ask. |
+
 ## PPTX Dependency Check
 
 The generated Python script must begin with:
@@ -26,20 +33,30 @@ except ImportError:
 Use these `RGBColor` constants throughout the script. Do NOT use ad-hoc hex values.
 
 ```python
-# ---- Brand ----
+# ---- Base (shared, both themes) ----
 CHARCOAL       = RGBColor(0x3A, 0x3A, 0x3A)  # Body text on white
-APTEAN_NAVY    = RGBColor(0x05, 0x08, 0x52)  # Headers, strong emphasis
-APTEAN_BLUE    = RGBColor(0x24, 0x59, 0xA9)  # Subheadings, links
-APTEAN_ORANGE  = RGBColor(0xE6, 0x61, 0x2E)  # Accent, call-to-action
-DARK_TEAL      = RGBColor(0x2B, 0x65, 0x83)  # Supporting color
-APTEAN_TEAL    = RGBColor(0x54, 0xB3, 0xBE)  # Icons, lighter accents
 LIGHT_GRAY     = RGBColor(0xEA, 0xEA, 0xEA)  # Backgrounds, dividers
 FOOTER_LINE    = RGBColor(0xE5, 0xE7, 0xEB)  # Footer separator line
 TEXT_SECONDARY = RGBColor(0x4B, 0x55, 0x63)  # Footer text, captions
 BLACK          = RGBColor(0x00, 0x00, 0x00)
 WHITE          = RGBColor(0xFF, 0xFF, 0xFF)
 
-# ---- Severity ----
+# ---- Brand: AppCentral / Aptean Intelligence theme (default) ----
+APTEAN_NAVY       = RGBColor(0x1C, 0x32, 0x51)  # Headers, strong emphasis
+APTEAN_TEAL       = RGBColor(0x33, 0x72, 0x8C)  # Subheadings, links
+APTEAN_TEAL_DARK  = RGBColor(0x28, 0x5A, 0x70)  # Supporting color
+APTEAN_TEAL_LIGHT = RGBColor(0x8F, 0xBD, 0xC9)  # Icons, lighter accents
+APTEAN_CORAL      = RGBColor(0xDA, 0x77, 0x59)  # Accent, call-to-action
+
+# ---- Brand: Aptean Corporate theme (alternate -- swap the 5 lines above for
+#      these 5 when the Corporate theme applies. No accent hue, no gradient.) ----
+# APTEAN_NAVY       = RGBColor(0x26, 0x26, 0x26)  # Headers, strong emphasis
+# APTEAN_TEAL       = RGBColor(0x26, 0x26, 0x26)  # Subheadings, links
+# APTEAN_TEAL_DARK  = RGBColor(0x00, 0x00, 0x00)  # Supporting color
+# APTEAN_TEAL_LIGHT = RGBColor(0xEA, 0xEA, 0xEA)  # Icons, lighter accents
+# APTEAN_CORAL      = RGBColor(0x26, 0x26, 0x26)  # Accent, call-to-action
+
+# ---- Severity (semantic, independent of brand theme) ----
 SEV_CRITICAL   = RGBColor(0xD3, 0x2F, 0x2F)
 SEV_HIGH       = RGBColor(0xE6, 0x51, 0x00)
 SEV_MEDIUM     = RGBColor(0xF5, 0x7F, 0x17)
@@ -54,12 +71,12 @@ SEV_LOW_BG      = RGBColor(0xEE, 0xF0, 0xFB)
 SEV_GOOD_BG     = RGBColor(0xF0, 0xFD, 0xF4)
 
 # ---- Chart sequence ----
-CHART_COLORS = [APTEAN_NAVY, APTEAN_BLUE, DARK_TEAL, APTEAN_TEAL, APTEAN_ORANGE]
+CHART_COLORS = [APTEAN_NAVY, APTEAN_TEAL, APTEAN_TEAL_DARK, APTEAN_TEAL_LIGHT, APTEAN_CORAL]
 ```
 
 ## PPTX Typography
 
-Titles: "Suisse Intl Condensed" (fallback: "Barlow Condensed"), Bold, 36-44pt, `APTEAN_NAVY`/`BLACK` (content) or `WHITE` (on dark/gradient). Body: "Suisse Intl" (fallback: "Arial"), Regular, 16-20pt, `CHARCOAL`. Code: "Consolas". Footer: 9-10pt, `TEXT_SECONDARY` on white background. Set `run.font.name` to primary font. Never use Calibri.
+Titles: **"Inter"**, Bold, 36-44pt, `APTEAN_NAVY`/`BLACK` (content) or `WHITE` (on dark/gradient). Body: **"Inter"**, Regular, 16-20pt, `CHARCOAL`. Code: "Consolas". Footer: 9-10pt, `TEXT_SECONDARY` on white background. Set `run.font.name` to `"Inter"` for every run (no separate condensed face -- the Brand Evolution 2026 typeface is Inter only). Never use Calibri. If Inter is not installed on the machine that opens the deck, PowerPoint substitutes its own default; embedding fonts is out of scope for the generated script.
 
 ## PPTX Slide Dimensions
 
@@ -78,8 +95,9 @@ from pptx.util import Inches, Pt, Emu, Mm
 from pathlib import Path
 
 # Logo paths - resolve from project media/ or .polaris/
+# The Aptean "A" icon mark is discontinued (2026 brand evolution) -- wordmark only.
 LOGO_BLACK = Path("media/aptean-logo-black.png")  # For content slides (white bg)
-LOGO_YELLOW_WHITE = Path("media/aptean-logo-yellow-white.png")  # For divider slides (dark bg)
+LOGO_WHITE = Path("media/aptean-logo-white.png")  # For divider slides (dark/gradient bg)
 
 def add_footer(slide, slide_number, prs):
     """Add the standard Aptean footer to a slide (clean, no dark bar)."""
@@ -112,22 +130,24 @@ def add_footer(slide, slide_number, prs):
     conf_tf.word_wrap = False
     conf_run = conf_tf.paragraphs[0].add_run()
     conf_run.text = f"Company Confidential - Internal Distribution Only   |   {slide_number}"
-    conf_run.font.name = "Suisse Intl"
+    conf_run.font.name = "Inter"
     conf_run.font.size = Pt(9)
     conf_run.font.color.rgb = TEXT_SECONDARY
     conf_tf.paragraphs[0].alignment = PP_ALIGN.RIGHT
     conf_tf.paragraphs[0].space_before = Pt(2)
 ```
 
-For **divider slides** (gradient background), use `LOGO_YELLOW_WHITE` instead of `LOGO_BLACK`, and skip the separator line and confidentiality text.
+For **divider slides** (gradient background under AppCentral, solid dark-gray under Corporate), use `LOGO_WHITE` instead of `LOGO_BLACK`, and skip the separator line and confidentiality text.
 
 ## PPTX Gradient Helper
 
-Section divider slides use the Aptean signature gradient (steel blue to dusty lavender to soft mauve-pink). Generate it with Pillow if available, otherwise fall back to solid navy.
+Under **AppCentral**, section divider slides use the brand's gradient mesh identifier (navy to teal to coral). Under **Corporate**, never generate a gradient -- go straight to the solid dark-gray fallback fill below.
 
 ```python
 def make_gradient_bg(width_px=1920, height_px=1080):
-    """Return gradient PNG bytes, or None if Pillow is unavailable."""
+    """Return gradient PNG bytes, or None if Pillow is unavailable.
+    AppCentral theme only -- under Corporate, skip this function entirely
+    and always use the solid APTEAN_NAVY fallback fill instead."""
     try:
         from PIL import Image
     except ImportError:
@@ -135,11 +155,11 @@ def make_gradient_bg(width_px=1920, height_px=1080):
 
     img = Image.new("RGB", (width_px, height_px))
     pixels = img.load()
-    # Gradient stops: 0% #477599, 40% #8276AE, 100% #C878BE
+    # Gradient stops: 0% navy #1C3251, 50% teal #33728C, 100% coral #DA7759
     stops = [
-        (0.0,  (0x47, 0x75, 0x99)),
-        (0.4,  (0x82, 0x76, 0xAE)),
-        (1.0,  (0xC8, 0x78, 0xBE)),
+        (0.0,  (0x1C, 0x32, 0x51)),
+        (0.5,  (0x33, 0x72, 0x8C)),
+        (1.0,  (0xDA, 0x77, 0x59)),
     ]
     for x in range(width_px):
         t = x / (width_px - 1)
@@ -181,7 +201,7 @@ title_tf = slide.shapes.add_textbox(
 title_tf.word_wrap = True
 title_run = title_tf.paragraphs[0].add_run()
 title_run.text = "{{REPORT_TITLE}}"
-title_run.font.name = "Suisse Intl Condensed"
+title_run.font.name = "Inter"
 title_run.font.size = Pt(44)
 title_run.font.bold = True
 title_run.font.color.rgb = BLACK
@@ -192,7 +212,7 @@ sub_tf = slide.shapes.add_textbox(
 ).text_frame
 sub_run = sub_tf.paragraphs[0].add_run()
 sub_run.text = "{{TAG_LINE}}"
-sub_run.font.name = "Suisse Intl"
+sub_run.font.name = "Inter"
 sub_run.font.size = Pt(20)
 sub_run.font.color.rgb = CHARCOAL
 
@@ -202,22 +222,22 @@ meta_tf = slide.shapes.add_textbox(
 ).text_frame
 meta_run = meta_tf.paragraphs[0].add_run()
 meta_run.text = "{{FULL_DATE}}  |  {{PROJECT_NAME}}  |  {{SCOPE_SUMMARY}}"
-meta_run.font.name = "Suisse Intl"
+meta_run.font.name = "Inter"
 meta_run.font.size = Pt(14)
-meta_run.font.color.rgb = APTEAN_BLUE
+meta_run.font.color.rgb = APTEAN_TEAL
 
 add_footer(slide, 1, prs)
 ```
 
 ### 2. Section Divider Slide
 
-Gradient background (or solid navy fallback), large white title, NO footer.
+Gradient background under AppCentral (or solid navy/dark-gray fallback), large white title, NO footer.
 
 ```python
 slide = prs.slides.add_slide(prs.slide_layouts[6])  # Blank
 
-# Gradient background
-gradient_bytes = make_gradient_bg()
+# Background: gradient under AppCentral, solid fill under Corporate (see note above)
+gradient_bytes = make_gradient_bg()  # always None under Corporate -- skip the call entirely
 if gradient_bytes:
     import io
     slide.shapes.add_picture(
@@ -226,7 +246,7 @@ if gradient_bytes:
         prs.slide_width, prs.slide_height,
     )
 else:
-    # Solid navy fallback
+    # Solid fallback fill (always used under Corporate)
     bg = slide.shapes.add_shape(
         MSO_SHAPE.RECTANGLE, Emu(0), Emu(0),
         prs.slide_width, prs.slide_height,
@@ -242,7 +262,7 @@ sec_tf = slide.shapes.add_textbox(
 sec_tf.word_wrap = True
 sec_run = sec_tf.paragraphs[0].add_run()
 sec_run.text = "{{SECTION_TITLE}}"
-sec_run.font.name = "Suisse Intl Condensed"
+sec_run.font.name = "Inter"
 sec_run.font.size = Pt(60)
 sec_run.font.bold = True
 sec_run.font.color.rgb = WHITE
@@ -262,7 +282,7 @@ title_tf = slide.shapes.add_textbox(
 ).text_frame
 title_run = title_tf.paragraphs[0].add_run()
 title_run.text = "{{SLIDE_TITLE}}"
-title_run.font.name = "Suisse Intl Condensed"
+title_run.font.name = "Inter"
 title_run.font.size = Pt(36)
 title_run.font.bold = True
 title_run.font.color.rgb = APTEAN_NAVY
@@ -277,7 +297,7 @@ for bullet_text in ["{{BULLET_1}}", "{{BULLET_2}}", "{{BULLET_3}}"]:
     p = body_tf.add_paragraph() if body_tf.paragraphs[0].text else body_tf.paragraphs[0]
     run = p.add_run()
     run.text = bullet_text
-    run.font.name = "Suisse Intl"
+    run.font.name = "Inter"
     run.font.size = Pt(18)
     run.font.color.rgb = CHARCOAL
     p.space_after = Pt(8)
@@ -298,7 +318,7 @@ title_tf = slide.shapes.add_textbox(
 ).text_frame
 title_run = title_tf.paragraphs[0].add_run()
 title_run.text = "{{TABLE_TITLE}}"
-title_run.font.name = "Suisse Intl Condensed"
+title_run.font.name = "Inter"
 title_run.font.size = Pt(36)
 title_run.font.bold = True
 title_run.font.color.rgb = APTEAN_NAVY
@@ -311,6 +331,8 @@ table_shape = slide.shapes.add_table(
     Inches(0.8), Inches(1.5), Inches(11.5), Inches(0.4 * rows)
 )
 table = table_shape.table
+table.horz_banding = False  # kill PowerPoint's default banded-row theme colors --
+                            # otherwise they bleed through under your explicit fills
 
 # Header row
 for idx, header in enumerate(["Severity", "Finding", "Location"]):
@@ -320,7 +342,7 @@ for idx, header in enumerate(["Severity", "Finding", "Location"]):
     cell.fill.fore_color.rgb = LIGHT_GRAY
     for p in cell.text_frame.paragraphs:
         for r in p.runs:
-            r.font.name = "Suisse Intl"
+            r.font.name = "Inter"
             r.font.size = Pt(11)
             r.font.bold = True
             r.font.color.rgb = APTEAN_NAVY
@@ -351,14 +373,19 @@ for row_idx, finding in enumerate(findings, start=1):
         r.font.color.rgb = fg
         r.font.bold = True
         r.font.size = Pt(10)
-        r.font.name = "Suisse Intl"
+        r.font.name = "Inter"
 
     table.cell(row_idx, 1).text = finding["title"]
     table.cell(row_idx, 2).text = finding["location"]
 
     for col in range(1, 3):
-        for r in table.cell(row_idx, col).text_frame.paragraphs[0].runs:
-            r.font.name = "Suisse Intl"
+        cell = table.cell(row_idx, col)
+        cell.fill.solid()
+        cell.fill.fore_color.rgb = WHITE  # explicit -- PowerPoint's default table
+                                          # theme tints unfilled cells even with
+                                          # horz_banding off
+        for r in cell.text_frame.paragraphs[0].runs:
+            r.font.name = "Inter"
             r.font.size = Pt(11)
             r.font.color.rgb = CHARCOAL
 
@@ -377,7 +404,7 @@ title_tf = slide.shapes.add_textbox(
 ).text_frame
 title_run = title_tf.paragraphs[0].add_run()
 title_run.text = "Executive Summary"
-title_run.font.name = "Suisse Intl Condensed"
+title_run.font.name = "Inter"
 title_run.font.size = Pt(36)
 title_run.font.bold = True
 title_run.font.color.rgb = APTEAN_NAVY
@@ -410,7 +437,7 @@ for i, m in enumerate(metrics):
     lbl_tf = slide.shapes.add_textbox(x, y + Inches(0.15), card_w, Inches(0.35)).text_frame
     lbl_run = lbl_tf.paragraphs[0].add_run()
     lbl_run.text = m["label"].upper()
-    lbl_run.font.name = "Suisse Intl"
+    lbl_run.font.name = "Inter"
     lbl_run.font.size = Pt(9)
     lbl_run.font.bold = True
     lbl_run.font.color.rgb = RGBColor(0x86, 0x94, 0xA1)
@@ -419,7 +446,7 @@ for i, m in enumerate(metrics):
     val_tf = slide.shapes.add_textbox(x, y + Inches(0.5), card_w, Inches(0.8)).text_frame
     val_run = val_tf.paragraphs[0].add_run()
     val_run.text = m["value"]
-    val_run.font.name = "Suisse Intl"
+    val_run.font.name = "Inter"
     val_run.font.size = Pt(28)
     val_run.font.bold = True
     val_run.font.color.rgb = m["color"]
@@ -449,7 +476,7 @@ quote_tf = slide.shapes.add_textbox(
 quote_tf.word_wrap = True
 quote_run = quote_tf.paragraphs[0].add_run()
 quote_run.text = "{{QUOTE_TEXT}}"
-quote_run.font.name = "Suisse Intl Condensed"
+quote_run.font.name = "Inter"
 quote_run.font.size = Pt(48)
 quote_run.font.bold = True
 quote_run.font.color.rgb = WHITE
@@ -468,6 +495,6 @@ Header->Title(#1), Methodology->Content(#3), Exec Summary->ScoreCard(#5), Dimens
 
 Steps 1-2 same as HTML. **Step 3**: Write self-contained `.py` script to `.polaris/reports/_generate_{report-slug}.py` with auto-install fallback, color constants, helpers, 16:9 Presentation, slides per mapping order. **Step 4**: Run script, verify `.pptx` created, report both paths.
 
-**PPTX Checklist**: Only RGBColor constants (no ad-hoc hex), title slide complete, dividers use gradient (no footer), all other slides have footer, severity fills in tables, correct fonts, 16:9 dimensions, tables split at 8 rows, no Unicode issues.
+**PPTX Checklist**: Only RGBColor constants (no ad-hoc hex), title slide complete, dividers use gradient under AppCentral / solid fill under Corporate (no footer either way), all other slides have footer, `table.horz_banding = False` set on every table (otherwise PowerPoint's default theme banding bleeds through your explicit cell fills), severity fills in tables, correct fonts (Inter throughout), 16:9 dimensions, tables split at 8 rows, no Unicode issues, no yellow logo variant.
 
 **Principles**: Design system is law, evidence-based, actionable, self-contained, non-destructive (`.polaris/reports/` only), cross-platform.

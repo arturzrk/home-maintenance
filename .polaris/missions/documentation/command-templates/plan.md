@@ -2,6 +2,10 @@
 description: Produce a documentation mission plan with audit/design guidance and generator setup.
 ---
 
+## Advanced Command Gate
+
+Load `.claude/commands/references/advanced-gate.md` and apply it before proceeding: gate on `advanced_commands` in `.polaris/config.yaml`, bypassing for autopilot or NL routing invocations.
+
 # Command Template: /polaris.plan (Documentation Mission)
 
 **Phases**: Audit (if gap-filling), Design

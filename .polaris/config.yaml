@@ -7,6 +7,9 @@ agents:
     strategy: preferred
     preferred_implementer: claude
     preferred_reviewer: claude
+  routing:
+    plan_agent: claude
+    impl_agent: claude
 paths:
   workspace: "backend/src/"
   tests: "backend/tests/"

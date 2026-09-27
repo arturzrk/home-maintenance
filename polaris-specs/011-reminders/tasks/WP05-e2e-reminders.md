@@ -9,6 +9,7 @@ test_file: frontend/e2e/wp11-reminders.spec.ts
 domain: testing-specialist
 reviewed_by: "Artur Żurek"
 review_status: "approved"
+evidence: "legacy-exempt"
 ---
 
 # WP05 - E2E: notification settings suite

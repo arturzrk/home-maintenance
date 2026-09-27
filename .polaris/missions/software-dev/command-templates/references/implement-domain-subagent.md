@@ -2,10 +2,12 @@
 
 ## Domain Expert Check
 
-Read the WP frontmatter `domain` field. If present:
-1. Look for prompt at `.polaris/skills/superpowers/<domain>.md`; fall back to `src/specify_cli/superpowers/prompts/<domain>.md`
-2. If found: read it. This is your domain expertise for the WP - follow its quality checklist, avoid its listed pitfalls, meet its output expectations.
-3. If not found: proceed normally.
+Read the WP frontmatter `domain` field. If present, resolve the prompt through this chain (first hit wins):
+1. Project override: `.polaris/skills/superpowers/<domain>.md`
+2. Custom domain skill: `.polaris/skills/custom/<domain>/SKILL.md` with frontmatter `kind: domain`. Honour its `applies_to` globs when declared: match them against the WP's file context (`files_touched` frontmatter when present, else file paths named in the subtasks). If no path matches, skip this step and continue the chain; if the WP has no file context, use the skill body anyway (fail-open) and note its declared scope.
+3. Package default: `src/specify_cli/superpowers/prompts/<domain>.md`
+
+If a prompt resolved: read it. This is your domain expertise for the WP - follow its quality checklist, avoid its listed pitfalls, meet its output expectations. If nothing resolved: proceed normally.
 
 Domain expertise applies to ALL work on this WP, including any subagents spawned.
 

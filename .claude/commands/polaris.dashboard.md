@@ -4,9 +4,7 @@ description: Open the polaris dashboard in your browser.
 
 ## Model Guidance
 
-This command does implementation work. Use **claude-sonnet-4-6** for this session.
-
-Execution against a defined plan - this is where call volume lives and where savings compound.
+Model: impl tier (see references/model-selection.md); routing is enforced by the launcher.
 
 ---
 

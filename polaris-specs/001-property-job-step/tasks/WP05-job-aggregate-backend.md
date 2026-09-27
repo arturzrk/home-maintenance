@@ -14,6 +14,7 @@ agent: "claude"
 assignee: "arturzrk@gmail.com"
 reviewed_by: "Artur Żurek"
 review_status: "approved"
+evidence: "legacy-exempt"
 ---
 
 # WP05 - Job aggregate backend

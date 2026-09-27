@@ -32,7 +32,7 @@ Ask the user about their project requirements:
 - **Project name**: kebab-case identifier (e.g., `my-new-service`)
 - **Description**: Brief one-liner for README and package metadata
 - **Aptean branding**: Should AppCentral design system be applied? (default: yes)
-  - Yes: Aptean dark theme, Suisse Intl typography, teal accent, `--aptean-*` CSS variables
+  - Yes: Aptean dark theme, AppCentral typography (Fira Sans / Inter / Fira Mono), teal accent, `--aptean-*` CSS variables
   - No: neutral default theme
 - **Deployment target**:
   - Kubernetes (AKS) for AppCentral (default) - Helm charts, AKS manifests, ACR registry
@@ -115,11 +115,123 @@ polaris init --here --merge
 
 If the user selected Aptean branding (default: yes):
 
-- Copy Suisse Intl fonts to `static/fonts/` (backend) or `public/fonts/` (frontend)
-- Generate base CSS with `--aptean-*` design tokens (dark theme, teal accent `#54B3BE`, Suisse Intl typography)
+- Typography is already handled for a TypeScript frontend: `polaris init` (step 4) auto-applies the `appcentral-shell` skill, which writes
+  `public/fonts/*.woff2` and `styles/appcentral-typography.css`. Import that stylesheet at the root and the app is on the AppCentral stack.
+- For a backend-rendered or non-TypeScript stack, copy the woff2 files from `.polaris/skills/aptean-brand/fonts/` into `static/fonts/` and declare the `@font-face` block from the brand guardrail
+- Generate base CSS with `--aptean-*` design tokens (dark theme, teal accent `#54B3BE`) plus the `--font-heading` / `--font-body` / `--font-mono` type tokens
 - Apply dark-theme-first color system
 - Add Aptean logo SVG to static assets
 - Reference `aptean-style/SKILL.md` for the full token set
+
+### 4a1. Wire AppCentral Language & Theme (mandatory for any UI)
+
+Every Aptean app embeds in the AppCentral shell, whose global header owns the language
+dropdown (`EN - English`) and the theme selector. An app that ignores those signals looks
+broken the moment a user switches language: they pick Dansk and nothing changes.
+
+`polaris init` (step 4) auto-applies the `appcentral-shell` skill, so `lib/appcentral/`
+already exists with `shell-context.tsx`, `i18n.ts`, `messages.ts`, and `i18n-context.tsx`.
+Do NOT re-create those files. Your job is to wire them up and then USE them.
+
+If the app has no UI at all (pure API, CLI, worker), skip this section.
+
+**1. Nest the providers in the root layout.** `AppCentralI18nProvider` reads the locale from
+`AppCentralShellProvider`, so the order is load-bearing:
+
+```tsx
+// app/layout.tsx
+import { AppCentralShellProvider } from "@/lib/appcentral/shell-context";
+import { AppCentralI18nProvider } from "@/lib/appcentral/i18n-context";
+import { AppCentralDevShellBar } from "@/lib/appcentral/dev-shell-bar";
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html>
+      <body>
+        <AppCentralDevShellBar />
+        <AppCentralShellProvider>
+          <AppCentralI18nProvider>{children}</AppCentralI18nProvider>
+        </AppCentralShellProvider>
+      </body>
+    </html>
+  );
+}
+```
+
+**2. Every user-visible string MUST go through `t()`.** This is the whole point - the
+providers alone change nothing. A hardcoded literal is invisible to the language selector
+forever, and converting literals later is far more expensive than writing them correctly
+now. Generate this:
+
+```tsx
+const { t } = useTranslation();
+return <button>{t("action.save")}</button>;   // CORRECT
+```
+
+Never this:
+
+```tsx
+return <button>Save</button>;                 // WRONG - never translates
+```
+
+That applies to buttons, labels, headings, placeholders, empty states, validation messages,
+`aria-label`s, and `<title>`. Dates and numbers use `formatDate` / `formatNumber` from the
+same hook, never `toLocaleString()` with a hardcoded locale.
+
+**3. Add every new string to all nine locale catalogs.** `messages.ts` ships nine locales
+matching the header dropdown - `en, de, fr, nl, es, pt, da, no, sv`. When you add a key,
+add it to all nine. A key present only in `en` renders English for everyone; a locale
+missing from `SUPPORTED_LOCALES` never resolves at all. Both fail silently.
+
+Use dotted namespaced keys (`checkout.submit`, not `submitButton`) and `{placeholder}`
+interpolation (`t("greeting.hello", { name })`) rather than string concatenation, which
+breaks in languages with different word order.
+
+**4. Never add a language or theme control to the app UI.** The AppCentral header owns both
+exclusively. No language dropdowns, no dark-mode toggles, no `localStorage` locale keys.
+See `guardrail.md` in the skill for the full rule set (14 rules).
+
+**Validation before you report done**: switch the dev shell bar to `DA - Dansk` and confirm
+visible text changes. If anything stays English, that string is still a hardcoded literal.
+
+### 4b0. Seed Resource Lifecycle Scaffolding (mandatory)
+
+Greenfield apps consistently leak DB connections, leaked threads, and unbounded queues because the lifecycle questions were never answered explicitly. Polaris now bakes the answers into every scaffold from day one.
+
+Read `src/specify_cli/scaffolds/resource_lifecycle.md` (the canonical Polaris pattern library) and apply the matching stack section verbatim. Do NOT invent alternative patterns - the reference patterns are deliberately concrete because past leaks have come from "we'll do something like a pool" hand-waves.
+
+For each scaffolded backend stack, the agent MUST produce:
+
+1. **Connection pool singleton** at module/process scope:
+   - FastAPI: `create_async_engine` in `app/db.py` with explicit `pool_size`, `max_overflow`, `pool_pre_ping`, `pool_recycle`. Session factory via `async_sessionmaker`. Per-request session via FastAPI dependency that closes in `finally`.
+   - Express / Node: `pg.Pool` in `src/db.js` with explicit `max`, `idleTimeoutMillis`, `connectionTimeoutMillis`. Module-scope singleton.
+   - Next.js: `globalThis._pgPool` singleton pattern in `lib/db.ts` for hot-reload safety on the Node runtime. Edge runtime requires HTTP-based DB clients.
+   - Django: `CONN_MAX_AGE`, `CONN_HEALTH_CHECKS=True`, `DISABLE_SERVER_SIDE_CURSORS=True` if PgBouncer; explicit `OPTIONS` for keepalive.
+   - Spring Boot: HikariCP with explicit `maximum-pool-size`, `minimum-idle`, `connection-timeout`, `idle-timeout`, `max-lifetime`, `leak-detection-threshold` in `application.yml`. Never accept Spring Boot's defaults.
+
+2. **HTTP client singleton** at module/process scope:
+   - Python: `httpx.AsyncClient` (or `httpx.Client` for sync) wired into FastAPI lifespan / Django app config `ready()`.
+   - Node: `undici.Pool` or `axios.create()` with `keepAlive: true` at module scope.
+   - Java: Singleton `RestClient` / `OkHttpClient` bean with `destroyMethod = "close"`.
+   - .NET: `IHttpClientFactory` registered via DI.
+   - NEVER instantiate HTTP clients per request.
+
+3. **Graceful shutdown handler** with explicit drain timeout:
+   - FastAPI: lifespan context manager that disposes engine and HTTP client in order.
+   - Express: `process.on('SIGTERM', shutdown)` with `server.close()` then `pool.end()` then a force-exit safety net (`setTimeout(..., 30_000).unref()`).
+   - Django: Gunicorn `--graceful-timeout 30` + `worker_exit` hook to close singleton clients.
+   - Spring Boot: `server.shutdown=graceful` + `spring.lifecycle.timeout-per-shutdown-phase=30s` in `application.yml`.
+
+4. **Bounded background-task pool** if the app spawns workers:
+   - FastAPI: `BoundedWorker` pattern (asyncio.Semaphore + tracked task set + drain on shutdown).
+   - Express: `BullMQ` / similar with bounded concurrency, never raw `setInterval` for production work.
+   - Spring: `ThreadPoolTaskExecutor` bean with explicit `corePoolSize`, `maxPoolSize`, `queueCapacity`, `setWaitForTasksToCompleteOnShutdown(true)`.
+
+5. **Liveness + readiness endpoints** at `/healthz/live` and `/healthz/ready`. Readiness flips to NotReady when shutdown begins so the load balancer drains the pod cleanly.
+
+6. **Observability hooks**: pool metrics (in-use, waiters, wait time histogram) and background-task metrics (queue depth, in-flight, p99 task duration) exposed via Prometheus / OpenTelemetry per the constitution's Phase 2B Q14 answer.
+
+After the code is written, run the generic checklist at the bottom of `resource_lifecycle.md` and add a `docs/architecture/resource-lifecycle.md` doc that records which patterns the app uses, which sizes were chosen, and the drain timeout.
 
 ### 4b. Seed Audit & Security Scaffolding (mandatory)
 
@@ -182,7 +294,7 @@ Next steps:
 
 - **Ask before acting**: Confirm choices before generating files
 - **Detect connectivity**: Try online template first, fall back to offline patterns
-- **CalVer versioning**: Initialize VERSION file with CalVer format (YYYY.MM.PATCH)
+- **CalVer versioning**: Initialize `VERSION` with the AppCentral CalVer standard `YY.MM.RR[.HH]` via `polaris calver check ""` (see ship.md Step 0b for why this must be a `polaris` subcommand, not a direct `specify_cli` import) and write its JSON `suggested` field to the file (release 1, no hotfix segment for a first release) - never a literal `YYYY.MM.PATCH` example.
 - **Never overwrite**: If target directory has existing files, warn and confirm
 
 ## Context

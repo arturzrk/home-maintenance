@@ -25,7 +25,7 @@ Check each area and record pass/fail/warn:
 
 **Folder Structure**: Has `src/`, `tests/`, `docs/`, CI/CD directory. Clean separation of concerns.
 
-**Versioning**: VERSION file with CalVer (YYYY.MM.PATCH), CHANGELOG.md, version consistency across files/tags.
+**Versioning**: `VERSION` file with AppCentral CalVer format `YY.MM.RR[.HH]` (2-digit year, month, release sequence, optional hotfix), CHANGELOG.md, version consistency across files/tags. Read the file's stripped contents (or `""` if missing) and run `polaris calver check "<contents>"` (see ship.md Step 0b for why this must be a `polaris` subcommand, not a direct `specify_cli` import). Its JSON `status` field distinguishes `missing`, `invalid`, and `legacy` (old `YYYY.MM.PATCH`) - three distinct HIGH-severity findings, never grouped as one; `valid` is a PASS.
 
 **Branching**: Protected main/master, feature branch naming convention, no stale branches >30 days.
 
@@ -39,6 +39,12 @@ Check each area and record pass/fail/warn:
 
 **Security**: No secrets in source (.env gitignored), pinned dependencies (lock file), vulnerability scanning configured, no known vulnerable deps.
 
+**Auth**: See `@references/quality-guardrails.md` Auth Cross-Check section. When `.polaris/memory/constitution.md` declares an AuthN/AuthZ model, cross-check changed code against it; when no constitution.md exists, run the generic checklist only and note `[WARN] No constitution.md found - generic checklist only` rather than skipping the category.
+
+**Concurrency**: See `@references/quality-guardrails.md` Concurrency Cross-Check section. Same constitution-present/absent behavior as Auth: cross-check against the Non-Functional Baseline when present, generic checklist with the same `[WARN]` note when absent.
+
+**Architecture**: See `@references/quality-guardrails.md` Architecture Review section. Findings are severity-graded (Critical/High/Medium/Low); only a Critical finding drops this category below PASS.
+
 **DAST**: Detect tooling via `detect_dast_tools()` from `specify_cli.assess.tooling_detection`. Supported: OWASP ZAP (.zap/, zap.yaml), Nuclei (nuclei-templates/, .nuclei-config.yaml), Burp Suite (.burp/, burp-project.json). When not detected, include setup guidance (install, config, run, docs).
 
 ### 2. Generate Report
@@ -48,6 +54,8 @@ Display category-by-category scores (pass/fail/warn per area), overall percentag
 ### 3. Offer Auto-Fix
 
 For straightforward fixes (VERSION file, CHANGELOG template, .dockerignore), offer to create. Never modify existing files without showing diff first.
+
+**VERSION file fix**: reuse the `polaris calver check "<contents>"` result from the audit step above - its `suggested` field is already the migrated value (legacy) or a freshly seeded one (missing/invalid). Show the before/after diff (e.g. `- 2026.02.0` / `+ 26.02.01`) using `current` and `suggested`. Apply only after the user confirms the diff.
 
 ### 4. Save Report
 

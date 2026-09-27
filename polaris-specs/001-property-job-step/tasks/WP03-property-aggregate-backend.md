@@ -12,6 +12,7 @@ domain: backend-logic
 shell_pid: "13951"
 agent: "claude"
 assignee: "arturzrk@gmail.com"
+evidence: "legacy-exempt"
 ---
 
 # WP03 - Property aggregate backend

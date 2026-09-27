@@ -11,6 +11,7 @@ domain: testing-specialist
 shell_pid: "68843"
 reviewed_by: "Artur Żurek"
 review_status: "approved"
+evidence: "legacy-exempt"
 ---
 
 # WP04 - E2E: assets suite

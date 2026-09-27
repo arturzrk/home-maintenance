@@ -13,6 +13,7 @@ domain: frontend-craft
 shell_pid: "981"
 reviewed_by: "Artur Żurek"
 review_status: "approved"
+evidence: "legacy-exempt"
 ---
 
 # WP01 - System menu + header rework

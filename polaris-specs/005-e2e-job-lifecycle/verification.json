@@ -1,0 +1,184 @@
+{
+  "content_hash": "d495f04cd9947f48a0c1d55d081d8d2a9a65cfa98f469c39282dfc04532e4d6d",
+  "criteria": [
+    {
+      "criterion_hash": "df769b78f30cd5a0a438969adfa1af2d9364ac8b0b96269352fa6a90210e661a",
+      "criterion_text": "`dotnet test` passes",
+      "evidence_path": null,
+      "id": "WP01-C1",
+      "passes": false,
+      "verification_steps": [
+        "Run: polaris runtests --wp WP01",
+        "Confirm the criterion holds: `dotnet test` passes"
+      ],
+      "waived": {
+        "by": "polaris-upgrade",
+        "reason": "legacy-exempt: feature finalized before the verification ledger existed"
+      },
+      "wp_id": "WP01"
+    },
+    {
+      "criterion_hash": "bebdd1af1b7919e5beed1850dee55df7023a23eab570f1cba333bc4840137f50",
+      "criterion_text": "Job endpoints return `\"status\": \"Active\"` / `\"Completed\"` (curl check)",
+      "evidence_path": null,
+      "id": "WP01-C2",
+      "passes": false,
+      "verification_steps": [
+        "Run: polaris runtests --wp WP01",
+        "Confirm the criterion holds: Job endpoints return `\"status\": \"Active\"` / `\"Completed\"` (curl check)"
+      ],
+      "waived": {
+        "by": "polaris-upgrade",
+        "reason": "legacy-exempt: feature finalized before the verification ledger existed"
+      },
+      "wp_id": "WP01"
+    },
+    {
+      "criterion_hash": "9928e56104001f96034e4bd6f0eb0cc456586016839f8603c46de326241eaf88",
+      "criterion_text": "Existing Playwright suites still pass (15/15)",
+      "evidence_path": null,
+      "id": "WP01-C3",
+      "passes": false,
+      "verification_steps": [
+        "Run: polaris runtests --wp WP01",
+        "Confirm the criterion holds: Existing Playwright suites still pass (15/15)"
+      ],
+      "waived": {
+        "by": "polaris-upgrade",
+        "reason": "legacy-exempt: feature finalized before the verification ledger existed"
+      },
+      "wp_id": "WP01"
+    },
+    {
+      "criterion_hash": "cda1eb5bc57aa6c0f5a7e9af609d7d728f7bb281dd3af685938538bbf7d63658",
+      "criterion_text": "No frontend changes needed (types already expect strings)",
+      "evidence_path": null,
+      "id": "WP01-C4",
+      "passes": false,
+      "verification_steps": [
+        "Run: polaris runtests --wp WP01",
+        "Confirm the criterion holds: No frontend changes needed (types already expect strings)"
+      ],
+      "waived": {
+        "by": "polaris-upgrade",
+        "reason": "legacy-exempt: feature finalized before the verification ledger existed"
+      },
+      "wp_id": "WP01"
+    },
+    {
+      "criterion_hash": "4f5e50873501d0f79df8e822fc1d9da9a7ac55d1b7ed7d218d28d8673662efbd",
+      "criterion_text": "PR reviewed and merged to main",
+      "evidence_path": null,
+      "id": "WP01-C5",
+      "passes": false,
+      "verification_steps": [
+        "Run: polaris runtests --wp WP01",
+        "Confirm the criterion holds: PR reviewed and merged to main"
+      ],
+      "waived": {
+        "by": "polaris-upgrade",
+        "reason": "legacy-exempt: feature finalized before the verification ledger existed"
+      },
+      "wp_id": "WP01"
+    },
+    {
+      "criterion_hash": "bbafd3f432aa6f1e02ce6f873075f2741513aaec1f1034235c91f9d5c8b62522",
+      "criterion_text": "`npx playwright test e2e/wp06-job-lifecycle.spec.ts` -> 6/6 pass",
+      "evidence_path": null,
+      "id": "WP02-C1",
+      "passes": false,
+      "verification_steps": [
+        "Run: polaris runtests --wp WP02",
+        "Confirm the criterion holds: `npx playwright test e2e/wp06-job-lifecycle.spec.ts` -> 6/6 pass"
+      ],
+      "waived": {
+        "by": "polaris-upgrade",
+        "reason": "legacy-exempt: feature finalized before the verification ledger existed"
+      },
+      "wp_id": "WP02"
+    },
+    {
+      "criterion_hash": "0ec84cffe5a0d9ee4d035705e0b14d794796e38eefefdbecceb48d1a67aabe95",
+      "criterion_text": "Full Playwright suite passes (15 existing + 6 new)",
+      "evidence_path": null,
+      "id": "WP02-C2",
+      "passes": false,
+      "verification_steps": [
+        "Run: polaris runtests --wp WP02",
+        "Confirm the criterion holds: Full Playwright suite passes (15 existing + 6 new)"
+      ],
+      "waived": {
+        "by": "polaris-upgrade",
+        "reason": "legacy-exempt: feature finalized before the verification ledger existed"
+      },
+      "wp_id": "WP02"
+    },
+    {
+      "criterion_hash": "0445379febbdf550bc6ae10c948d462155622df480279ca52949e212655d0506",
+      "criterion_text": "`createJobViaApi` added to `e2e/helpers/setup.ts`",
+      "evidence_path": null,
+      "id": "WP02-C3",
+      "passes": false,
+      "verification_steps": [
+        "Run: polaris runtests --wp WP02",
+        "Confirm the criterion holds: `createJobViaApi` added to `e2e/helpers/setup.ts`"
+      ],
+      "waived": {
+        "by": "polaris-upgrade",
+        "reason": "legacy-exempt: feature finalized before the verification ledger existed"
+      },
+      "wp_id": "WP02"
+    },
+    {
+      "criterion_hash": "3349d073bcdd4e29bcb085f77c6c568da17eb2041a8b86ee2127f9a98fa24538",
+      "criterion_text": "Each test isolated (unique user + property + job)",
+      "evidence_path": null,
+      "id": "WP02-C4",
+      "passes": false,
+      "verification_steps": [
+        "Run: polaris runtests --wp WP02",
+        "Confirm the criterion holds: Each test isolated (unique user + property + job)"
+      ],
+      "waived": {
+        "by": "polaris-upgrade",
+        "reason": "legacy-exempt: feature finalized before the verification ledger existed"
+      },
+      "wp_id": "WP02"
+    },
+    {
+      "criterion_hash": "9fe02c8b08eab8d281f0043f26ce776e5595d797189bc844359293619d999f32",
+      "criterion_text": "No production code changes in this WP",
+      "evidence_path": null,
+      "id": "WP02-C5",
+      "passes": false,
+      "verification_steps": [
+        "Run: polaris runtests --wp WP02",
+        "Confirm the criterion holds: No production code changes in this WP"
+      ],
+      "waived": {
+        "by": "polaris-upgrade",
+        "reason": "legacy-exempt: feature finalized before the verification ledger existed"
+      },
+      "wp_id": "WP02"
+    },
+    {
+      "criterion_hash": "4f5e50873501d0f79df8e822fc1d9da9a7ac55d1b7ed7d218d28d8673662efbd",
+      "criterion_text": "PR reviewed and merged to main",
+      "evidence_path": null,
+      "id": "WP02-C6",
+      "passes": false,
+      "verification_steps": [
+        "Run: polaris runtests --wp WP02",
+        "Confirm the criterion holds: PR reviewed and merged to main"
+      ],
+      "waived": {
+        "by": "polaris-upgrade",
+        "reason": "legacy-exempt: feature finalized before the verification ledger existed"
+      },
+      "wp_id": "WP02"
+    }
+  ],
+  "feature": "005-e2e-job-lifecycle",
+  "generated_at": "2026-09-27T14:11:58Z",
+  "schema_version": 1
+}

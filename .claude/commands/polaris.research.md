@@ -4,11 +4,7 @@ description: Run the Phase 0 research workflow to scaffold research artifacts be
 
 ## Model Guidance
 
-This command does planning work. Use **claude-opus-4-6** for this session.
-
-Deep reasoning, synthesis, and decision-making here propagate to all downstream work. Opus-level reasoning is insurance, not indulgence.
-
-If you are currently on Sonnet: switch to Opus before proceeding (`/model claude-opus-4-6`).
+Model: plan tier (see references/model-selection.md); routing is enforced by the launcher.
 
 ---
 

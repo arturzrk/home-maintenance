@@ -2,6 +2,10 @@
 description: Merge a completed feature into the main branch and clean up worktree
 ---
 
+## Advanced Command Gate
+
+Load `.claude/commands/references/advanced-gate.md` and apply it before proceeding: gate on `advanced_commands` in `.polaris/config.yaml`, bypassing for autopilot or NL routing invocations.
+
 ## User Input
 
 **Telemetry**: Run: `polaris telemetry record merge --feature <slug> --phase start --agent {{AGENT_NAME}}`

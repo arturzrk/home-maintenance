@@ -1,0 +1,184 @@
+{
+  "content_hash": "bb4ff87ecf144141b31d0715bb9ac0ac8f38201e73a6598030fbe975dfdd65ce",
+  "criteria": [
+    {
+      "criterion_hash": "10076dd210376f9b815a8c109413c23d5e1fbaefb485a136ed0e719122907bae",
+      "criterion_text": "`npm run lint`, `npm test`, `npm run build` green",
+      "evidence_path": null,
+      "id": "WP01-C1",
+      "passes": false,
+      "verification_steps": [
+        "Run: polaris runtests --wp WP01",
+        "Confirm the criterion holds: `npm run lint`, `npm test`, `npm run build` green"
+      ],
+      "waived": {
+        "by": "polaris-upgrade",
+        "reason": "legacy-exempt: feature finalized before the verification ledger existed"
+      },
+      "wp_id": "WP01"
+    },
+    {
+      "criterion_hash": "ff758022ee01226ac4e0dd7f15360847a8e1e57e5b4345d7106673dc2adf76b0",
+      "criterion_text": "Existing Playwright suite (33) still passes locally",
+      "evidence_path": null,
+      "id": "WP01-C2",
+      "passes": false,
+      "verification_steps": [
+        "Run: polaris runtests --wp WP01",
+        "Confirm the criterion holds: Existing Playwright suite (33) still passes locally"
+      ],
+      "waived": {
+        "by": "polaris-upgrade",
+        "reason": "legacy-exempt: feature finalized before the verification ledger existed"
+      },
+      "wp_id": "WP01"
+    },
+    {
+      "criterion_hash": "d0c45e4d2f353597af6f8a1c40498e822ef804f44a2dbb7a1445bfa3e97186f2",
+      "criterion_text": "/signin shows plain header (no menu, no identity)",
+      "evidence_path": null,
+      "id": "WP01-C3",
+      "passes": false,
+      "verification_steps": [
+        "Run: polaris runtests --wp WP01",
+        "Confirm the criterion holds: /signin shows plain header (no menu, no identity)"
+      ],
+      "waived": {
+        "by": "polaris-upgrade",
+        "reason": "legacy-exempt: feature finalized before the verification ledger existed"
+      },
+      "wp_id": "WP01"
+    },
+    {
+      "criterion_hash": "f744bb1c2a9e7aa1dbdf204a14a29dca726b0493a202abb283c918dccebf0ecd",
+      "criterion_text": "idToken never passed to any client component",
+      "evidence_path": null,
+      "id": "WP01-C4",
+      "passes": false,
+      "verification_steps": [
+        "Run: polaris runtests --wp WP01",
+        "Confirm the criterion holds: idToken never passed to any client component"
+      ],
+      "waived": {
+        "by": "polaris-upgrade",
+        "reason": "legacy-exempt: feature finalized before the verification ledger existed"
+      },
+      "wp_id": "WP01"
+    },
+    {
+      "criterion_hash": "c04c61d9753c43c93c42e974d9015c2b1786e48e50165d8eeb71a88a7a7b112c",
+      "criterion_text": "Stub sign-in without callbackUrl lands on `/` (manual check)",
+      "evidence_path": null,
+      "id": "WP02-C1",
+      "passes": false,
+      "verification_steps": [
+        "Run: polaris runtests --wp WP02",
+        "Confirm the criterion holds: Stub sign-in without callbackUrl lands on `/` (manual check)"
+      ],
+      "waived": {
+        "by": "polaris-upgrade",
+        "reason": "legacy-exempt: feature finalized before the verification ledger existed"
+      },
+      "wp_id": "WP02"
+    },
+    {
+      "criterion_hash": "0d5f4feead54e11618383502346dc2482ebbdac4c74097cad8bf7feddb345731",
+      "criterion_text": "Visiting `/` signed out redirects to /signin with callbackUrl",
+      "evidence_path": null,
+      "id": "WP02-C2",
+      "passes": false,
+      "verification_steps": [
+        "Run: polaris runtests --wp WP02",
+        "Confirm the criterion holds: Visiting `/` signed out redirects to /signin with callbackUrl"
+      ],
+      "waived": {
+        "by": "polaris-upgrade",
+        "reason": "legacy-exempt: feature finalized before the verification ledger existed"
+      },
+      "wp_id": "WP02"
+    },
+    {
+      "criterion_hash": "137eb96a2fbefee8822eb194101cbf72c8645b3e5dc899f1f9ff3c4d7a0566da",
+      "criterion_text": "33/33 Playwright locally; lint/jest/build green",
+      "evidence_path": null,
+      "id": "WP02-C3",
+      "passes": false,
+      "verification_steps": [
+        "Run: polaris runtests --wp WP02",
+        "Confirm the criterion holds: 33/33 Playwright locally; lint/jest/build green"
+      ],
+      "waived": {
+        "by": "polaris-upgrade",
+        "reason": "legacy-exempt: feature finalized before the verification ledger existed"
+      },
+      "wp_id": "WP02"
+    },
+    {
+      "criterion_hash": "a931fcb3e6dedc3ba6a93d8334914658b3e454cd175f96a44db8713104e8a19e",
+      "criterion_text": "Deep link: /properties/{id} signed out -> signin -> back on the page",
+      "evidence_path": null,
+      "id": "WP02-C4",
+      "passes": false,
+      "verification_steps": [
+        "Run: polaris runtests --wp WP02",
+        "Confirm the criterion holds: Deep link: /properties/{id} signed out -> signin -> back on the page"
+      ],
+      "waived": {
+        "by": "polaris-upgrade",
+        "reason": "legacy-exempt: feature finalized before the verification ledger existed"
+      },
+      "wp_id": "WP02"
+    },
+    {
+      "criterion_hash": "cc2dd951149aa58e7ffb5ae42b7785aaa29cb774fca757f54c475b37e36139ad",
+      "criterion_text": "`npx playwright test e2e/wp09-system-menu.spec.ts` -> 6/6",
+      "evidence_path": null,
+      "id": "WP03-C1",
+      "passes": false,
+      "verification_steps": [
+        "Run: polaris runtests --wp WP03",
+        "Confirm the criterion holds: `npx playwright test e2e/wp09-system-menu.spec.ts` -> 6/6"
+      ],
+      "waived": {
+        "by": "polaris-upgrade",
+        "reason": "legacy-exempt: feature finalized before the verification ledger existed"
+      },
+      "wp_id": "WP03"
+    },
+    {
+      "criterion_hash": "f9353e6a2cdb1276ada8ec818ca5aa21be23c87f5beef93b4f3ae3cff4736856",
+      "criterion_text": "Full suite passes locally (39) and in the CI e2e job",
+      "evidence_path": null,
+      "id": "WP03-C2",
+      "passes": false,
+      "verification_steps": [
+        "Run: polaris runtests --wp WP03",
+        "Confirm the criterion holds: Full suite passes locally (39) and in the CI e2e job"
+      ],
+      "waived": {
+        "by": "polaris-upgrade",
+        "reason": "legacy-exempt: feature finalized before the verification ledger existed"
+      },
+      "wp_id": "WP03"
+    },
+    {
+      "criterion_hash": "4ff6230ac91506973055b8079e683aa35cca7b5ddfee6533ca5c97da465da20d",
+      "criterion_text": "No production code changes",
+      "evidence_path": null,
+      "id": "WP03-C3",
+      "passes": false,
+      "verification_steps": [
+        "Run: polaris runtests --wp WP03",
+        "Confirm the criterion holds: No production code changes"
+      ],
+      "waived": {
+        "by": "polaris-upgrade",
+        "reason": "legacy-exempt: feature finalized before the verification ledger existed"
+      },
+      "wp_id": "WP03"
+    }
+  ],
+  "feature": "009-system-menu",
+  "generated_at": "2026-09-27T14:11:58Z",
+  "schema_version": 1
+}

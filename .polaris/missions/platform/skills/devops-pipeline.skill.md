@@ -592,7 +592,7 @@ The generated file MUST include these sections:
 | `type` | `frontend` / `backend` (creates K8s Service, eligible for Ingress) / `worker` (no Service, no Ingress) / `cronjob` (K8s CronJob, no Service) |
 | `port` | container port (1-65535) |
 | `bgmEnabled` | true/false (blue-green deployment support) |
-| `healthCheck` | `{ path, port, initialDelaySeconds, periodSeconds }` |
+| `healthCheck` | `{ path, port, initialDelaySeconds, periodSeconds }` - **CONDITIONAL**: ask the user "Has this deployment implemented a health endpoint (e.g. GET /health)? (Yes/No)" before emitting. If No, **omit the `healthCheck` field entirely**. Emitting a probe path that does not exist causes `connection refused` failures and pods will never reach Running state. The field can be added later via `/polaris.healthcheck`. |
 | `languages` | array of languages used (informational) |
 | `capacity` | per-environment resource specs: `replicas: { min, max }` (HPA bounds), `resources: { cpu, cpuLimit, memory, memoryLimit }` |
 | `configuration` | array of env vars: `{ name (UPPER_SNAKE_CASE), type: applicationConfig | applicationSecret, defaultValue (optional, applicationConfig only) }` |

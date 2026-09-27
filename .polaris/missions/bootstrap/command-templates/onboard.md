@@ -62,7 +62,7 @@ Ask the user 3-4 focused questions (one at a time). Wait for each answer before 
 
 **Question 3a - Aptean Branding (only if project has a frontend framework or HTML output):**
 > Should Aptean AppCentral branding be applied to this project's UI? (default: yes)
-> Includes: Aptean dark theme, Suisse Intl typography, teal accent palette, --aptean-* CSS variables.
+> Includes: Aptean dark theme, AppCentral typography (Fira Sans / Inter / Fira Mono), teal accent palette, --aptean-* CSS variables.
 
 Skip this question if no UI or frontend was detected in the project analysis.
 
@@ -111,7 +111,7 @@ The constitution should be concise (under 200 lines) and project-specific. Use t
 
 ## Branding (if Aptean branding selected)
 This project uses Aptean AppCentral design system. All UI must follow the Aptean dark
-theme, use Suisse Intl typography, and apply --aptean-* CSS variables.
+theme, use AppCentral typography (Fira Sans for headings, Inter for body and labels, Fira Mono for code), and apply --aptean-* CSS variables.
 ```
 
 ### 5. Generate Onboarding Report

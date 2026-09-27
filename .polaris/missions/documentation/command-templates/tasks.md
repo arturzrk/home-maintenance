@@ -2,6 +2,10 @@
 description: Generate documentation work packages and subtasks aligned to Divio types.
 ---
 
+## Advanced Command Gate
+
+Load `.claude/commands/references/advanced-gate.md` and apply it before proceeding: gate on `advanced_commands` in `.polaris/config.yaml`, bypassing for autopilot or NL routing invocations.
+
 # Command Template: /polaris.tasks (Documentation Mission)
 
 **Phase**: Design (finalizing work breakdown)

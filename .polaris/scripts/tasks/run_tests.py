@@ -15,13 +15,32 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import re
 import subprocess
 import sys
+import tempfile
 import time
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
+
+
+def _default_timeout() -> int:
+    """Default per-run test timeout in seconds.
+
+    300s proved too short for real suites (Polaris's own suite needs ~14
+    minutes). Override per-invocation with --timeout, or globally with the
+    POLARIS_TEST_TIMEOUT environment variable.
+    """
+    try:
+        return int(os.environ["POLARIS_TEST_TIMEOUT"])
+    except (KeyError, ValueError):
+        return 1800
+
+
+DEFAULT_TIMEOUT_SECONDS = _default_timeout()
 
 
 # Directories to skip when searching for test files
@@ -353,7 +372,7 @@ def find_wp_test_paths(project_root: str, wp_id: str) -> list[str]:
 def run_tests(
     project_root: str,
     wp_id: str | None = None,
-    timeout: int = 300,
+    timeout: int = DEFAULT_TIMEOUT_SECONDS,
     changed_only: bool = False,
     diff_base: str | None = None,
     feature: str | None = None,
@@ -577,6 +596,120 @@ def validate_test_plan(project_root: str, test_plan_path: str) -> dict:
     }
 
 
+def _evidence_head_sha(project_root: str) -> str:
+    """Return the full HEAD SHA of project_root, or "" on any error."""
+    try:
+        result = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=project_root,
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return ""
+    return result.stdout.strip() if result.returncode == 0 else ""
+
+
+def _evidence_content_hash(record: dict) -> str:
+    """sha256 of the canonical JSON with content_hash blanked (matches
+    specify_cli.testing.evidence.compute_content_hash)."""
+    to_hash = dict(record)
+    to_hash["content_hash"] = ""
+    canonical = json.dumps(to_hash, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+
+
+def write_project_evidence(
+    project_root: str,
+    feature: str,
+    wp_id: str | None,
+    report: dict,
+) -> str | None:
+    """Write an append-only test-evidence artifact for the project test suite.
+
+    This script is deployed standalone into customer projects (.polaris/scripts/
+    tasks/) and cannot import specify_cli, so the writer is inlined here using
+    only the stdlib. It produces the SAME schema as
+    specify_cli.testing.evidence.write_evidence with runner="project".
+
+    Never raises: evidence must not affect the test run's exit code. Returns the
+    written path, or None if writing was skipped or failed.
+    """
+    try:
+        failed = int(report.get("failed", 0) or 0)
+        errors = int(report.get("errors", 0) or 0)
+        passed = int(report.get("passed", 0) or 0)
+        skipped = int(report.get("skipped", 0) or 0)
+        success = bool(report.get("success"))
+        if not success or failed or errors:
+            result = "failed"
+        elif passed == 0 and skipped > 0:
+            result = "skipped"
+        else:
+            result = "passed"
+
+        duration_seconds = float(report.get("duration_seconds", 0.0) or 0.0)
+        started_at = datetime.now(timezone.utc) - timedelta(seconds=duration_seconds)
+
+        tests: list[dict] = []
+        if result == "failed":
+            output = (report.get("output") or "")[:4000]
+            tests.append(
+                {
+                    "file": report.get("command", ""),
+                    "name": report.get("framework", "project"),
+                    "status": "failed",
+                    "failure_output": output or None,
+                }
+            )
+
+        record = {
+            "schema_version": 1,
+            "feature": feature,
+            "wp_id": wp_id,
+            "runner": "project",
+            "started_at": started_at.strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "duration_ms": int(duration_seconds * 1000),
+            "head_sha": _evidence_head_sha(project_root),
+            "worktree": str(Path(project_root).resolve()),
+            "exit_code": int(report.get("exit_code", 0) or 0),
+            "result": result,
+            "tests": tests,
+            "content_hash": "",
+        }
+        record["content_hash"] = _evidence_content_hash(record)
+
+        directory = Path(project_root) / ".polaris" / "test-evidence" / feature
+        directory.mkdir(parents=True, exist_ok=True)
+        timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+        base = f"{wp_id}-{timestamp}" if wp_id else f"feature-{timestamp}"
+        target = directory / f"{base}.json"
+        suffix = 2
+        while target.exists():
+            target = directory / f"{base}-{suffix}.json"
+            suffix += 1
+
+        fd, tmp_name = tempfile.mkstemp(
+            dir=str(directory), prefix=".evidence-tmp-", suffix=".json"
+        )
+        try:
+            with os.fdopen(fd, "w", encoding="utf-8") as handle:
+                json.dump(record, handle, indent=2, sort_keys=True)
+                handle.write("\n")
+            os.replace(tmp_name, target)
+        except BaseException:
+            try:
+                os.unlink(tmp_name)
+            except OSError:
+                pass
+            raise
+        return str(target)
+    except Exception as exc:  # noqa: BLE001 - evidence must never break the run
+        print(f"Warning: could not write test evidence: {exc}", file=sys.stderr)
+        return None
+
+
 def main() -> None:
     """CLI entry point for the test runner."""
     parser = argparse.ArgumentParser(description="Polaris test runner")
@@ -586,9 +719,10 @@ def main() -> None:
                         help="Run only tests in tests/<slug>/ directory. Falls back to full suite if not found.")
     parser.add_argument("--validate-plan", default=None, help="Path to test-plan.md")
     parser.add_argument("--no-run", action="store_true", dest="no_run",
-                        help="Skip test execution — only validate the test plan (requires --validate-plan)")
+                        help="Skip test execution - only validate the test plan (requires --validate-plan)")
     parser.add_argument("--json", action="store_true", dest="json_output", help="Output as JSON")
-    parser.add_argument("--timeout", type=int, default=300, help="Test timeout in seconds")
+    parser.add_argument("--timeout", type=int, default=DEFAULT_TIMEOUT_SECONDS,
+                        help="Test timeout in seconds (default: POLARIS_TEST_TIMEOUT env var or 1800)")
     parser.add_argument(
         "--changed-only",
         action="store_true",
@@ -624,6 +758,16 @@ def main() -> None:
     if args.validate_plan:
         validation = validate_test_plan(args.project_root, args.validate_plan)
         result["validation"] = validation
+
+    # Write durable, tamper-evident test evidence when a feature context is known.
+    # Skip silently otherwise (no feature slug -> no place to file the artifact).
+    if (
+        args.feature
+        and not args.no_run
+        and not result.get("no_tests")
+        and result.get("framework") not in ("none", "unknown", "skipped")
+    ):
+        write_project_evidence(args.project_root, args.feature, args.wp, result)
 
     if args.json_output:
         print(json.dumps(result, indent=2))

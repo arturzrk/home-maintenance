@@ -11,6 +11,7 @@ test_status: required
 test_file: tests/e2e/WP03-infrastructure-repositories-backgroundservice.e2e.js
 review_status: "approved"
 reviewed_by: "Artur Żurek"
+evidence: "legacy-exempt"
 history:
 - timestamp: '2026-05-29T00:00:00Z'
   lane: planned

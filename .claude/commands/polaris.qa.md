@@ -4,11 +4,7 @@ description: Generate E2E tests from an Azure DevOps work item for QA engineers.
 
 ## Model Guidance
 
-This command does planning work. Use **claude-opus-4-6** for this session.
-
-Deep reasoning, synthesis, and decision-making here propagate to all downstream work. Opus-level reasoning is insurance, not indulgence.
-
-If you are currently on Sonnet: switch to Opus before proceeding (`/model claude-opus-4-6`).
+Model: impl tier (see references/model-selection.md); routing is enforced by the launcher.
 
 ---
 
@@ -27,6 +23,10 @@ $ARGUMENTS
 ```
 
 You **MUST** consider the user input before proceeding (if not empty).
+
+## Autopilot Context
+
+If invoked with `AUTOPILOT_RUN` and an approved spec (`autopilot:` frontmatter) exists, run unattended: do NOT emit `WAITING_FOR_QA_INPUT` at any of the gates below. For QA Discovery, use the `autopilot.qa` defaults from spec frontmatter and the `qa:` config (base_url, auth) instead of asking. If the work item ID or the ADO token/config cannot be resolved (so QA cannot proceed at all), do NOT wait: load `references/escalation.md` and run `polaris agent escalate --feature <slug> --stage qa --reason "<what is missing>"`, then STOP. Direct human invocation is unchanged.
 
 ## Work Item ID Parsing
 

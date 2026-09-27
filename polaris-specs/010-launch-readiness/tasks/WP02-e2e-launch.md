@@ -10,6 +10,7 @@ domain: testing-specialist
 shell_pid: "87481"
 reviewed_by: "Artur Żurek"
 review_status: "approved"
+evidence: "legacy-exempt"
 ---
 
 # WP02 - E2E launch suite

@@ -147,6 +147,23 @@ description: |
     → Add/fix annotations in configs[], secrets[], containerRegistries[]
     → Verify: Annotations present in all required files
 
+  SCENARIO: "Fix ingress class" / "Wrong Kong ingress" / "ingress_class_name incorrect"
+  (ingress_class_name in helm deploy workflows was left as kong-shr after scaffolding)
+  Steps to execute:
+    → Step 16: INGRESS CLASS NAME RULES
+      * In `helm.{{ .ServiceName }}.deploy.yml`:
+        - Set dev matrix entry:   `ingress_class_name: 'kong-dev'`
+        - Set tst matrix entry:   `ingress_class_name: 'kong-tst'`
+      * In `helm.upr.{{ .ServiceName }}.deploy.yml`:
+        - Set uat-A matrix entry: `ingress_class_name: 'kong-shr'`
+        - Set prd-A matrix entry: `ingress_class_name: 'kong-prda'`
+      * In `helm/{{ .ServiceName }}/values-{{ .ServiceName }}.yml`:
+        - Verify `ingressClassName: #{ingress_class_name}#` (token, not hardcoded)
+        - If hardcoded to `kong-shr`: replace with `#{ingress_class_name}#`
+    → Load Helm Runtime Skill for INGRESS CLASS NAME RULES
+    → Verify: no `kong-shr` remains for dev or prd-A matrix entries;
+      values file uses token not hardcode
+
   SCENARIO: "Deploy now" / "Trigger pipelines" / "Deploy to dev"
   Steps to execute:
     → Steps 36-42: Deploy phase

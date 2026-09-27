@@ -34,7 +34,7 @@ artifacts:
 paths:
   workspace: "src/"
   tests: "tests/"
-  deliverables: "contracts/"
+  deliverables: "polaris-specs/"  # per-feature contracts live in polaris-specs/<feature>/contracts/
   documentation: "docs/"
 
 # Validation rules

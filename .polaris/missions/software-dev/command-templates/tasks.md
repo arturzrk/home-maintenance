@@ -4,9 +4,7 @@ description: Generate grouped work packages with actionable subtasks and matchin
 
 ## Model Guidance
 
-This command does planning work. Use **claude-opus-4-6** for this session.
-
-Work package decomposition made here defines the implementation structure for the entire feature. Errors in WP scope, dependencies, or sizing compound in every downstream implementation session. If you are on Sonnet: switch to Opus (`/model claude-opus-4-6`).
+Model: plan tier (see references/model-selection.md); routing is enforced by the launcher.
 
 ---
 
@@ -71,6 +69,15 @@ Write to `FEATURE_DIR/tasks.md` with WP sections: summary, subtask checklist, im
 Create `FEATURE_DIR/tasks/WPxx-slug.md` for each WP (FLAT directory - NO subdirectories under `tasks/`).
 
 Frontmatter: `work_package_id`, `subtasks`, `lane: "planned"`, `dependencies`. Include objective, detailed per-subtask guidance, test strategy, DoD, risks.
+
+Do NOT hand-write `files_touched`: `finalize-tasks` seeds it automatically from the code graph. When present, `files_touched` is a YAML block sequence of the file paths a WP is predicted to modify (the files it names plus their direct importers). It is used to detect cross-WP semantic conflicts before parallel implementation. It is omitted entirely when the code graph is disabled or unavailable, so never fill it in yourself:
+
+```yaml
+work_package_id: WP03
+files_touched:
+- src/specify_cli/cli/commands/graph.py
+- src/specify_cli/code_intelligence/queries.py
+```
 
 Lane status is in `lane:` frontmatter only - never in directory structure.
 

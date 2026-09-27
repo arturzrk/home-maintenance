@@ -37,7 +37,7 @@ Thumbs.db
 .polaris/reports/
 .polaris/autopilot-state.json
 .polaris/autopilot-state.json.bak
-.polaris/code-graph.json
+.polaris/code-graph.db
 .claude/settings.json
 .claude/helpers/polaris-status.cjs
 .polaris/audit-trail/
@@ -46,3 +46,5 @@ Thumbs.db
 # Audit log local sink (FileAuditLog default path; managed sink in production)
 audit-trail/
 frontend/test-results/.last-run.json
+.polaris/test-evidence/
+.polaris/workspaces/

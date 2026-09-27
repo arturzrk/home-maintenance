@@ -13,6 +13,7 @@ domain: devops-infra
 shell_pid: "78557"
 reviewed_by: "Artur Żurek"
 review_status: "approved"
+evidence: "legacy-exempt"
 ---
 
 # WP01 - CI e2e job in ci.yml

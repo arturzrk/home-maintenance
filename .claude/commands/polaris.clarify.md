@@ -4,11 +4,7 @@ description: Identify underspecified areas in the current feature spec by asking
 
 ## Model Guidance
 
-This command does planning work. Use **claude-opus-4-6** for this session.
-
-Deep reasoning, synthesis, and decision-making here propagate to all downstream work. Opus-level reasoning is insurance, not indulgence.
-
-If you are currently on Sonnet: switch to Opus before proceeding (`/model claude-opus-4-6`).
+Model: plan tier (see references/model-selection.md); routing is enforced by the launcher.
 
 ---
 
@@ -28,6 +24,10 @@ $ARGUMENTS
 ```
 
 You **MUST** consider the user input before proceeding (if not empty).
+
+## Autopilot Context
+
+If invoked with `AUTOPILOT_RUN` and an approved spec (`autopilot:` frontmatter) exists, run unattended: do NOT emit `WAITING_FOR_CLARIFICATION_INPUT`. For each generated question, auto-resolve with a best-judgment default and record it in the spec `## Clarifications` log as an assumption (`- Q: <question> -> A: <assumption> (auto-resolved under autopilot)`), then continue. Only when a question genuinely blocks correctness and cannot be assumed, load `references/escalation.md` and run `polaris agent escalate --feature <slug> --stage clarify --reason "<question>"`, then STOP. Direct human invocation is unchanged.
 
 ---
 
