@@ -17,31 +17,67 @@ Production values used throughout:
 | Public brand | Maintained House |
 | Frontend domain | `maintained.house` (Vercel) |
 | API domain | `api.maintained.house` (Azure App Service) |
-| Contact mailbox | `contact@maintained.house` |
+| Registrar | Porkbun |
+| Contact mailbox | `contact@maintained.house` (Migadu, or Zoho Mail Lite) |
+| Reminder sender | `reminders@notify.maintained.house` (Resend) |
 | Database | MongoDB Atlas, EU region, TLS |
 | OAuth consent | Published, basic scopes (`openid`, `email`, `profile`) |
 
 ## Phase 1 - Domain
 
-1. **Buy `maintained.house`** at a registrar (Namecheap, Cloudflare,
-   OVH, ...). Expect roughly USD 30/year and confirm the renewal price
-   before purchase (it is a flat-rate TLD, not a teaser rate).
-   *Verify*: registrar dashboard shows the domain active.
-2. **Choose the DNS host** - the registrar's own DNS is fine. You will
-   add records in phases 4 and 5; nothing to create yet.
+1. **Buy `maintained.house`** at **Porkbun** (chosen for at-cost
+   pricing, free WHOIS privacy/SSL, and a DNS panel that comfortably
+   handles the MX/SPF/DKIM records below). Expect roughly USD 30/year
+   and confirm the renewal price before purchase.
+   *Verify*: Porkbun dashboard shows the domain active.
+2. **Choose the DNS host** - Porkbun's own DNS is fine. You will add
+   records in phases 3, 5, and 6; nothing to create yet.
    *Verify*: you can open the DNS record editor.
 
 ## Phase 2 - Contact mailbox
 
-1. **Set up forwarding** for `contact@maintained.house` to your
-   personal inbox. Most registrars offer free email forwarding; if not,
-   an MX-based forwarder (e.g. Cloudflare Email Routing, ImprovMX)
-   works. Add the MX/TXT records the provider prescribes.
+1. **Set up a mailbox** for `contact@maintained.house` via **Migadu**
+   (flat annual fee, unlimited mailboxes/aliases - preferred since this
+   project only needs a handful of addresses) or **Zoho Mail Lite**
+   (~$1/user/month) as a fallback. Add the MX/SPF/DKIM records the
+   provider prescribes at Porkbun. Forward-only setups (registrar
+   forwarding, ImprovMX) remain acceptable if you don't need to send
+   from the address.
    *Verify*: send a test mail from another account and confirm it
    arrives; reply and confirm the reply sends (or note reply-from
    limitations - forward-only is acceptable for launch).
 
-## Phase 3 - MongoDB Atlas
+## Phase 3 - Resend transactional email (reminders)
+
+The reminders feature (011-reminders) sends daily digest emails via
+Resend (`Email:Provider=Resend` in
+`backend/src/HomeMaintenance.Infrastructure/Email/EmailExtensions.cs`).
+It fails fast at API startup if the required settings below are
+missing. Send from a dedicated subdomain rather than the bare domain so
+its SPF/DKIM/deliverability reputation stays isolated from the contact
+mailbox in phase 2 - a bounce-heavy digest should never risk contact@'s
+inbox reputation.
+
+1. **Add the domain in Resend**: dashboard -> Domains -> Add Domain ->
+   `notify.maintained.house` (not the bare `maintained.house`).
+2. **Verify it**: add the SPF, DKIM, and DMARC TXT records Resend
+   generates to the `notify` subdomain at Porkbun's DNS editor. Since
+   this is a distinct subdomain zone, no merging with the contact
+   mailbox's SPF record is needed.
+   *Verify*: Resend's Domains page shows `notify.maintained.house` as
+   Verified.
+3. **Set the app settings** (App Service -> Configuration, alongside
+   phase 5's settings): `Email__Provider=Resend`,
+   `Email__Resend__ApiKey` (from Resend -> API Keys), and
+   `Email__FromAddress=reminders@notify.maintained.house`. Confirm
+   `Frontend__BaseUrl=https://maintained.house` is also set - the
+   digest service skips its run entirely if this is blank.
+   *Verify*: `ReminderDigestService`'s startup log line shows no
+   fail-fast error; trigger a digest pass (or wait for the daily run)
+   and confirm a test owner with `RemindersEnabled=true` receives an
+   email from `reminders@notify.maintained.house`.
+
+## Phase 4 - MongoDB Atlas
 
 1. **Create a cluster**: [cloud.mongodb.com](https://cloud.mongodb.com)
    -> new project `maintained-house-prod` -> create a cluster in an EU
@@ -58,7 +94,7 @@ Production values used throughout:
    *Verify*: `mongosh "<uri>" --eval "db.runCommand({ ping: 1 })"`
    returns `ok: 1` from your machine (temporarily allow your IP).
 
-## Phase 4 - Azure App Service (production API)
+## Phase 5 - Azure App Service (production API)
 
 1. **App Service**: reuse the staging app or (recommended) create a
    second app, e.g. `maintained-house-prod`, so staging keeps working.
@@ -74,7 +110,7 @@ Production values used throughout:
    apply the production variant of the backend matrix in
    [oidc-setup.md](oidc-setup.md#backend-configuration):
    `ASPNETCORE_ENVIRONMENT=Production`, `Auth__Google__ClientId` (the
-   production client from phase 6), `MongoDB__ConnectionString` (the
+   production client from phase 7), `MongoDB__ConnectionString` (the
    Atlas URI), `Cors__AllowedOrigins=https://maintained.house`.
    `Auth__UseStub` stays unset - production startup refuses the stub.
 3. **Audit-log sink**: per the constitution, production audit records
@@ -88,7 +124,7 @@ Production values used throughout:
    *Verify*: `curl https://api.maintained.house/health` returns 200
    with a valid certificate, and `/` returns the service banner.
 
-## Phase 5 - Vercel (production frontend)
+## Phase 6 - Vercel (production frontend)
 
 1. **Domain**: Vercel project -> Settings -> Domains -> add
    `maintained.house`; create the A/CNAME records Vercel prescribes.
@@ -96,7 +132,7 @@ Production values used throughout:
    variant of the frontend matrix in
    [oidc-setup.md](oidc-setup.md#frontend-configuration):
    `NEXTAUTH_URL=https://maintained.house`, fresh `NEXTAUTH_SECRET`,
-   `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` (phase 6),
+   `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` (phase 7),
    `API_BASE_URL=https://api.maintained.house`,
    `NEXT_PUBLIC_API_URL=https://api.maintained.house`,
    `AUTH_TRUST_HOST=true`. `NEXTAUTH_DEV_STUB` must NOT be set.
@@ -105,7 +141,7 @@ Production values used throughout:
    valid certificate; the amber dev-stub box does NOT appear on
    `/signin`.
 
-## Phase 6 - Google OAuth (production client + publishing)
+## Phase 7 - Google OAuth (production client + publishing)
 
 Follow [oidc-setup.md](oidc-setup.md#step-by-step-google-cloud-console-setup)
 with the production values:
@@ -127,7 +163,7 @@ with the production values:
    *Verify*: consent screen shows "In production"; the client's
    redirect URI list contains exactly the production callback.
 
-## Phase 7 - Launch verification
+## Phase 8 - Launch verification
 
 Run through in an incognito window:
 
@@ -145,7 +181,7 @@ Run through in an incognito window:
    the sign-in page and `/properties` redirects back to sign-in.
 8. `https://api.maintained.house/health` returns 200.
 
-## Phase 8 - Rollback notes
+## Phase 9 - Rollback notes
 
 - **Stop new sign-ins**: set the OAuth consent screen back to
   "Testing" - existing sessions keep working, new users are blocked.
