@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <Version>0.1.1</Version>
@@ -7,6 +7,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <InvariantGlobalization>true</InvariantGlobalization>
+    <UserSecretsId>a57b9618-adfb-418f-b07d-6e68beb76df2</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
