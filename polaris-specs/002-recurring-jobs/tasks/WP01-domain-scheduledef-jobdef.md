@@ -207,12 +207,12 @@ Required test cases:
 
 ## Definition of Done
 
-- [ ] All 4 new files compile with no warnings.
-- [ ] `Job.cs` extended cleanly; all existing callers still compile.
-- [ ] `ScheduleDefinitionTests` - all cases pass.
-- [ ] `JobDefinitionTests` - all cases pass.
-- [ ] `dotnet test` is green on the full Unit.Tests project.
-- [ ] `JobDefinitions/` folder exists under `HomeMaintenance.Domain/`.
+- [x] All 4 new files compile with no warnings.
+- [x] `Job.cs` extended cleanly; all existing callers still compile.
+- [x] `ScheduleDefinitionTests` - all cases pass.
+- [x] `JobDefinitionTests` - all cases pass.
+- [x] `dotnet test` is green on the full Unit.Tests project.
+- [x] `JobDefinitions/` folder exists under `HomeMaintenance.Domain/`.
 
 ## Risks
 

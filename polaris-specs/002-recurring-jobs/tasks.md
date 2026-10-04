@@ -22,29 +22,29 @@ WP01 T001 and T002 are parallel-safe. WP02 T008 and T009 are parallel-safe.
 
 New Domain entities and value objects. No Application or Infrastructure changes yet.
 
-- [ ] T001 [P] `CadenceUnit` enum (`Day | Week | Month | Year`) in
+- [x] T001 [P] `CadenceUnit` enum (`Day | Week | Month | Year`) in
       `backend/src/HomeMaintenance.Domain/JobDefinitions/CadenceUnit.cs`.
-- [ ] T002 [P] `ScheduleDefinition` sealed record in
+- [x] T002 [P] `ScheduleDefinition` sealed record in
       `backend/src/HomeMaintenance.Domain/JobDefinitions/ScheduleDefinition.cs`
       with `OccurrencesInRange(DateOnly from, DateOnly to)` method.
       Constructor validates Multiplier >= 1 and EndDate > StartDate.
-- [ ] T003 `StepTemplate` sealed class in
+- [x] T003 `StepTemplate` sealed class in
       `backend/src/HomeMaintenance.Domain/JobDefinitions/StepTemplate.cs`
       with `Create` factory and `EditDescription` mutation.
-- [ ] T004 `JobDefinition` aggregate root in
+- [x] T004 `JobDefinition` aggregate root in
       `backend/src/HomeMaintenance.Domain/JobDefinitions/JobDefinition.cs`
       with `Create`, `Hydrate`, `Rename`, `UpdateSchedule`, and all four
       step-template mutation methods.
-- [ ] T005 Extend `Job` aggregate:
+- [x] T005 Extend `Job` aggregate:
       add nullable `JobDefinitionId` property; extend `Create` and
       `Hydrate` to accept optional `jobDefinitionId`. `JobDefinitionId`
       is immutable after creation.
-- [ ] T006 Unit tests for `ScheduleDefinition` in
+- [x] T006 Unit tests for `ScheduleDefinition` in
       `backend/tests/HomeMaintenance.Unit.Tests/Domain/JobDefinitions/ScheduleDefinitionTests.cs`:
       all four cadence units, multiplier > 1, month-end clamping (Jan 31),
       leap-year (Feb 29 + 12 months), EndDate cutoff, start date in past,
       empty range, horizon boundary inclusion.
-- [ ] T007 Unit tests for `JobDefinition` in
+- [x] T007 Unit tests for `JobDefinition` in
       `backend/tests/HomeMaintenance.Unit.Tests/Domain/JobDefinitions/JobDefinitionTests.cs`:
       Create invariants, Rename validation, UpdateSchedule, all four
       StepTemplate mutations (add/remove/reorder/edit) and their
