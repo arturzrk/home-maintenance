@@ -16,7 +16,7 @@ set -m  # background jobs get own process groups, so cleanup stops whole trees
 
 ROOT="$(cd "${BASH_SOURCE[0]%/*}/.." && pwd)"
 LOG_DIR="$ROOT/logs/dev"
-PID_FILE="$LOG_DIR/dev.pids"
+PID_FILE="${DEV_PID_FILE:-$LOG_DIR/dev.pids}"
 API_URL="http://localhost:5000"
 WEB_URL="http://localhost:3000"
 
@@ -117,15 +117,16 @@ write_pid_file() {
   } >"$PID_FILE"
 }
 
+wait_or_die() {
+  local url="$1" name="$2" secs="$3" log="$4"
+  wait_for_url "$url" "$name" "$secs" && return 0
+  tail -n 30 "$log" >&2 || true
+  cleanup 1
+}
+
 wait_for_api_and_frontend() {
-  if ! wait_for_url "$API_URL/health" "API" 120; then
-    tail -n 30 "$LOG_DIR/api.log" >&2 || true
-    cleanup 1
-  fi
-  if ! wait_for_url "$WEB_URL" "frontend" 90; then
-    tail -n 30 "$LOG_DIR/web.log" >&2 || true
-    cleanup 1
-  fi
+  wait_or_die "$API_URL/health" "API" 120 "$LOG_DIR/api.log"
+  wait_or_die "$WEB_URL" "frontend" 90 "$LOG_DIR/web.log"
 }
 
 run_dev() {
@@ -147,9 +148,11 @@ parse_args() {
   case "${1:-}" in
     --help|-h) usage; exit 0 ;;
     --check)   check_prereqs; exit $? ;;
-    --*)       printf 'Unknown option: %s\n\n' "$1" >&2; usage >&2; exit 2 ;;
+    ?*)        printf 'Unknown option: %s\n\n' "$1" >&2; usage >&2; exit 2 ;;
   esac
 }
 
-parse_args "$@"
-run_dev
+if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
+  parse_args "$@"
+  run_dev
+fi

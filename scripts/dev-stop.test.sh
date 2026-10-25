@@ -169,6 +169,17 @@ test_unknown_flag() {
   fi
 }
 
+test_single_dash_typo_is_rejected() {
+  rm -f "$DOCKER_LOG"
+  local out rc
+  out="$(run_stop -dry-run 2>&1)"; rc=$?
+  if [ "$rc" -ne 0 ] && printf '%s' "$out" | grep -qi 'usage' && [ ! -f "$DOCKER_LOG" ]; then
+    ok "single-dash typo (-dry-run) is rejected, not silently run for real"
+  else
+    bad "single-dash typo (rc=$rc, docker_called=$([ -f "$DOCKER_LOG" ] && echo yes || echo no))"
+  fi
+}
+
 test_help
 test_no_pid_file
 test_stops_live_recorded_pid
@@ -177,6 +188,7 @@ test_stale_pid_reported_as_already_stopped
 test_tail_label_is_stopped
 test_mongo_failure_still_clears_pid_file
 test_unknown_flag
+test_single_dash_typo_is_rejected
 
 if [ -n "$failures" ]; then
   printf '\nFAILED\n'

@@ -80,7 +80,7 @@ parse_args() {
   case "${1:-}" in
     --help|-h) usage; exit 0 ;;
     --dry-run) DRY_RUN=1 ;;
-    --*)       printf 'Unknown option: %s\n\n' "$1" >&2; usage >&2; exit 2 ;;
+    ?*)        printf 'Unknown option: %s\n\n' "$1" >&2; usage >&2; exit 2 ;;
   esac
 }
 
