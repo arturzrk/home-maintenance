@@ -70,6 +70,7 @@ kill_group() {
 }
 
 cleanup() {
+  local code="${1:-0}"
   trap - INT TERM
   printf '\nStopping API and frontend...\n'
   kill_group "$TAIL_PID"
@@ -78,7 +79,7 @@ cleanup() {
   wait 2>/dev/null || true
   rm -f "$PID_FILE"
   printf 'Done. MongoDB still running — stop it with: docker compose stop mongodb\n'
-  exit 0
+  exit "$code"
 }
 
 banner() {
@@ -112,7 +113,19 @@ write_pid_file() {
   {
     printf 'api=%s\n' "$API_PID"
     printf 'web=%s\n' "$WEB_PID"
+    printf 'tail=%s\n' "$TAIL_PID"
   } >"$PID_FILE"
+}
+
+wait_for_api_and_frontend() {
+  if ! wait_for_url "$API_URL/health" "API" 120; then
+    tail -n 30 "$LOG_DIR/api.log" >&2 || true
+    cleanup 1
+  fi
+  if ! wait_for_url "$WEB_URL" "frontend" 90; then
+    tail -n 30 "$LOG_DIR/web.log" >&2 || true
+    cleanup 1
+  fi
 }
 
 run_dev() {
@@ -122,17 +135,10 @@ run_dev() {
   start_mongo
   start_api
   start_frontend
-  write_pid_file
-  if ! wait_for_url "$API_URL/health" "API" 120; then
-    tail -n 30 "$LOG_DIR/api.log" >&2 || true
-    exit 1
-  fi
-  if ! wait_for_url "$WEB_URL" "frontend" 90; then
-    tail -n 30 "$LOG_DIR/web.log" >&2 || true
-    exit 1
-  fi
+  wait_for_api_and_frontend
   tail -f "$LOG_DIR/api.log" "$LOG_DIR/web.log" &
   TAIL_PID=$!
+  write_pid_file
   banner
   wait
 }

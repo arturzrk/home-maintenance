@@ -30,7 +30,9 @@ cleanup_all() {
 }
 trap cleanup_all EXIT
 
-printf '#!/usr/bin/env bash\nprintf "%%s\\n" "$*" >>"%s"\n' "$DOCKER_LOG" >"$STUB_DIR/docker"
+DOCKER_FAIL_FLAG="$STUB_DIR/docker-should-fail"
+printf '#!/usr/bin/env bash\nprintf "%%s\\n" "$*" >>"%s"\n[ -f "%s" ] && exit 1\nexit 0\n' \
+  "$DOCKER_LOG" "$DOCKER_FAIL_FLAG" >"$STUB_DIR/docker"
 chmod +x "$STUB_DIR/docker"
 STUB_PATH="$STUB_DIR:/usr/bin:/bin"
 
@@ -120,6 +122,43 @@ test_stale_pid_reported_as_already_stopped() {
   fi
 }
 
+test_tail_label_is_stopped() {
+  spawn_sleeper
+  local pid="$SLEEPER_PID"
+  printf 'tail=%s\n' "$pid" >"$PID_FILE"
+  rm -f "$DOCKER_LOG"
+  local out rc
+  out="$(run_stop 2>&1)"; rc=$?
+  sleep 0.3
+  if [ "$rc" -eq 0 ] \
+      && printf '%s' "$out" | grep -q "log tail: stopping pid $pid" \
+      && ! kill -0 "$pid" 2>/dev/null; then
+    ok "tail label is stopped alongside api/web"
+  else
+    bad "tail label (rc=$rc)"
+  fi
+}
+
+test_mongo_failure_still_clears_pid_file() {
+  spawn_sleeper
+  local pid="$SLEEPER_PID"
+  printf 'api=%s\n' "$pid" >"$PID_FILE"
+  rm -f "$DOCKER_LOG"
+  touch "$DOCKER_FAIL_FLAG"
+  local out rc
+  out="$(run_stop 2>&1)"; rc=$?
+  rm -f "$DOCKER_FAIL_FLAG"
+  sleep 0.3
+  if [ "$rc" -ne 0 ] \
+      && printf '%s' "$out" | grep -q "API: stopping pid $pid" \
+      && ! kill -0 "$pid" 2>/dev/null \
+      && [ ! -f "$PID_FILE" ]; then
+    ok "a failing mongo stop still stops recorded pids and clears the pid file"
+  else
+    bad "mongo failure (rc=$rc, pid_file_exists=$([ -f "$PID_FILE" ] && echo yes || echo no))"
+  fi
+}
+
 test_unknown_flag() {
   local out rc
   out="$(run_stop --bogus 2>&1)"; rc=$?
@@ -135,6 +174,8 @@ test_no_pid_file
 test_stops_live_recorded_pid
 test_dry_run_leaves_live_pid_running
 test_stale_pid_reported_as_already_stopped
+test_tail_label_is_stopped
+test_mongo_failure_still_clears_pid_file
 test_unknown_flag
 
 if [ -n "$failures" ]; then

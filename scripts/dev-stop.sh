@@ -17,8 +17,8 @@ DRY_RUN=0
 usage() {
   printf '%s\n' "Usage: scripts/dev-stop.sh [--dry-run|--help]"
   printf '%s\n' ""
-  printf '%s\n' "Stops the API/frontend recorded in $PID_FILE (written by"
-  printf '%s\n' "scripts/dev.sh on startup), then stops the MongoDB container."
+  printf '%s\n' "Stops the API/frontend/log-tail recorded in $PID_FILE (written"
+  printf '%s\n' "by scripts/dev.sh on startup), then stops the MongoDB container."
   printf '%s\n' ""
   printf '%s\n' "  --dry-run   show what would be stopped, without stopping anything"
   printf '%s\n' "  --help      show this message"
@@ -29,17 +29,26 @@ pid_for() {
   sed -n "s/^$1=//p" "$PID_FILE"
 }
 
-stop_recorded() {
+# resolve_pid label name — prints the live pid on stdout and returns 0, or
+# reports why there's nothing to stop and returns 1 (no recorded pid, or
+# the recorded pid isn't running).
+resolve_pid() {
   local label="$1" name="$2" pid
   pid="$(pid_for "$label")"
   if [ -z "$pid" ]; then
-    printf '%s: no recorded pid in %s\n' "$name" "$PID_FILE"
-    return 0
+    printf '%s: no recorded pid in %s\n' "$name" "$PID_FILE" >&2
+    return 1
   fi
   if ! kill -0 "$pid" 2>/dev/null; then
-    printf '%s: pid %s not running (already stopped)\n' "$name" "$pid"
-    return 0
+    printf '%s: pid %s not running (already stopped)\n' "$name" "$pid" >&2
+    return 1
   fi
+  printf '%s' "$pid"
+}
+
+stop_recorded() {
+  local label="$1" name="$2" pid
+  pid="$(resolve_pid "$label" "$name")" || return 0
   if [ "$DRY_RUN" = "1" ]; then
     printf '%s: would stop pid %s\n' "$name" "$pid"
     return 0
@@ -58,10 +67,13 @@ stop_mongo() {
 }
 
 run_stop() {
+  local mongo_rc=0
   stop_recorded api API
   stop_recorded web frontend
-  stop_mongo
+  stop_recorded tail "log tail"
+  stop_mongo || mongo_rc=$?
   [ "$DRY_RUN" = "1" ] || rm -f "$PID_FILE"
+  return "$mongo_rc"
 }
 
 parse_args() {

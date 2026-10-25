@@ -50,4 +50,4 @@ frontend/test-results/.last-run.json
 .polaris/workspaces/
 
 # Local dev script logs (scripts/dev.sh)
-logs/
+/logs/
