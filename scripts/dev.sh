@@ -71,7 +71,7 @@ kill_group() {
 
 cleanup() {
   local code="${1:-0}"
-  trap - INT TERM
+  trap - INT TERM HUP
   printf '\nStopping API and frontend...\n'
   kill_group "$TAIL_PID"
   kill_group "$API_PID"
@@ -132,7 +132,7 @@ wait_for_api_and_frontend() {
 run_dev() {
   check_prereqs
   mkdir -p "$LOG_DIR"
-  trap cleanup INT TERM
+  trap cleanup INT TERM HUP
   start_mongo
   start_api
   start_frontend

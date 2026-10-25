@@ -39,6 +39,10 @@ resolve_pid() {
     printf '%s: no recorded pid in %s\n' "$name" "$PID_FILE" >&2
     return 1
   fi
+  if ! [[ "$pid" =~ ^[1-9][0-9]*$ ]]; then
+    printf '%s: invalid recorded pid %q in %s\n' "$name" "$pid" "$PID_FILE" >&2
+    return 1
+  fi
   if ! kill -0 "$pid" 2>/dev/null; then
     printf '%s: pid %s not running (already stopped)\n' "$name" "$pid" >&2
     return 1

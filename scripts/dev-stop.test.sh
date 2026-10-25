@@ -85,7 +85,8 @@ test_stops_live_recorded_pid() {
   if [ "$rc" -eq 0 ] \
       && printf '%s' "$out" | grep -q "API: stopping pid $pid" \
       && ! kill -0 "$pid" 2>/dev/null \
-      && [ ! -f "$PID_FILE" ]; then
+      && [ ! -f "$PID_FILE" ] \
+      && [ -f "$DOCKER_LOG" ] && grep -q 'compose stop mongodb' "$DOCKER_LOG"; then
     ok "default run stops a live recorded pid and clears the pid file"
   else
     bad "stop live pid (rc=$rc, still alive=$(kill -0 "$pid" 2>/dev/null && echo yes || echo no))"
@@ -132,7 +133,8 @@ test_tail_label_is_stopped() {
   sleep 0.3
   if [ "$rc" -eq 0 ] \
       && printf '%s' "$out" | grep -q "log tail: stopping pid $pid" \
-      && ! kill -0 "$pid" 2>/dev/null; then
+      && ! kill -0 "$pid" 2>/dev/null \
+      && [ -f "$DOCKER_LOG" ] && grep -q 'compose stop mongodb' "$DOCKER_LOG"; then
     ok "tail label is stopped alongside api/web"
   else
     bad "tail label (rc=$rc)"
@@ -169,6 +171,22 @@ test_unknown_flag() {
   fi
 }
 
+test_pid_zero_is_rejected_not_self_signaled() {
+  # kill -0 0 / kill -TERM -- "-0" both succeed (pid 0 means "my own
+  # process group" per POSIX), so an invalid "0" pid must be rejected
+  # before ever reaching kill -- this test only exercises the fixed
+  # validation path, never the raw kill call with pid 0.
+  printf 'api=0\n' >"$PID_FILE"
+  rm -f "$DOCKER_LOG"
+  local out rc
+  out="$(run_stop 2>&1)"; rc=$?
+  if [ "$rc" -eq 0 ] && printf '%s' "$out" | grep -q 'invalid recorded pid'; then
+    ok "pid=0 is rejected as invalid, never passed to kill"
+  else
+    bad "pid=0 (rc=$rc)"
+  fi
+}
+
 test_single_dash_typo_is_rejected() {
   rm -f "$DOCKER_LOG"
   local out rc
@@ -189,6 +207,7 @@ test_tail_label_is_stopped
 test_mongo_failure_still_clears_pid_file
 test_unknown_flag
 test_single_dash_typo_is_rejected
+test_pid_zero_is_rejected_not_self_signaled
 
 if [ -n "$failures" ]; then
   printf '\nFAILED\n'
