@@ -48,3 +48,6 @@ audit-trail/
 frontend/test-results/.last-run.json
 .polaris/test-evidence/
 .polaris/workspaces/
+
+# Local dev script logs (scripts/dev.sh)
+logs/
