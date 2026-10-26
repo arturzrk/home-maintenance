@@ -20,6 +20,17 @@ describe("readJwtExp", () => {
     expect(readJwtExp(makeJwt({}))).toBeUndefined();
     expect(readJwtExp(makeJwt({ exp: "later" }))).toBeUndefined();
   });
+
+  it("falls back to Buffer decoding when atob is unavailable", () => {
+    const original = globalThis.atob;
+    // @ts-expect-error -- deliberately removing the global for this case
+    delete globalThis.atob;
+    try {
+      expect(readJwtExp(makeJwt({ exp: 1700000000 }))).toBe(1700000000);
+    } finally {
+      globalThis.atob = original;
+    }
+  });
 });
 
 describe("refreshGoogleIdToken", () => {
@@ -91,6 +102,17 @@ describe("refreshGoogleIdToken", () => {
 
     await expect(refreshGoogleIdToken({ ...baseArgs, fetchImpl })).rejects.toThrow(
       /Token has been expired or revoked/,
+    );
+  });
+
+  it("throws when neither the JWT claim nor expires_in provide an expiry", async () => {
+    const fetchImpl = jest.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ id_token: makeJwt({}) }),
+    } as unknown as Response);
+
+    await expect(refreshGoogleIdToken({ ...baseArgs, fetchImpl })).rejects.toThrow(
+      /did not provide an expiry/,
     );
   });
 

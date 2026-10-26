@@ -89,6 +89,17 @@ cd backend
 dotnet test tests/HomeMaintenance.Unit.Tests
 ```
 
+Unit test coverage must stay at or above 90% (line, branch, method) on
+the Domain+Application assemblies -- CI enforces this. To check locally:
+
+```bash
+dotnet build --configuration Release
+dotnet test tests/HomeMaintenance.Unit.Tests --no-build --configuration Release \
+  "/p:CollectCoverage=true" \
+  "/p:Include=[HomeMaintenance.Domain]*%2c[HomeMaintenance.Application]*" \
+  "/p:Threshold=90" "/p:ThresholdType=line%2cbranch%2cmethod" "/p:ThresholdStat=total"
+```
+
 ### Backend integration tests (requires Docker for Testcontainers)
 
 ```bash
@@ -108,6 +119,14 @@ dotnet test tests/HomeMaintenance.Integration.Tests --filter "Category=perf"
 ```bash
 cd frontend
 npm test
+```
+
+Unit test coverage must stay at or above 90% (statements, branches,
+functions, lines) -- CI enforces this via Jest's `coverageThreshold`. To
+check locally:
+
+```bash
+npm test -- --coverage
 ```
 
 ## Setting up Google sign-in (staging / production)

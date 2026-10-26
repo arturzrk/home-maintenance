@@ -1,6 +1,6 @@
 # home-maintenance Constitution
 
-**Version**: 1.0.0
+**Version**: 2.0.0
 **Adopted**: 2026-05-10
 **Status**: Active
 **Source of truth for**: architectural decisions, security baseline, quality gates, governance
@@ -59,10 +59,15 @@ are the unit of growth.
   dependencies.
 - **Frontend tests** use Jest + Testing Library (`@testing-library/react`,
   `@testing-library/jest-dom`, `@testing-library/user-event`).
-- **Coverage**: meaningful tests over high percentages. A feature is not
-  complete until its tests are green.
-- **Mandatory before merge**: `dotnet test` (both projects) and
-  `npm --prefix frontend test`.
+- **Coverage**: unit test coverage MUST be at least 90% (line, branch, and
+  method/function) for both backend and frontend. Enforced as a hard CI
+  gate (coverlet.msbuild on `backend/tests/HomeMaintenance.Unit.Tests`,
+  scoped to the Domain+Application assemblies; Jest `coverageThreshold` on
+  the frontend) -- a PR below 90% on any of these metrics fails CI and
+  cannot merge. Meaningful tests remain the goal; the threshold is a floor,
+  not a license to write hollow tests purely to hit a number.
+- **Mandatory before merge**: `dotnet test` (both projects, coverage gate
+  included) and `npm --prefix frontend test -- --coverage`.
 
 ### Performance and scale (Q3)
 - **Concurrent users**: targets up to ~10 concurrent users (personal-scale).
@@ -211,6 +216,8 @@ Whether self-reviewing or being reviewed by a teammate, confirm:
 
 ### Quality gates (must pass before merge)
 - All unit tests green.
+- Unit test coverage >= 90% (line, branch, method/function), backend and
+  frontend -- enforced by CI, see Testing (Q2) above.
 - All integration tests green (Docker available).
 - Frontend Jest suite green.
 - Encoding validator (`polaris validate-encoding`) green: UTF-8 only, no

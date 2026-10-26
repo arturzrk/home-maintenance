@@ -2,6 +2,7 @@ using HomeMaintenance.Application.Common;
 using HomeMaintenance.Application.Common.Interfaces;
 using HomeMaintenance.Application.Jobs.Commands;
 using HomeMaintenance.Application.Jobs.Queries;
+using HomeMaintenance.Domain.Assets;
 using HomeMaintenance.Domain.Identity;
 using HomeMaintenance.Domain.Jobs;
 using HomeMaintenance.Domain.Properties;
@@ -91,6 +92,43 @@ public sealed class CreateJobHandlerTests
 
         result.IsFailure.ShouldBeTrue();
         result.Error.ShouldBeOfType<ValidationError>();
+        await jobs.DidNotReceive().AddAsync(Arg.Any<Job>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_WithValidAssetId_ScopesJobToAsset()
+    {
+        var (jobs, properties, identity, audit, correlation) = TestFixtures.NewSubs();
+        properties.GetAsync("prop-1", TestFixtures.Alice, Arg.Any<CancellationToken>())
+            .Returns(Property.Create("prop-1", TestFixtures.Alice, "Main House"));
+        var assets = Substitute.For<IAssetRepository>();
+        var asset = Asset.Create("asset-1", TestFixtures.Alice, "prop-1", "Boiler");
+        assets.GetAsync("asset-1", TestFixtures.Alice, Arg.Any<CancellationToken>()).Returns(asset);
+
+        var handler = new CreateJobHandler(jobs, properties, assets, identity, audit, correlation);
+        var result = await handler.Handle(new CreateJobCommand(
+            "prop-1", "Service boiler", null, Array.Empty<string>(), AssetId: "asset-1"));
+
+        result.IsSuccess.ShouldBeTrue();
+        result.Value!.AssetId.ShouldBe("asset-1");
+    }
+
+    [Fact]
+    public async Task Handle_WithAssetFromDifferentProperty_ReturnsBusinessRuleError()
+    {
+        var (jobs, properties, identity, audit, correlation) = TestFixtures.NewSubs();
+        properties.GetAsync("prop-1", TestFixtures.Alice, Arg.Any<CancellationToken>())
+            .Returns(Property.Create("prop-1", TestFixtures.Alice, "Main House"));
+        var assets = Substitute.For<IAssetRepository>();
+        var asset = Asset.Create("asset-1", TestFixtures.Alice, "prop-other", "Boiler");
+        assets.GetAsync("asset-1", TestFixtures.Alice, Arg.Any<CancellationToken>()).Returns(asset);
+
+        var handler = new CreateJobHandler(jobs, properties, assets, identity, audit, correlation);
+        var result = await handler.Handle(new CreateJobCommand(
+            "prop-1", "Service boiler", null, Array.Empty<string>(), AssetId: "asset-1"));
+
+        result.IsFailure.ShouldBeTrue();
+        result.Error.ShouldBeOfType<BusinessRuleError>();
         await jobs.DidNotReceive().AddAsync(Arg.Any<Job>(), Arg.Any<CancellationToken>());
     }
 }

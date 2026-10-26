@@ -93,4 +93,74 @@ describe("AssetHeader", () => {
       expect(updateAsset).toHaveBeenCalledWith("asset-1", { name: "New boiler" }),
     );
   });
+
+  it("rename failure surfaces the error without refreshing", async () => {
+    (updateAsset as jest.Mock).mockResolvedValueOnce({ ok: false, error: "Name too long" });
+
+    render(<AssetHeader asset={asset()} />);
+    fireEvent.click(screen.getByRole("button", { name: "Edit asset name" }));
+    const input = screen.getByRole("textbox", { name: "Edit asset name" });
+    fireEvent.change(input, { target: { value: "x" } });
+    fireEvent.keyDown(input, { key: "Enter" });
+
+    expect(await screen.findByText("Name too long")).toBeInTheDocument();
+  });
+
+  it("edits the category via the inline editor", async () => {
+    (updateAsset as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      value: asset({ category: "Plumbing" }),
+    });
+
+    render(<AssetHeader asset={asset()} />);
+    fireEvent.click(screen.getByRole("button", { name: "Edit asset category" }));
+    const input = screen.getByRole("textbox", { name: "Edit asset category" });
+    fireEvent.change(input, { target: { value: "Plumbing" } });
+    fireEvent.keyDown(input, { key: "Enter" });
+
+    await waitFor(() =>
+      expect(updateAsset).toHaveBeenCalledWith("asset-1", { category: "Plumbing" }),
+    );
+  });
+
+  it("category edit failure surfaces the error", async () => {
+    (updateAsset as jest.Mock).mockResolvedValueOnce({ ok: false, error: "Category rejected" });
+
+    render(<AssetHeader asset={asset()} />);
+    fireEvent.click(screen.getByRole("button", { name: "Edit asset category" }));
+    const input = screen.getByRole("textbox", { name: "Edit asset category" });
+    fireEvent.change(input, { target: { value: "Bad" } });
+    fireEvent.keyDown(input, { key: "Enter" });
+
+    expect(await screen.findByText("Category rejected")).toBeInTheDocument();
+  });
+
+  it("edits notes via the inline editor", async () => {
+    (updateAsset as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      value: asset({ notes: "Serviced yearly" }),
+    });
+
+    render(<AssetHeader asset={asset()} />);
+    fireEvent.click(screen.getByRole("button", { name: "Edit asset notes" }));
+    const input = screen.getByRole("textbox", { name: "Edit asset notes" });
+    fireEvent.change(input, { target: { value: "Serviced yearly" } });
+    fireEvent.keyDown(input, { key: "Enter" });
+
+    await waitFor(() =>
+      expect(updateAsset).toHaveBeenCalledWith("asset-1", { notes: "Serviced yearly" }),
+    );
+  });
+
+  it("notes edit failure surfaces the error", async () => {
+    (updateAsset as jest.Mock).mockResolvedValueOnce({ ok: false, error: "Notes rejected" });
+
+    render(<AssetHeader asset={asset()} />);
+    fireEvent.click(screen.getByRole("button", { name: "Edit asset notes" }));
+    const input = screen.getByRole("textbox", { name: "Edit asset notes" });
+    fireEvent.change(input, { target: { value: "Bad" } });
+    fireEvent.keyDown(input, { key: "Enter" });
+
+    expect(await screen.findByText("Notes rejected")).toBeInTheDocument();
+  });
 });

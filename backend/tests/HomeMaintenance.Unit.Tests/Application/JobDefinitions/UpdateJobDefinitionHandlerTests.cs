@@ -135,4 +135,119 @@ public sealed class UpdateJobDefinitionHandlerTests
         result.IsFailure.ShouldBeTrue();
         result.Error!.Code.ShouldBe("validation");
     }
+
+    [Fact]
+    public async Task UpdateSchedule_InvalidUnit_ReturnsValidationError()
+    {
+        var (_, _, handler) = Build();
+        var badSchedule = new ScheduleDefinitionDto("NotAUnit", 1, new DateOnly(2026, 1, 1), null);
+
+        var result = await handler.Handle(new UpdateJobDefinitionCommand("def-1", Schedule: badSchedule));
+
+        result.IsFailure.ShouldBeTrue();
+        result.Error!.Code.ShouldBe("validation");
+    }
+
+    [Fact]
+    public async Task AddStep_EmptyDescription_ReturnsValidationError()
+    {
+        var (_, _, handler) = Build();
+        var result = await handler.Handle(new UpdateJobDefinitionCommand(
+            "def-1", AddStepDescriptions: new[] { "" }));
+
+        result.IsFailure.ShouldBeTrue();
+        result.Error!.Code.ShouldBe("validation");
+    }
+
+    [Fact]
+    public async Task ReorderSteps_ValidOrder_Reorders()
+    {
+        var def = MakeDefinition(new[] { "A", "B" });
+        var reversed = def.StepTemplates.Reverse().Select(s => s.Id).ToList();
+        var (_, _, handler) = Build(def);
+
+        var result = await handler.Handle(new UpdateJobDefinitionCommand(
+            "def-1", ReorderStepTemplateIds: reversed));
+
+        result.IsSuccess.ShouldBeTrue();
+        result.Value!.StepTemplates.Select(s => s.Id).ShouldBe(reversed);
+    }
+
+    [Fact]
+    public async Task ReorderSteps_WrongCount_ReturnsValidationError()
+    {
+        var def = MakeDefinition(new[] { "A", "B" });
+        var (_, _, handler) = Build(def);
+
+        var result = await handler.Handle(new UpdateJobDefinitionCommand(
+            "def-1", ReorderStepTemplateIds: new[] { def.StepTemplates[0].Id }));
+
+        result.IsFailure.ShouldBeTrue();
+        result.Error!.Code.ShouldBe("validation");
+    }
+
+    [Fact]
+    public async Task ReorderSteps_DuplicateId_ReturnsValidationError()
+    {
+        var def = MakeDefinition(new[] { "A", "B" });
+        var (_, _, handler) = Build(def);
+
+        var result = await handler.Handle(new UpdateJobDefinitionCommand(
+            "def-1", ReorderStepTemplateIds: new[] { def.StepTemplates[0].Id, def.StepTemplates[0].Id }));
+
+        result.IsFailure.ShouldBeTrue();
+        result.Error!.Code.ShouldBe("validation");
+    }
+
+    [Fact]
+    public async Task ReorderSteps_UnknownId_ReturnsValidationError()
+    {
+        var def = MakeDefinition(new[] { "A", "B" });
+        var (_, _, handler) = Build(def);
+
+        var result = await handler.Handle(new UpdateJobDefinitionCommand(
+            "def-1", ReorderStepTemplateIds: new[] { def.StepTemplates[1].Id, "ghost-id" }));
+
+        result.IsFailure.ShouldBeTrue();
+        result.Error!.Code.ShouldBe("validation");
+    }
+
+    [Fact]
+    public async Task EditStepTemplate_KnownId_EditsDescription()
+    {
+        var def = MakeDefinition(new[] { "A", "B" });
+        var idToEdit = def.StepTemplates[0].Id;
+        var (_, _, handler) = Build(def);
+
+        var result = await handler.Handle(new UpdateJobDefinitionCommand(
+            "def-1", EditStepTemplates: new[] { new StepTemplateEdit(idToEdit, "Updated") }));
+
+        result.IsSuccess.ShouldBeTrue();
+        result.Value!.StepTemplates[0].Description.ShouldBe("Updated");
+    }
+
+    [Fact]
+    public async Task EditStepTemplate_EmptyDescription_ReturnsValidationError()
+    {
+        var def = MakeDefinition(new[] { "A", "B" });
+        var idToEdit = def.StepTemplates[0].Id;
+        var (_, _, handler) = Build(def);
+
+        var result = await handler.Handle(new UpdateJobDefinitionCommand(
+            "def-1", EditStepTemplates: new[] { new StepTemplateEdit(idToEdit, "") }));
+
+        result.IsFailure.ShouldBeTrue();
+        result.Error!.Code.ShouldBe("validation");
+    }
+
+    [Fact]
+    public async Task EditStepTemplate_UnknownId_ReturnsNotFound()
+    {
+        var (_, _, handler) = Build();
+        var result = await handler.Handle(new UpdateJobDefinitionCommand(
+            "def-1", EditStepTemplates: new[] { new StepTemplateEdit("ghost-id", "Updated") }));
+
+        result.IsFailure.ShouldBeTrue();
+        result.Error!.Code.ShouldBe("not_found");
+    }
 }

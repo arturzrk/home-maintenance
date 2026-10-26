@@ -125,4 +125,45 @@ describe("JobChecklist", () => {
     );
     expect(screen.queryByPlaceholderText(/add a step/i)).toBeNull();
   });
+
+  it("shows placeholder text when there are no steps", () => {
+    render(<JobChecklist jobId="job-1" initialSteps={[]} jobLocked={false} />);
+    expect(screen.getByText("No steps on this job.")).toBeInTheDocument();
+  });
+
+  it("addStep_EmptyDescription_ShowsValidationError_AndDoesNotCallApi", () => {
+    render(<JobChecklist jobId="job-1" initialSteps={initialSteps} jobLocked={false} />);
+
+    const input = screen.getByPlaceholderText(/add a step/i);
+    const form = input.closest("form")!;
+    fireEvent.submit(form);
+
+    expect(screen.getByText("Description is required")).toBeInTheDocument();
+    expect(addStep).not.toHaveBeenCalled();
+  });
+
+  it("addStep_ApiFailure_ShowsError", async () => {
+    (addStep as jest.Mock).mockResolvedValueOnce({ ok: false, error: "Job is completed" });
+
+    render(<JobChecklist jobId="job-1" initialSteps={initialSteps} jobLocked={false} />);
+
+    const input = screen.getByPlaceholderText(/add a step/i);
+    fireEvent.change(input, { target: { value: "New step" } });
+    fireEvent.click(screen.getByRole("button", { name: /^add$/i }));
+
+    expect(await screen.findByText("Job is completed")).toBeInTheDocument();
+  });
+
+  it("moveUp_ApiFailure_RollsBackToServerOrder", async () => {
+    (reorderSteps as jest.Mock).mockResolvedValueOnce({ ok: false, error: "Reorder rejected" });
+
+    render(<JobChecklist jobId="job-1" initialSteps={initialSteps} jobLocked={false} />);
+
+    fireEvent.click(screen.getByRole("button", { name: /move "Drain system" up/i }));
+
+    expect(await screen.findByText("Reorder rejected")).toBeInTheDocument();
+    // Still showing original order after rollback.
+    const items = screen.getAllByRole("checkbox").map((el) => el.getAttribute("aria-label"));
+    expect(items[0]).toContain("Shut off gas");
+  });
 });

@@ -24,4 +24,24 @@ describe("JobCard", () => {
     render(<JobCard job={base} />);
     expect(screen.queryByText("Recurring")).not.toBeInTheDocument();
   });
+
+  it("statusBadge_Completed_RendersGreenStyling", () => {
+    render(<JobCard job={{ ...base, status: "Completed" }} />);
+    expect(screen.getByText("Completed")).toHaveClass("bg-green-100");
+  });
+
+  it("statusBadge_Active_RendersBlueStyling", () => {
+    render(<JobCard job={{ ...base, status: "Active" }} />);
+    expect(screen.getByText("Active")).toHaveClass("bg-blue-100");
+  });
+
+  it("dueDate_Present_RendersDueText", () => {
+    render(<JobCard job={{ ...base, dueDate: "2026-07-01" }} />);
+    expect(screen.getByText(/due 2026-07-01/i)).toBeInTheDocument();
+  });
+
+  it("dueDate_Null_OmitsDueText", () => {
+    render(<JobCard job={base} />);
+    expect(screen.queryByText(/due/i)).not.toBeInTheDocument();
+  });
 });
