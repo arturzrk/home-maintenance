@@ -269,3 +269,9 @@ jobs:
 
       - name: Validate docker-compose.yml
         run: docker compose -f docker-compose.yml config --quiet
+
+      - name: Dev script tests (dev.sh)
+        run: bash scripts/dev.test.sh
+
+      - name: Dev script tests (dev-stop.sh)
+        run: bash scripts/dev-stop.test.sh

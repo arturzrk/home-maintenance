@@ -17,6 +17,27 @@ See [ARCHITECTURE.md](./ARCHITECTURE.md) for all project rules and decisions.
 
 ## Quick Start (local dev)
 
+### One command: scripts/dev.sh
+
+```bash
+./scripts/dev.sh
+```
+
+Starts MongoDB (via docker compose), the API (http://localhost:5000) and
+the frontend (http://localhost:3000), waits until both respond, then
+tails their logs. Ctrl+C stops the API and frontend; MongoDB keeps
+running (`docker compose stop mongodb` to stop it). Logs also land in
+`logs/dev/`. `./scripts/dev.sh --check` verifies prerequisites only.
+
+If a session was left running (e.g. terminal closed without Ctrl+C), use
+`./scripts/dev-stop.sh` to stop the recorded API/frontend processes and
+the MongoDB container. `--dry-run` shows what it would stop.
+
+Prereqs for the frontend: `cd frontend && npm install` once, plus a
+`.env.local` (see step 3 below).
+
+Or run each service manually:
+
 ### 1. Start MongoDB
 
 ```bash
@@ -44,7 +65,7 @@ REST Client extension).
 ```bash
 cd frontend
 npm install
-cp ../.env.example .env.local        # then fill in NEXTAUTH_SECRET
+cp .env.example .env.local         # then fill in NEXTAUTH_SECRET
 npm run dev
 # App available at http://localhost:3000
 ```
