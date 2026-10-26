@@ -1,6 +1,7 @@
 using HomeMaintenance.Application.Common;
 using HomeMaintenance.Application.Common.Interfaces;
 using HomeMaintenance.Application.JobDefinitions.Dto;
+using HomeMaintenance.Domain.Identity;
 using HomeMaintenance.Domain.JobDefinitions;
 
 namespace HomeMaintenance.Application.JobDefinitions.Commands;
@@ -49,49 +50,53 @@ public sealed class CreateJobDefinitionHandler
     {
         var owner = _identity.CurrentOwner;
 
-        var property = await _properties.GetAsync(cmd.PropertyId, owner, ct);
-        if (property is null)
-            return Result<JobDefinitionDto>.Failure(new NotFoundError("Property", cmd.PropertyId));
+        var guardError = await EnsurePropertyExists(cmd, owner, ct) ?? await ValidateAssetScope(cmd, owner, ct);
+        if (guardError is not null)
+            return Result<JobDefinitionDto>.Failure(guardError);
 
-        if (cmd.AssetId is not null)
-        {
-            var scopeError = await Assets.AssetScopeValidation.CheckAsync(
-                _assets, owner, cmd.PropertyId, cmd.AssetId, ct);
-            if (scopeError is not null)
-                return Result<JobDefinitionDto>.Failure(scopeError);
-        }
+        var scheduleResult = TryCreate(() => ParseSchedule(cmd.Schedule), _ => "schedule");
+        if (scheduleResult.IsFailure)
+            return Result<JobDefinitionDto>.Failure(scheduleResult.Error!);
 
-        ScheduleDefinition schedule;
-        try
-        {
-            schedule = ParseSchedule(cmd.Schedule);
-        }
-        catch (ArgumentException ex)
-        {
-            return Result<JobDefinitionDto>.Failure(new ValidationError("schedule", ex.Message));
-        }
-
-        JobDefinition definition;
-        try
-        {
-            definition = JobDefinition.Create(
-                IdFactory.NewId(),
-                owner,
-                cmd.PropertyId,
-                cmd.Name,
-                schedule,
-                cmd.StepDescriptions,
-                assetId: cmd.AssetId);
-        }
-        catch (ArgumentException ex)
-        {
-            return Result<JobDefinitionDto>.Failure(new ValidationError(ex.ParamName ?? "request", ex.Message));
-        }
+        var definitionResult = TryCreate(
+            () => BuildDefinition(cmd, owner, scheduleResult.Value!),
+            ex => ex.ParamName ?? "request");
+        if (definitionResult.IsFailure)
+            return Result<JobDefinitionDto>.Failure(definitionResult.Error!);
+        var definition = definitionResult.Value!;
 
         await _definitions.AddAsync(definition, ct);
         await _generationService.GenerateForDefinition(definition, _clock.UtcToday, ct);
+        await EmitCreatedAudit(cmd, definition, owner, ct);
 
-        await _audit.RecordAsync(new AuditEvent(
+        return Result<JobDefinitionDto>.Success(definition.ToDto());
+    }
+
+    private async Task<Error?> EnsurePropertyExists(CreateJobDefinitionCommand cmd, OwnerId owner, CancellationToken ct)
+    {
+        var property = await _properties.GetAsync(cmd.PropertyId, owner, ct);
+        return property is null ? new NotFoundError("Property", cmd.PropertyId) : null;
+    }
+
+    private async Task<Error?> ValidateAssetScope(CreateJobDefinitionCommand cmd, OwnerId owner, CancellationToken ct)
+    {
+        if (cmd.AssetId is null)
+            return null;
+        return await Assets.AssetScopeValidation.CheckAsync(_assets, owner, cmd.PropertyId, cmd.AssetId, ct);
+    }
+
+    private static JobDefinition BuildDefinition(CreateJobDefinitionCommand cmd, OwnerId owner, ScheduleDefinition schedule)
+        => JobDefinition.Create(
+            IdFactory.NewId(),
+            owner,
+            cmd.PropertyId,
+            cmd.Name,
+            schedule,
+            cmd.StepDescriptions,
+            assetId: cmd.AssetId);
+
+    private Task EmitCreatedAudit(CreateJobDefinitionCommand cmd, JobDefinition definition, OwnerId owner, CancellationToken ct)
+        => _audit.RecordAsync(new AuditEvent(
             AuditEventTypes.JobDefinitionCreated,
             owner.Value,
             $"job_definition:{definition.Id}",
@@ -105,13 +110,21 @@ public sealed class CreateJobDefinitionHandler
                 ["schedule"] = cmd.Schedule,
             }), ct);
 
-        return Result<JobDefinitionDto>.Success(definition.ToDto());
-    }
-
     internal static ScheduleDefinition ParseSchedule(ScheduleDefinitionDto dto)
     {
         if (!Enum.TryParse<CadenceUnit>(dto.Unit, ignoreCase: true, out var unit))
             throw new ArgumentException($"Unknown cadence unit: {dto.Unit}", nameof(dto));
         return new ScheduleDefinition(unit, dto.Multiplier, dto.StartDate, dto.EndDate);
+    }
+
+    /// <summary>
+    /// Runs <paramref name="create"/>, translating a domain ArgumentException into a
+    /// ValidationError whose field is chosen by <paramref name="selectField"/> -- callers
+    /// decide whether to trust the exception's own ParamName or report a fixed field name.
+    /// </summary>
+    private static Result<T> TryCreate<T>(Func<T> create, Func<ArgumentException, string> selectField)
+    {
+        try { return Result<T>.Success(create()); }
+        catch (ArgumentException ex) { return Result<T>.Failure(new ValidationError(selectField(ex), ex.Message)); }
     }
 }
