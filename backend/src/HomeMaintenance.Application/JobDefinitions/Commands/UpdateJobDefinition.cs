@@ -38,16 +38,9 @@ public sealed class UpdateJobDefinitionHandler
         UpdateJobDefinitionCommand cmd,
         CancellationToken ct = default)
     {
-        if (cmd.Name is null
-            && cmd.Schedule is null
-            && cmd.AddStepDescriptions is null
-            && cmd.RemoveStepTemplateIds is null
-            && cmd.ReorderStepTemplateIds is null
-            && cmd.EditStepTemplates is null)
-        {
+        if (IsEmptyRequest(cmd))
             return Result<JobDefinitionDto>.Failure(
                 new ValidationError("request", "Provide at least one change to apply."));
-        }
 
         var owner = _identity.CurrentOwner;
 
@@ -57,82 +50,14 @@ public sealed class UpdateJobDefinitionHandler
 
         var pendingAudits = new List<(string EventType, Dictionary<string, object?> Payload)>();
 
-        if (cmd.Name is not null)
-        {
-            try { definition.Rename(cmd.Name); }
-            catch (ArgumentException ex)
-            {
-                return Result<JobDefinitionDto>.Failure(new ValidationError(ex.ParamName ?? "name", ex.Message));
-            }
-            pendingAudits.Add((AuditEventTypes.JobDefinitionRenamed, new Dictionary<string, object?> { ["name"] = cmd.Name }));
-        }
-
-        if (cmd.Schedule is not null)
-        {
-            ScheduleDefinition schedule;
-            try { schedule = CreateJobDefinitionHandler.ParseSchedule(cmd.Schedule); }
-            catch (ArgumentException ex)
-            {
-                return Result<JobDefinitionDto>.Failure(new ValidationError("schedule", ex.Message));
-            }
-            definition.UpdateSchedule(schedule);
-            pendingAudits.Add((AuditEventTypes.JobDefinitionScheduleChanged, new Dictionary<string, object?> { ["schedule"] = cmd.Schedule }));
-        }
-
-        if (cmd.RemoveStepTemplateIds is not null)
-        {
-            foreach (var id in cmd.RemoveStepTemplateIds)
-            {
-                var outcome = definition.RemoveStepTemplate(id);
-                if (outcome == StepTemplateMutationOutcome.StepTemplateNotFound)
-                    return Result<JobDefinitionDto>.Failure(new NotFoundError("StepTemplate", id));
-            }
-            pendingAudits.Add((AuditEventTypes.JobDefinitionStepTemplateMutated, new Dictionary<string, object?> { ["mutation_type"] = "removed" }));
-        }
-
-        if (cmd.ReorderStepTemplateIds is not null)
-        {
-            var outcome = definition.ReorderStepTemplates(cmd.ReorderStepTemplateIds);
-            var error = outcome switch
-            {
-                ReorderStepTemplatesOutcome.WrongCount => "Must list every existing step template id exactly once.",
-                ReorderStepTemplatesOutcome.DuplicateId => "Duplicate step template id in the order list.",
-                ReorderStepTemplatesOutcome.UnknownId => "Unknown step template id in the order list.",
-                _ => null,
-            };
-            if (error is not null)
-                return Result<JobDefinitionDto>.Failure(new ValidationError("reorderStepTemplateIds", error));
-            pendingAudits.Add((AuditEventTypes.JobDefinitionStepTemplateMutated, new Dictionary<string, object?> { ["mutation_type"] = "reordered" }));
-        }
-
-        if (cmd.EditStepTemplates is not null)
-        {
-            foreach (var edit in cmd.EditStepTemplates)
-            {
-                StepTemplateMutationOutcome outcome;
-                try { outcome = definition.EditStepTemplateDescription(edit.Id, edit.Description); }
-                catch (ArgumentException ex)
-                {
-                    return Result<JobDefinitionDto>.Failure(new ValidationError("description", ex.Message));
-                }
-                if (outcome == StepTemplateMutationOutcome.StepTemplateNotFound)
-                    return Result<JobDefinitionDto>.Failure(new NotFoundError("StepTemplate", edit.Id));
-            }
-            pendingAudits.Add((AuditEventTypes.JobDefinitionStepTemplateMutated, new Dictionary<string, object?> { ["mutation_type"] = "edited" }));
-        }
-
-        if (cmd.AddStepDescriptions is not null)
-        {
-            foreach (var description in cmd.AddStepDescriptions)
-            {
-                try { definition.AddStepTemplate(description); }
-                catch (ArgumentException ex)
-                {
-                    return Result<JobDefinitionDto>.Failure(new ValidationError("description", ex.Message));
-                }
-            }
-            pendingAudits.Add((AuditEventTypes.JobDefinitionStepTemplateMutated, new Dictionary<string, object?> { ["mutation_type"] = "added" }));
-        }
+        var error = ApplyRename(cmd, definition, pendingAudits)
+            ?? ApplySchedule(cmd, definition, pendingAudits)
+            ?? ApplyStepTemplateRemovals(cmd, definition, pendingAudits)
+            ?? ApplyStepTemplateReorder(cmd, definition, pendingAudits)
+            ?? ApplyStepTemplateEdits(cmd, definition, pendingAudits)
+            ?? ApplyStepTemplateAdditions(cmd, definition, pendingAudits);
+        if (error is not null)
+            return Result<JobDefinitionDto>.Failure(error);
 
         await _definitions.UpdateAsync(definition, ct);
 
@@ -140,6 +65,133 @@ public sealed class UpdateJobDefinitionHandler
             await EmitAudit(eventType, cmd.Id, owner, payload, ct);
 
         return Result<JobDefinitionDto>.Success(definition.ToDto());
+    }
+
+    private static bool IsEmptyRequest(UpdateJobDefinitionCommand cmd)
+        => cmd.Name is null
+            && cmd.Schedule is null
+            && cmd.AddStepDescriptions is null
+            && cmd.RemoveStepTemplateIds is null
+            && cmd.ReorderStepTemplateIds is null
+            && cmd.EditStepTemplates is null;
+
+    private static Error? ApplyRename(
+        UpdateJobDefinitionCommand cmd,
+        JobDefinition definition,
+        List<(string EventType, Dictionary<string, object?> Payload)> pendingAudits)
+    {
+        if (cmd.Name is null)
+            return null;
+
+        try { definition.Rename(cmd.Name); }
+        catch (ArgumentException ex)
+        {
+            return new ValidationError(ex.ParamName ?? "name", ex.Message);
+        }
+        pendingAudits.Add((AuditEventTypes.JobDefinitionRenamed, new Dictionary<string, object?> { ["name"] = cmd.Name }));
+        return null;
+    }
+
+    private static Error? ApplySchedule(
+        UpdateJobDefinitionCommand cmd,
+        JobDefinition definition,
+        List<(string EventType, Dictionary<string, object?> Payload)> pendingAudits)
+    {
+        if (cmd.Schedule is null)
+            return null;
+
+        ScheduleDefinition schedule;
+        try { schedule = CreateJobDefinitionHandler.ParseSchedule(cmd.Schedule); }
+        catch (ArgumentException ex)
+        {
+            return new ValidationError("schedule", ex.Message);
+        }
+        definition.UpdateSchedule(schedule);
+        pendingAudits.Add((AuditEventTypes.JobDefinitionScheduleChanged, new Dictionary<string, object?> { ["schedule"] = cmd.Schedule }));
+        return null;
+    }
+
+    private static Error? ApplyStepTemplateRemovals(
+        UpdateJobDefinitionCommand cmd,
+        JobDefinition definition,
+        List<(string EventType, Dictionary<string, object?> Payload)> pendingAudits)
+    {
+        if (cmd.RemoveStepTemplateIds is null)
+            return null;
+
+        foreach (var id in cmd.RemoveStepTemplateIds)
+        {
+            var outcome = definition.RemoveStepTemplate(id);
+            if (outcome == StepTemplateMutationOutcome.StepTemplateNotFound)
+                return new NotFoundError("StepTemplate", id);
+        }
+        pendingAudits.Add((AuditEventTypes.JobDefinitionStepTemplateMutated, new Dictionary<string, object?> { ["mutation_type"] = "removed" }));
+        return null;
+    }
+
+    private static Error? ApplyStepTemplateReorder(
+        UpdateJobDefinitionCommand cmd,
+        JobDefinition definition,
+        List<(string EventType, Dictionary<string, object?> Payload)> pendingAudits)
+    {
+        if (cmd.ReorderStepTemplateIds is null)
+            return null;
+
+        var outcome = definition.ReorderStepTemplates(cmd.ReorderStepTemplateIds);
+        var message = outcome switch
+        {
+            ReorderStepTemplatesOutcome.WrongCount => "Must list every existing step template id exactly once.",
+            ReorderStepTemplatesOutcome.DuplicateId => "Duplicate step template id in the order list.",
+            ReorderStepTemplatesOutcome.UnknownId => "Unknown step template id in the order list.",
+            _ => null,
+        };
+        if (message is not null)
+            return new ValidationError("reorderStepTemplateIds", message);
+        pendingAudits.Add((AuditEventTypes.JobDefinitionStepTemplateMutated, new Dictionary<string, object?> { ["mutation_type"] = "reordered" }));
+        return null;
+    }
+
+    private static Error? ApplyStepTemplateEdits(
+        UpdateJobDefinitionCommand cmd,
+        JobDefinition definition,
+        List<(string EventType, Dictionary<string, object?> Payload)> pendingAudits)
+    {
+        if (cmd.EditStepTemplates is null)
+            return null;
+
+        foreach (var edit in cmd.EditStepTemplates)
+        {
+            StepTemplateMutationOutcome outcome;
+            try { outcome = definition.EditStepTemplateDescription(edit.Id, edit.Description); }
+            catch (ArgumentException ex)
+            {
+                return new ValidationError("description", ex.Message);
+            }
+            if (outcome == StepTemplateMutationOutcome.StepTemplateNotFound)
+                return new NotFoundError("StepTemplate", edit.Id);
+        }
+        pendingAudits.Add((AuditEventTypes.JobDefinitionStepTemplateMutated, new Dictionary<string, object?> { ["mutation_type"] = "edited" }));
+        return null;
+    }
+
+    private static Error? ApplyStepTemplateAdditions(
+        UpdateJobDefinitionCommand cmd,
+        JobDefinition definition,
+        List<(string EventType, Dictionary<string, object?> Payload)> pendingAudits)
+    {
+        if (cmd.AddStepDescriptions is null)
+            return null;
+
+        foreach (var description in cmd.AddStepDescriptions)
+        {
+            try { definition.AddStepTemplate(description); }
+            catch (ArgumentException ex)
+            {
+                return new ValidationError("description", ex.Message);
+            }
+        }
+        pendingAudits.Add((AuditEventTypes.JobDefinitionStepTemplateMutated, new Dictionary<string, object?> { ["mutation_type"] = "added" }));
+        return null;
     }
 
     private Task EmitAudit(string eventType, string definitionId, OwnerId owner, Dictionary<string, object?> payload, CancellationToken ct)
