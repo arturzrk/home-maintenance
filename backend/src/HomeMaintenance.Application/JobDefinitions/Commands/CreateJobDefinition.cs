@@ -78,10 +78,12 @@ public sealed class CreateJobDefinitionHandler
         return property is null ? new NotFoundError("Property", cmd.PropertyId) : null;
     }
 
-    private Task<Error?> ValidateAssetScope(CreateJobDefinitionCommand cmd, OwnerId owner, CancellationToken ct)
-        => cmd.AssetId is null
-            ? Task.FromResult<Error?>(null)
-            : Assets.AssetScopeValidation.CheckAsync(_assets, owner, cmd.PropertyId, cmd.AssetId, ct);
+    private async Task<Error?> ValidateAssetScope(CreateJobDefinitionCommand cmd, OwnerId owner, CancellationToken ct)
+    {
+        if (cmd.AssetId is null)
+            return null;
+        return await Assets.AssetScopeValidation.CheckAsync(_assets, owner, cmd.PropertyId, cmd.AssetId, ct);
+    }
 
     private static JobDefinition BuildDefinition(CreateJobDefinitionCommand cmd, OwnerId owner, ScheduleDefinition schedule)
         => JobDefinition.Create(
