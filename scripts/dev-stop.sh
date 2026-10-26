@@ -88,5 +88,7 @@ parse_args() {
   esac
 }
 
-parse_args "$@"
-run_stop
+if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
+  parse_args "$@"
+  run_stop
+fi

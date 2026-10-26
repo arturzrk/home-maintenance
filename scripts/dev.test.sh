@@ -135,6 +135,56 @@ test_wait_or_die_failure_invokes_cleanup() {
   fi
 }
 
+test_wait_for_url_bounds_curl_with_max_time() {
+  # wait_for_url redirects curl's own stdout to /dev/null, so the stub
+  # must record its args to a file instead of printing them.
+  local log out
+  log="$(mktemp)"
+  out="$(bash -c '
+    source "$1"
+    curl() { printf "%s\n" "$*" >>"'"$log"'"; return 0; }
+    wait_for_url "http://x" "X" 1
+  ' _ "$DEV" 2>&1)"
+  if grep -q -- '--max-time' "$log"; then
+    ok "wait_for_url bounds each curl call with --max-time"
+  else
+    bad "wait_for_url curl timeout (log: $(cat "$log" 2>/dev/null), out: $out)"
+  fi
+  rm -f "$log"
+}
+
+test_start_mongo_passes_wait_timeout() {
+  local out
+  out="$(bash -c '
+    source "$1"
+    docker() { printf "DOCKER_ARGS:%s\n" "$*"; return 0; }
+    start_mongo
+  ' _ "$DEV" 2>&1)"
+  if printf '%s' "$out" | grep -q 'DOCKER_ARGS:.*--wait-timeout'; then
+    ok "start_mongo bounds docker compose --wait with --wait-timeout"
+  else
+    bad "start_mongo wait-timeout ($out)"
+  fi
+}
+
+test_register_traps_uses_signal_specific_exit_codes() {
+  local out
+  out="$(bash -c '
+    source "$1"
+    register_traps
+    trap -p INT
+    trap -p TERM
+    trap -p HUP
+  ' _ "$DEV" 2>&1)"
+  if printf '%s' "$out" | grep -q "cleanup 130" \
+      && printf '%s' "$out" | grep -q "cleanup 143" \
+      && printf '%s' "$out" | grep -q "cleanup 129"; then
+    ok "register_traps wires INT/TERM/HUP to cleanup with distinct exit codes"
+  else
+    bad "register_traps exit codes ($out)"
+  fi
+}
+
 test_help
 test_check_all_present
 test_check_missing_tool
@@ -143,6 +193,9 @@ test_single_dash_typo_is_rejected
 test_write_pid_file_records_all_three_pids
 test_wait_or_die_success_does_not_cleanup
 test_wait_or_die_failure_invokes_cleanup
+test_wait_for_url_bounds_curl_with_max_time
+test_start_mongo_passes_wait_timeout
+test_register_traps_uses_signal_specific_exit_codes
 
 if [ -n "$failures" ]; then
   printf '\nFAILED\n'

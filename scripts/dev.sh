@@ -54,7 +54,7 @@ wait_for_url() {
   local url="$1" name="$2" secs="${3:-90}"
   local i
   for i in $(seq 1 "$secs"); do
-    if curl -sf "$url" >/dev/null 2>&1; then
+    if curl -sf --max-time 5 "$url" >/dev/null 2>&1; then
       printf '%s ready at %s\n' "$name" "$url"
       return 0
     fi
@@ -94,7 +94,7 @@ banner() {
 
 start_mongo() {
   printf 'Starting MongoDB...\n'
-  (cd "$ROOT" && docker compose up mongodb -d --wait)
+  (cd "$ROOT" && docker compose up mongodb -d --wait --wait-timeout 60)
 }
 
 start_api() {
@@ -129,10 +129,20 @@ wait_for_api_and_frontend() {
   wait_or_die "$WEB_URL" "frontend" 90 "$LOG_DIR/web.log"
 }
 
+register_traps() {
+  # Bash passes no arguments to a trapped command, so `trap cleanup ...`
+  # would always see code="${1:-0}" as 0. Baking the exit code into each
+  # trap's command string gives each signal a distinct, correct exit code
+  # (128+signum, the usual convention).
+  trap 'cleanup 130' INT
+  trap 'cleanup 143' TERM
+  trap 'cleanup 129' HUP
+}
+
 run_dev() {
   check_prereqs
   mkdir -p "$LOG_DIR"
-  trap cleanup INT TERM HUP
+  register_traps
   start_mongo
   start_api
   start_frontend

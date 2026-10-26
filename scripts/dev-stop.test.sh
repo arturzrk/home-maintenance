@@ -198,6 +198,23 @@ test_single_dash_typo_is_rejected() {
   fi
 }
 
+test_sourcing_does_not_run_stop_logic() {
+  # Sourcing must be inert (no guard would otherwise run real stop logic
+  # unconditionally the moment the file is sourced).
+  rm -f "$DOCKER_LOG"
+  local out
+  out="$(PATH="$STUB_PATH" DEV_PID_FILE="$PID_FILE" TARGET="$STOP" bash -c '
+    set --
+    source "$TARGET"
+    printf "SOURCED_OK\n"
+  ' 2>&1)"
+  if printf '%s' "$out" | grep -q 'SOURCED_OK' && [ ! -f "$DOCKER_LOG" ]; then
+    ok "sourcing dev-stop.sh does not invoke run_stop"
+  else
+    bad "sourcing guard (docker_called=$([ -f "$DOCKER_LOG" ] && echo yes || echo no))"
+  fi
+}
+
 test_help
 test_no_pid_file
 test_stops_live_recorded_pid
@@ -208,6 +225,7 @@ test_mongo_failure_still_clears_pid_file
 test_unknown_flag
 test_single_dash_typo_is_rejected
 test_pid_zero_is_rejected_not_self_signaled
+test_sourcing_does_not_run_stop_logic
 
 if [ -n "$failures" ]; then
   printf '\nFAILED\n'
