@@ -7,6 +7,10 @@ set -uo pipefail
 
 REPO_ROOT="$(cd "${BASH_SOURCE[0]%/*}/.." && pwd)"
 DEV="$REPO_ROOT/scripts/dev.sh"
+# Resolved once, with the harness's own PATH, before any test narrows PATH
+# down to a stub directory — a bare `PATH=... bash ...` would otherwise
+# try to resolve "bash" itself using the narrowed PATH.
+BASH_BIN="$(command -v bash)"
 
 failures=""
 
@@ -29,7 +33,7 @@ trap 'rm -r "$STUB_DIR" 2>/dev/null || true' EXIT
 
 test_help() {
   local out rc
-  out="$(PATH="$STUB_DIR:/usr/bin:/bin" bash "$DEV" --help 2>&1)"; rc=$?
+  out="$(PATH="$STUB_DIR" "$BASH_BIN" "$DEV" --help 2>&1)"; rc=$?
   if [ "$rc" -eq 0 ] && printf '%s' "$out" | grep -qi 'usage'; then
     ok "--help exits 0 and prints usage"
   else
@@ -40,7 +44,12 @@ test_help() {
 test_check_all_present() {
   make_stubs "$STUB_DIR" docker dotnet node npm curl
   local out rc
-  out="$(PATH="$STUB_DIR:/usr/bin:/bin" bash "$DEV" --check 2>&1)"; rc=$?
+  # No /usr/bin:/bin fallback: a real dotnet/docker/etc. preinstalled on
+  # the host (e.g. GitHub-hosted runners ship .NET at /usr/bin/dotnet)
+  # would otherwise make test_check_missing_tool below pass even when
+  # check_prereqs is broken, since it'd find the real tool instead of
+  # noticing the stub is missing.
+  out="$(PATH="$STUB_DIR" "$BASH_BIN" "$DEV" --check 2>&1)"; rc=$?
   if [ "$rc" -eq 0 ] && printf '%s' "$out" | grep -qi 'ok'; then
     ok "--check passes when all prerequisites are on PATH"
   else
@@ -51,7 +60,7 @@ test_check_all_present() {
 test_check_missing_tool() {
   rm -f "$STUB_DIR/dotnet"
   local out rc
-  out="$(PATH="$STUB_DIR:/usr/bin:/bin" bash "$DEV" --check 2>&1)"; rc=$?
+  out="$(PATH="$STUB_DIR" "$BASH_BIN" "$DEV" --check 2>&1)"; rc=$?
   if [ "$rc" -ne 0 ] && printf '%s' "$out" | grep -q 'dotnet'; then
     ok "--check fails and names the missing tool"
   else
