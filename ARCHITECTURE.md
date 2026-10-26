@@ -20,7 +20,7 @@ functionality is accompanied by tests before it is considered done.
 - Unit tests live in `HomeMaintenance.Unit.Tests` and test the Application and Domain layers in isolation.
 - Integration tests live in `HomeMaintenance.Integration.Tests` and test Infrastructure + API against real dependencies (MongoDB via TestContainers).
 - A feature is not complete until its tests pass.
-- Test coverage is a signal, not a target - favour meaningful tests over high percentages.
+- Unit test coverage must be at least 90% (line, branch, and method/function) for both backend and frontend. This is a hard CI gate, not aspirational - a PR below 90% fails CI. The threshold is a floor: tests must still be meaningful, not padding written purely to clear the number.
 
 ### 3. Dependency Rule (Clean Architecture)
 ```

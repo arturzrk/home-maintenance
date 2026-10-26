@@ -38,11 +38,16 @@ jobs:
       - name: Build
         run: dotnet build --no-restore --configuration Release
 
-      - name: Unit tests
+      - name: Unit tests (with coverage gate)
         run: >
           dotnet test tests/HomeMaintenance.Unit.Tests
           --no-build --configuration Release
           --logger "console;verbosity=normal"
+          "/p:CollectCoverage=true"
+          "/p:Include=[HomeMaintenance.Domain]*%2c[HomeMaintenance.Application]*"
+          "/p:Threshold=90"
+          "/p:ThresholdType=line%2cbranch%2cmethod"
+          "/p:ThresholdStat=total"
 
       - name: Integration tests (Testcontainers MongoDB)
         if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
@@ -76,7 +81,7 @@ jobs:
         run: npm run lint
 
       - name: Test
-        run: npm test -- --passWithNoTests
+        run: npm test -- --coverage --passWithNoTests
 
       - name: Build
         run: npm run build

@@ -9,6 +9,7 @@ using HomeMaintenance.Application.Jobs.Queries;
 using HomeMaintenance.Application.Properties.Commands;
 using HomeMaintenance.Application.Properties.Queries;
 using Microsoft.Extensions.DependencyInjection;
+using System.Diagnostics.CodeAnalysis;
 
 namespace HomeMaintenance.Application;
 
@@ -16,6 +17,12 @@ namespace HomeMaintenance.Application;
 /// Registers Application layer services with the DI container.
 /// Called from the API project's Program.cs.
 /// </summary>
+/// <remarks>
+/// Excluded from code coverage: pure DI registration with no branches
+/// or business logic to unit-test; its correctness is exercised
+/// end-to-end by every integration test that boots the API.
+/// </remarks>
+[ExcludeFromCodeCoverage]
 public static class DependencyInjection
 {
     public static IServiceCollection AddApplication(this IServiceCollection services)

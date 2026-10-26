@@ -109,4 +109,79 @@ describe("CreateJobDefinitionForm", () => {
     fireEvent.click(screen.getByRole("button", { name: /\+ add step/i }));
     expect(screen.getByLabelText(/Step 2/i)).toBeInTheDocument();
   });
+
+  it("removeStep_RemovesRowAndRenumbers", () => {
+    render(<CreateJobDefinitionForm propertyId="prop-1" />);
+    openForm();
+
+    fireEvent.click(screen.getByRole("button", { name: /\+ add step/i }));
+    fireEvent.click(screen.getByRole("button", { name: /\+ add step/i }));
+    fireEvent.change(screen.getByLabelText(/Step 1/i), { target: { value: "First" } });
+    fireEvent.change(screen.getByLabelText(/Step 2/i), { target: { value: "Second" } });
+
+    fireEvent.click(screen.getAllByRole("button", { name: /^remove$/i })[0]);
+
+    expect(screen.getByLabelText(/Step 1/i)).toHaveValue("Second");
+    expect(screen.queryByLabelText(/Step 2/i)).not.toBeInTheDocument();
+  });
+
+  it("submit_MultiplierZero_ShowsValidationError", () => {
+    render(<CreateJobDefinitionForm propertyId="prop-1" />);
+    openForm();
+
+    fireEvent.change(screen.getByLabelText(/^Name$/i), { target: { value: "Service boiler" } });
+    fireEvent.change(screen.getByLabelText(/^Every$/i), { target: { value: "0" } });
+    fireEvent.change(screen.getByLabelText(/Start date/i), { target: { value: "2026-06-01" } });
+    fireEvent.click(screen.getByRole("button", { name: /save recurring job/i }));
+
+    expect(screen.getByText(/Multiplier must be at least 1/i)).toBeInTheDocument();
+    expect(createJobDefinition).not.toHaveBeenCalled();
+  });
+
+  it("submit_MissingStartDate_ShowsValidationError", () => {
+    render(<CreateJobDefinitionForm propertyId="prop-1" />);
+    openForm();
+
+    fireEvent.change(screen.getByLabelText(/^Name$/i), { target: { value: "Service boiler" } });
+    fireEvent.click(screen.getByRole("button", { name: /save recurring job/i }));
+
+    expect(screen.getByText(/Start date is required/i)).toBeInTheDocument();
+    expect(createJobDefinition).not.toHaveBeenCalled();
+  });
+
+  it("submit_ApiFailure_ShowsServerError", async () => {
+    (createJobDefinition as jest.Mock).mockResolvedValueOnce({ ok: false, error: "Server rejected definition" });
+
+    render(<CreateJobDefinitionForm propertyId="prop-1" />);
+    openForm();
+
+    fireEvent.change(screen.getByLabelText(/^Name$/i), { target: { value: "Service boiler" } });
+    fireEvent.change(screen.getByLabelText(/Start date/i), { target: { value: "2026-06-01" } });
+    fireEvent.click(screen.getByRole("button", { name: /save recurring job/i }));
+
+    expect(await screen.findByText("Server rejected definition")).toBeInTheDocument();
+  });
+
+  it("submit_WithStepTemplates_FiltersBlankSteps", async () => {
+    (createJobDefinition as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      value: { id: "def-1", propertyId: "prop-1", name: "Service boiler", schedule: {}, stepTemplates: [] },
+    });
+
+    render(<CreateJobDefinitionForm propertyId="prop-1" />);
+    openForm();
+
+    fireEvent.change(screen.getByLabelText(/^Name$/i), { target: { value: "Service boiler" } });
+    fireEvent.change(screen.getByLabelText(/Start date/i), { target: { value: "2026-06-01" } });
+    fireEvent.click(screen.getByRole("button", { name: /\+ add step/i }));
+    fireEvent.click(screen.getByRole("button", { name: /\+ add step/i }));
+    fireEvent.change(screen.getByLabelText(/Step 1/i), { target: { value: "Shut off gas" } });
+    fireEvent.change(screen.getByLabelText(/Step 2/i), { target: { value: "   " } });
+
+    fireEvent.click(screen.getByRole("button", { name: /save recurring job/i }));
+
+    await waitFor(() => expect(createJobDefinition).toHaveBeenCalledTimes(1));
+    const [, body] = (createJobDefinition as jest.Mock).mock.calls[0];
+    expect(body.stepTemplates).toEqual([{ description: "Shut off gas" }]);
+  });
 });
