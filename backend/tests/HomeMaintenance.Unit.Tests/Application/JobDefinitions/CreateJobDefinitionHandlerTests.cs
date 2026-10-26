@@ -1,3 +1,4 @@
+using HomeMaintenance.Application.Common;
 using HomeMaintenance.Application.Common.Interfaces;
 using HomeMaintenance.Application.JobDefinitions;
 using HomeMaintenance.Application.JobDefinitions.Commands;
@@ -83,6 +84,7 @@ public sealed class CreateJobDefinitionHandlerTests
 
         result.IsFailure.ShouldBeTrue();
         result.Error!.Code.ShouldBe("validation");
+        ((ValidationError)result.Error!).Field.ShouldBe("schedule");
     }
 
     [Fact]
@@ -152,5 +154,6 @@ public sealed class CreateJobDefinitionHandlerTests
 
         result.IsFailure.ShouldBeTrue();
         result.Error!.Code.ShouldBe("validation");
+        ((ValidationError)result.Error!).Field.ShouldBe("name");
     }
 }
