@@ -67,27 +67,6 @@ public sealed class UpdateJobDefinitionHandler
         return Result<JobDefinitionDto>.Success(definition.ToDto());
     }
 
-    private static bool IsEmptyRequest(UpdateJobDefinitionCommand cmd)
-        => cmd.Name is null
-            && cmd.Schedule is null
-            && cmd.AddStepDescriptions is null
-            && cmd.RemoveStepTemplateIds is null
-            && cmd.ReorderStepTemplateIds is null
-            && cmd.EditStepTemplates is null;
-
-    /// <summary>Queues audit events to emit only after the whole update succeeds.</summary>
-    private sealed class AuditQueue : List<(string EventType, Dictionary<string, object?> Payload)>
-    {
-        public void Add(string eventType, Dictionary<string, object?> payload) => Add((eventType, payload));
-    }
-
-    /// <summary>Runs <paramref name="mutate"/>, translating a domain ArgumentException into a ValidationError.</summary>
-    private static Error? AsValidationError(Action mutate, string fallbackField)
-    {
-        try { mutate(); return null; }
-        catch (ArgumentException ex) { return new ValidationError(ex.ParamName ?? fallbackField, ex.Message); }
-    }
-
     private static Error? ApplyRename(UpdateJobDefinitionCommand cmd, JobDefinition definition, AuditQueue audits)
     {
         if (cmd.Name is null)
@@ -126,7 +105,7 @@ public sealed class UpdateJobDefinitionHandler
                 return new NotFoundError("StepTemplate", id);
         }
 
-        audits.Add(AuditEventTypes.JobDefinitionStepTemplateMutated, new Dictionary<string, object?> { ["mutation_type"] = "removed" });
+        audits.AddStepTemplateMutation(StepTemplateMutationType.Removed);
         return null;
     }
 
@@ -145,7 +124,7 @@ public sealed class UpdateJobDefinitionHandler
         if (message is not null)
             return new ValidationError("reorderStepTemplateIds", message);
 
-        audits.Add(AuditEventTypes.JobDefinitionStepTemplateMutated, new Dictionary<string, object?> { ["mutation_type"] = "reordered" });
+        audits.AddStepTemplateMutation(StepTemplateMutationType.Reordered);
         return null;
     }
 
@@ -156,15 +135,14 @@ public sealed class UpdateJobDefinitionHandler
 
         foreach (var edit in cmd.EditStepTemplates)
         {
-            StepTemplateMutationOutcome outcome = default;
-            var error = AsValidationError(() => outcome = definition.EditStepTemplateDescription(edit.Id, edit.Description), "description");
+            var (outcome, error) = TryMutate(() => definition.EditStepTemplateDescription(edit.Id, edit.Description), "description");
             if (error is not null)
                 return error;
             if (outcome == StepTemplateMutationOutcome.StepTemplateNotFound)
                 return new NotFoundError("StepTemplate", edit.Id);
         }
 
-        audits.Add(AuditEventTypes.JobDefinitionStepTemplateMutated, new Dictionary<string, object?> { ["mutation_type"] = "edited" });
+        audits.AddStepTemplateMutation(StepTemplateMutationType.Edited);
         return null;
     }
 
@@ -180,7 +158,7 @@ public sealed class UpdateJobDefinitionHandler
                 return error;
         }
 
-        audits.Add(AuditEventTypes.JobDefinitionStepTemplateMutated, new Dictionary<string, object?> { ["mutation_type"] = "added" });
+        audits.AddStepTemplateMutation(StepTemplateMutationType.Added);
         return null;
     }
 
@@ -192,4 +170,44 @@ public sealed class UpdateJobDefinitionHandler
             DateTime.UtcNow,
             _correlation.CurrentId,
             payload), ct);
+
+    private static bool IsEmptyRequest(UpdateJobDefinitionCommand cmd)
+        => cmd.Name is null
+            && cmd.Schedule is null
+            && cmd.AddStepDescriptions is null
+            && cmd.RemoveStepTemplateIds is null
+            && cmd.ReorderStepTemplateIds is null
+            && cmd.EditStepTemplates is null;
+
+    /// <summary>Queues audit events to emit only after the whole update succeeds.</summary>
+    private sealed class AuditQueue : List<(string EventType, Dictionary<string, object?> Payload)>
+    {
+        public void Add(string eventType, Dictionary<string, object?> payload) => Add((eventType, payload));
+
+        public void AddStepTemplateMutation(string mutationType)
+            => Add(AuditEventTypes.JobDefinitionStepTemplateMutated, new Dictionary<string, object?> { ["mutation_type"] = mutationType });
+    }
+
+    /// <summary>Tags for the step-template "mutation_type" audit payload field.</summary>
+    private static class StepTemplateMutationType
+    {
+        public const string Removed = "removed";
+        public const string Reordered = "reordered";
+        public const string Edited = "edited";
+        public const string Added = "added";
+    }
+
+    /// <summary>Runs <paramref name="mutate"/>, translating a domain ArgumentException into a ValidationError.</summary>
+    private static Error? AsValidationError(Action mutate, string fallbackField)
+    {
+        try { mutate(); return null; }
+        catch (ArgumentException ex) { return new ValidationError(ex.ParamName ?? fallbackField, ex.Message); }
+    }
+
+    /// <summary>Runs <paramref name="mutate"/>, returning its value or translating a domain ArgumentException into a ValidationError.</summary>
+    private static (T? Value, Error? Error) TryMutate<T>(Func<T> mutate, string fallbackField)
+    {
+        try { return (mutate(), null); }
+        catch (ArgumentException ex) { return (default, new ValidationError(ex.ParamName ?? fallbackField, ex.Message)); }
+    }
 }
