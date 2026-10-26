@@ -50,17 +50,9 @@ public sealed class CreateJobDefinitionHandler
     {
         var owner = _identity.CurrentOwner;
 
-        var property = await _properties.GetAsync(cmd.PropertyId, owner, ct);
-        if (property is null)
-            return Result<JobDefinitionDto>.Failure(new NotFoundError("Property", cmd.PropertyId));
-
-        if (cmd.AssetId is not null)
-        {
-            var scopeError = await Assets.AssetScopeValidation.CheckAsync(
-                _assets, owner, cmd.PropertyId, cmd.AssetId, ct);
-            if (scopeError is not null)
-                return Result<JobDefinitionDto>.Failure(scopeError);
-        }
+        var guardError = await EnsurePropertyExists(cmd, owner, ct) ?? await ValidateAssetScope(cmd, owner, ct);
+        if (guardError is not null)
+            return Result<JobDefinitionDto>.Failure(guardError);
 
         var scheduleResult = TryCreate(() => ParseSchedule(cmd.Schedule), _ => "schedule");
         if (scheduleResult.IsFailure)
@@ -79,6 +71,17 @@ public sealed class CreateJobDefinitionHandler
 
         return Result<JobDefinitionDto>.Success(definition.ToDto());
     }
+
+    private async Task<Error?> EnsurePropertyExists(CreateJobDefinitionCommand cmd, OwnerId owner, CancellationToken ct)
+    {
+        var property = await _properties.GetAsync(cmd.PropertyId, owner, ct);
+        return property is null ? new NotFoundError("Property", cmd.PropertyId) : null;
+    }
+
+    private Task<Error?> ValidateAssetScope(CreateJobDefinitionCommand cmd, OwnerId owner, CancellationToken ct)
+        => cmd.AssetId is null
+            ? Task.FromResult<Error?>(null)
+            : Assets.AssetScopeValidation.CheckAsync(_assets, owner, cmd.PropertyId, cmd.AssetId, ct);
 
     private static JobDefinition BuildDefinition(CreateJobDefinitionCommand cmd, OwnerId owner, ScheduleDefinition schedule)
         => JobDefinition.Create(
