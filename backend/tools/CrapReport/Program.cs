@@ -13,6 +13,9 @@
 // itself.
 //
 // Usage: dotnet run --project backend/tools/CrapReport -- <reportDir> <outputMarkdownPath>
+// Also writes a "<outputMarkdownPath>-topN.md" sibling file with just the
+// top N rows, sized for pasting into somewhere space-constrained (e.g. a
+// GitHub Actions job summary) without the full ~200-row table.
 
 using System.Globalization;
 using System.Text;
@@ -24,8 +27,13 @@ if (args.Length < 2)
     return 1;
 }
 
+const int TopN = 15;
+
 var reportDir = args[0];
 var outputPath = args[1];
+var topOutputPath = Path.Combine(
+    Path.GetDirectoryName(Path.GetFullPath(outputPath))!,
+    $"{Path.GetFileNameWithoutExtension(outputPath)}-top{TopN}.md");
 
 var methods = CollectMethods(reportDir);
 if (methods.Count == 0)
@@ -36,11 +44,13 @@ if (methods.Count == 0)
 
 methods.Sort((a, b) => b.Crap.CompareTo(a.Crap));
 
-WriteMarkdownReport(outputPath, methods);
-PrintTopOffenders(methods, take: 15);
+WriteMarkdownReport(outputPath, methods, heading: "# CRAP Score Report");
+WriteMarkdownReport(topOutputPath, methods.Take(TopN).ToList(), heading: $"## CRAP Score Report (top {TopN}, backend)");
+PrintTopOffenders(methods, TopN);
 
 Console.WriteLine();
 Console.WriteLine($"Full report ({methods.Count} methods): {outputPath}");
+Console.WriteLine($"Top {TopN} snippet: {topOutputPath}");
 return 0;
 
 static List<MethodRisk> CollectMethods(string reportDir)
@@ -90,10 +100,10 @@ static void PrintTopOffenders(List<MethodRisk> methods, int take)
         Console.WriteLine($"{m.Crap,8:F1}  {m.Complexity,10}  {m.CoveragePercent,7:F0}%  {m.ClassLabel} :: {m.MethodName}");
 }
 
-static void WriteMarkdownReport(string outputPath, List<MethodRisk> methods)
+static void WriteMarkdownReport(string outputPath, List<MethodRisk> methods, string heading)
 {
     var sb = new StringBuilder();
-    sb.AppendLine("# CRAP Score Report");
+    sb.AppendLine(heading);
     sb.AppendLine();
     sb.AppendLine("CRAP(m) = complexity(m)^2 * (1 - coverage(m))^3 + complexity(m)");
     sb.AppendLine();

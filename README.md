@@ -143,8 +143,14 @@ Builds the backend, runs the unit tests with coverage, then uses
 [ReportGenerator](https://github.com/danielpalme/ReportGenerator) (MIT) to
 get accurate per-method cyclomatic complexity from the C# source, which
 `backend/tools/CrapReport` combines with per-method coverage into the
-final ranking. Output: `logs/crap/crap-report.md` (full list) plus the
-top 15 printed to stdout.
+final ranking. Output: `logs/crap/crap-report.md` (full list) and
+`logs/crap/crap-report-top15.md` (just the top 15, sized for pasting
+somewhere space-constrained); the same top 15 is also printed to stdout.
+
+On every push to `main`, CI runs this and publishes the top-15 table to
+that workflow run's **Summary** tab on GitHub (Actions -> the run ->
+Summary) -- no download needed. This does not run on pull requests and
+never fails CI; it's informational only.
 
 ## Setting up Google sign-in (staging / production)
 

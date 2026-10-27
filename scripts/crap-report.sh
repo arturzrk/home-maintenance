@@ -17,6 +17,7 @@ BACKEND="$ROOT/backend"
 OUT_DIR="$ROOT/logs/crap"
 HTML_DIR="$OUT_DIR/html"
 REPORT_PATH="$OUT_DIR/crap-report.md"
+TOP_REPORT_PATH="$OUT_DIR/crap-report-top15.md"
 
 usage() {
   printf '%s\n' "Usage: scripts/crap-report.sh [--help]"
@@ -25,7 +26,8 @@ usage() {
   printf '%s\n' "Domain+Application method by CRAP score (complexity^2 * (1-coverage)^3"
   printf '%s\n' "+ complexity). Report-only: never fails the build."
   printf '%s\n' ""
-  printf '%s\n' "Output: logs/crap/crap-report.md (plus the top 15 printed to stdout)."
+  printf '%s\n' "Output: logs/crap/crap-report.md (full) and logs/crap/crap-report-top15.md"
+  printf '%s\n' "(the same top 15 also printed to stdout)."
   printf '%s\n' ""
   printf '%s\n' "  --help   show this message"
 }

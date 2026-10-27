@@ -57,6 +57,34 @@ jobs:
           --filter "Category!=perf"
           --logger "console;verbosity=normal"
 
+  crap-report:
+    name: crap-report
+    needs: backend
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up .NET 9
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('backend/**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Generate CRAP score report
+        run: ./scripts/crap-report.sh
+
+      - name: Publish top 15 to job summary
+        run: cat logs/crap/crap-report-top15.md >> "$GITHUB_STEP_SUMMARY"
+
   frontend:
     name: frontend
     runs-on: ubuntu-latest
