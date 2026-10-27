@@ -1,6 +1,7 @@
 using HomeMaintenance.Application.Common;
 using HomeMaintenance.Application.Common.Interfaces;
 using HomeMaintenance.Application.Jobs.Dto;
+using HomeMaintenance.Domain.Identity;
 using HomeMaintenance.Domain.Jobs;
 
 namespace HomeMaintenance.Application.Jobs.Commands;
@@ -38,7 +39,7 @@ public sealed class UpdateJobHandler
 
     public async Task<Result<JobDetailDto>> Handle(UpdateJobCommand cmd, CancellationToken ct = default)
     {
-        if (cmd.Name is null && !cmd.DueDateProvided)
+        if (IsEmptyRequest(cmd))
             return Result<JobDetailDto>.Failure(
                 new ValidationError("request", "Provide at least one of name or dueDate."));
 
@@ -51,51 +52,56 @@ public sealed class UpdateJobHandler
             return Result<JobDetailDto>.Failure(
                 new BusinessRuleError("job_completed", "Job is completed; mutation not allowed."));
 
-        var changes = new Dictionary<string, object?>();
-        if (cmd.Name is not null)
-        {
-            var oldName = job.Name;
-            try
-            {
-                job.Rename(cmd.Name);
-            }
-            catch (ArgumentException ex)
-            {
-                return Result<JobDetailDto>.Failure(new ValidationError("name", ex.Message));
-            }
-            changes["name"] = new { old_value = oldName, new_value = job.Name };
-        }
-
-        if (cmd.DueDateProvided)
-        {
-            var oldDueDate = job.DueDate;
-            job.SetDueDate(cmd.DueDate);
-            changes["dueDate"] = new { old_value = oldDueDate?.ToString("O"), new_value = job.DueDate?.ToString("O") };
-        }
+        var audits = new AuditQueue();
+        var error = ApplyRename(cmd, job, audits) ?? ApplyDueDate(cmd, job, audits);
+        if (error is not null)
+            return Result<JobDetailDto>.Failure(error);
 
         await _jobs.UpdateAsync(job, ct);
 
-        if (cmd.Name is not null)
-        {
-            await _audit.RecordAsync(new AuditEvent(
-                AuditEventTypes.JobRenamed,
-                owner.Value,
-                $"job:{job.Id}",
-                DateTime.UtcNow,
-                _correlation.CurrentId,
-                new Dictionary<string, object?> { ["new_name"] = job.Name }), ct);
-        }
-        if (cmd.DueDateProvided)
-        {
-            await _audit.RecordAsync(new AuditEvent(
-                AuditEventTypes.JobDueDateChanged,
-                owner.Value,
-                $"job:{job.Id}",
-                DateTime.UtcNow,
-                _correlation.CurrentId,
-                new Dictionary<string, object?> { ["new_due_date"] = job.DueDate?.ToString("O") }), ct);
-        }
+        foreach (var (eventType, payload) in audits)
+            await EmitAudit(eventType, job.Id, owner, payload, ct);
 
         return Result<JobDetailDto>.Success(job.ToDetailDto());
+    }
+
+    private static Error? ApplyRename(UpdateJobCommand cmd, Job job, AuditQueue audits)
+    {
+        if (cmd.Name is null)
+            return null;
+
+        try { job.Rename(cmd.Name); }
+        catch (ArgumentException ex) { return new ValidationError("name", ex.Message); }
+
+        audits.Add(AuditEventTypes.JobRenamed, new Dictionary<string, object?> { ["new_name"] = job.Name });
+        return null;
+    }
+
+    private static Error? ApplyDueDate(UpdateJobCommand cmd, Job job, AuditQueue audits)
+    {
+        if (!cmd.DueDateProvided)
+            return null;
+
+        job.SetDueDate(cmd.DueDate);
+        audits.Add(AuditEventTypes.JobDueDateChanged, new Dictionary<string, object?> { ["new_due_date"] = job.DueDate?.ToString("O") });
+        return null;
+    }
+
+    private Task EmitAudit(string eventType, string jobId, OwnerId owner, Dictionary<string, object?> payload, CancellationToken ct)
+        => _audit.RecordAsync(new AuditEvent(
+            eventType,
+            owner.Value,
+            $"job:{jobId}",
+            DateTime.UtcNow,
+            _correlation.CurrentId,
+            payload), ct);
+
+    private static bool IsEmptyRequest(UpdateJobCommand cmd)
+        => cmd.Name is null && !cmd.DueDateProvided;
+
+    /// <summary>Queues audit events to emit only after the whole update succeeds.</summary>
+    private sealed class AuditQueue : List<(string EventType, Dictionary<string, object?> Payload)>
+    {
+        public void Add(string eventType, Dictionary<string, object?> payload) => Add((eventType, payload));
     }
 }
