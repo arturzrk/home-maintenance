@@ -129,28 +129,50 @@ check locally:
 npm test -- --coverage
 ```
 
-### Change-risk report (CRAP score)
+### Change-risk reports (CRAP score)
+
+Report-only (never fails the build). Ranks functions/methods by CRAP
+score -- `complexity^2 * (1 - coverage)^3 + complexity` -- so code that
+is both complex *and* undertested surfaces at the top, distinct from
+code that is merely complex but already well covered.
+
+**Backend:**
 
 ```bash
 ./scripts/crap-report.sh
 ```
 
-Report-only (never fails the build). Ranks every backend Domain+Application
-method by CRAP score -- `complexity^2 * (1 - coverage)^3 + complexity` --
-so methods that are both complex *and* undertested surface at the top,
-distinct from methods that are merely complex but already well covered.
 Builds the backend, runs the unit tests with coverage, then uses
 [ReportGenerator](https://github.com/danielpalme/ReportGenerator) (MIT) to
 get accurate per-method cyclomatic complexity from the C# source, which
 `backend/tools/CrapReport` combines with per-method coverage into the
 final ranking. Output: `logs/crap/crap-report.md` (full list) and
-`logs/crap/crap-report-top15.md` (just the top 15, sized for pasting
-somewhere space-constrained); the same top 15 is also printed to stdout.
+`logs/crap/crap-report-top15.md` (just the top 15).
 
-On every push to `main`, CI runs this and publishes the top-15 table to
-that workflow run's **Summary** tab on GitHub (Actions -> the run ->
-Summary) -- no download needed. This does not run on pull requests and
-never fails CI; it's informational only.
+**Frontend:**
+
+```bash
+./scripts/frontend-crap-report.sh
+```
+
+Runs the Jest suite with coverage, then `frontend/tools/crap-report`
+combines Jest's own coverage data (which already has per-function
+location ranges and statement hit counts, regardless of coverage
+provider) with ESLint's built-in `complexity` rule (forced to report on
+every function, not just violations) to rank every function. The two
+tools don't always agree on what counts as a separately-tracked
+function -- a handful of small nested closures (e.g. an inline
+`async () => {...}` passed to `startTransition`) aren't instrumented on
+their own by Jest, so their row inherits coverage from the smallest
+enclosing function that is instrumented, rather than an exact number of
+their own. Output: `logs/crap/frontend-crap-report.md` (full list) and
+`logs/crap/frontend-crap-report-top15.md` (just the top 15).
+
+Both print their top 15 to stdout too. On every push to `main`, CI runs
+both and publishes each top-15 table to that workflow run's **Summary**
+tab on GitHub (Actions -> the run -> Summary) -- no download needed.
+Neither runs on pull requests, and neither ever fails CI; both are
+informational only.
 
 ## Setting up Google sign-in (staging / production)
 
