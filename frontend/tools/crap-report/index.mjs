@@ -46,6 +46,7 @@ import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { dirname, relative, resolve, extname } from "node:path";
 
 const TOP_N = 15;
+const CRAPPY_THRESHOLD = 20;
 
 function main() {
   const [coveragePath, outputPath] = process.argv.slice(2);
@@ -65,11 +66,12 @@ function main() {
 
   const rows = files.flatMap((file) => rowsForFile(file, coverage[file], complexityByFile.get(file) ?? []));
   rows.sort((a, b) => b.crap - a.crap);
+  const crappyCount = rows.filter((r) => r.crap > CRAPPY_THRESHOLD).length;
 
   const topOutputPath = outputPath.replace(/\.md$/, `-top${TOP_N}.md`);
-  writeMarkdownReport(outputPath, rows, "# CRAP Score Report (frontend)");
-  writeMarkdownReport(topOutputPath, rows.slice(0, TOP_N), `## CRAP Score Report (top ${TOP_N}, frontend)`);
-  printTopOffenders(rows, TOP_N);
+  writeMarkdownReport(outputPath, rows, "# CRAP Score Report (frontend)", crappyCount);
+  writeMarkdownReport(topOutputPath, rows.slice(0, TOP_N), `## CRAP Score Report (top ${TOP_N}, frontend)`, crappyCount);
+  printTopOffenders(rows, TOP_N, crappyCount);
 
   console.log();
   console.log(`Full report (${rows.length} functions): ${outputPath}`);
@@ -196,17 +198,20 @@ function fileLineCoverage(fileCoverage) {
   return (hits.filter((h) => h > 0).length / hits.length) * 100;
 }
 
-function printTopOffenders(rows, take) {
+function printTopOffenders(rows, take, crappyCount) {
   console.log(`Top ${Math.min(take, rows.length)} by CRAP score:`);
   console.log(`${"CRAP".padStart(8)}  ${"Complexity".padStart(10)}  ${"Coverage".padStart(8)}  File / Function`);
   for (const r of rows.slice(0, take)) {
+    const flag = r.crap > CRAPPY_THRESHOLD ? "  CRAPPY" : "";
     console.log(
-      `${r.crap.toFixed(1).padStart(8)}  ${String(r.complexity).padStart(10)}  ${`${Math.round(r.coveragePercent)}%`.padStart(8)}  ${r.classLabel} :: ${r.methodName}`,
+      `${r.crap.toFixed(1).padStart(8)}  ${String(r.complexity).padStart(10)}  ${`${Math.round(r.coveragePercent)}%`.padStart(8)}  ${r.classLabel} :: ${r.methodName}${flag}`,
     );
   }
+  console.log();
+  console.log(`${crappyCount} function(s) flagged as CRAPPY (CRAP > ${CRAPPY_THRESHOLD}).`);
 }
 
-function writeMarkdownReport(outputPath, rows, heading) {
+function writeMarkdownReport(outputPath, rows, heading, crappyCount) {
   const lines = [
     heading,
     "",
@@ -217,11 +222,14 @@ function writeMarkdownReport(outputPath, rows, heading) {
     "the combination this metric exists to flag. This is a report, not a",
     "CI gate: nothing here fails a build.",
     "",
-    "| CRAP | Complexity | Coverage | File | Function |",
-    "|-----:|-----------:|---------:|------|----------|",
-    ...rows.map(
-      (r) => `| ${r.crap.toFixed(1)} | ${r.complexity} | ${Math.round(r.coveragePercent)}% | ${r.classLabel} | ${r.methodName} |`,
-    ),
+    `**${crappyCount} function(s) flagged as CRAPPY** (CRAP > ${CRAPPY_THRESHOLD}) across the full report.`,
+    "",
+    "| CRAP | Complexity | Coverage | File | Function | Flag |",
+    "|-----:|-----------:|---------:|------|----------|------|",
+    ...rows.map((r) => {
+      const flag = r.crap > CRAPPY_THRESHOLD ? "CRAPPY" : "";
+      return `| ${r.crap.toFixed(1)} | ${r.complexity} | ${Math.round(r.coveragePercent)}% | ${r.classLabel} | ${r.methodName} | ${flag} |`;
+    }),
   ];
   mkdirSync(dirname(resolve(outputPath)), { recursive: true });
   writeFileSync(outputPath, lines.join("\n") + "\n");

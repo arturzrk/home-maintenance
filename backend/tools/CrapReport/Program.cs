@@ -28,6 +28,7 @@ if (args.Length < 2)
 }
 
 const int TopN = 15;
+const double CrappyThreshold = 20.0;
 
 var reportDir = args[0];
 var outputPath = args[1];
@@ -43,10 +44,11 @@ if (methods.Count == 0)
 }
 
 methods.Sort((a, b) => b.Crap.CompareTo(a.Crap));
+var crappyCount = methods.Count(m => m.Crap > CrappyThreshold);
 
-WriteMarkdownReport(outputPath, methods, heading: "# CRAP Score Report");
-WriteMarkdownReport(topOutputPath, methods.Take(TopN).ToList(), heading: $"## CRAP Score Report (top {TopN}, backend)");
-PrintTopOffenders(methods, TopN);
+WriteMarkdownReport(outputPath, methods, heading: "# CRAP Score Report", crappyCount);
+WriteMarkdownReport(topOutputPath, methods.Take(TopN).ToList(), heading: $"## CRAP Score Report (top {TopN}, backend)", crappyCount);
+PrintTopOffenders(methods, TopN, crappyCount);
 
 Console.WriteLine();
 Console.WriteLine($"Full report ({methods.Count} methods): {outputPath}");
@@ -92,15 +94,20 @@ static double Crap(int complexity, double coveragePercent)
     return complexity * complexity * Math.Pow(uncovered, 3) + complexity;
 }
 
-static void PrintTopOffenders(List<MethodRisk> methods, int take)
+static void PrintTopOffenders(List<MethodRisk> methods, int take, int crappyCount)
 {
     Console.WriteLine($"Top {Math.Min(take, methods.Count)} by CRAP score:");
     Console.WriteLine($"{"CRAP",8}  {"Complexity",10}  {"Coverage",8}  Class / Method");
     foreach (var m in methods.Take(take))
-        Console.WriteLine($"{m.Crap,8:F1}  {m.Complexity,10}  {m.CoveragePercent,7:F0}%  {m.ClassLabel} :: {m.MethodName}");
+    {
+        var flag = m.Crap > CrappyThreshold ? "  CRAPPY" : "";
+        Console.WriteLine($"{m.Crap,8:F1}  {m.Complexity,10}  {m.CoveragePercent,7:F0}%  {m.ClassLabel} :: {m.MethodName}{flag}");
+    }
+    Console.WriteLine();
+    Console.WriteLine($"{crappyCount} method(s) flagged as CRAPPY (CRAP > {CrappyThreshold:F0}).");
 }
 
-static void WriteMarkdownReport(string outputPath, List<MethodRisk> methods, string heading)
+static void WriteMarkdownReport(string outputPath, List<MethodRisk> methods, string heading, int crappyCount)
 {
     var sb = new StringBuilder();
     sb.AppendLine(heading);
@@ -112,10 +119,15 @@ static void WriteMarkdownReport(string outputPath, List<MethodRisk> methods, str
     sb.AppendLine("combination this metric exists to flag. This is a report, not a CI gate:");
     sb.AppendLine("nothing here fails a build.");
     sb.AppendLine();
-    sb.AppendLine("| CRAP | Complexity | Coverage | Class | Method |");
-    sb.AppendLine("|-----:|-----------:|---------:|-------|--------|");
+    sb.AppendLine($"**{crappyCount} method(s) flagged as CRAPPY** (CRAP > {CrappyThreshold:F0}) across the full report.");
+    sb.AppendLine();
+    sb.AppendLine("| CRAP | Complexity | Coverage | Class | Method | Flag |");
+    sb.AppendLine("|-----:|-----------:|---------:|-------|--------|------|");
     foreach (var m in methods)
-        sb.AppendLine($"| {m.Crap:F1} | {m.Complexity} | {m.CoveragePercent:F0}% | {m.ClassLabel} | {m.MethodName} |");
+    {
+        var flag = m.Crap > CrappyThreshold ? "CRAPPY" : "";
+        sb.AppendLine($"| {m.Crap:F1} | {m.Complexity} | {m.CoveragePercent:F0}% | {m.ClassLabel} | {m.MethodName} | {flag} |");
+    }
 
     Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(outputPath))!);
     File.WriteAllText(outputPath, sb.ToString());

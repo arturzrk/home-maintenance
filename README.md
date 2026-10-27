@@ -134,7 +134,10 @@ npm test -- --coverage
 Report-only (never fails the build). Ranks functions/methods by CRAP
 score -- `complexity^2 * (1 - coverage)^3 + complexity` -- so code that
 is both complex *and* undertested surfaces at the top, distinct from
-code that is merely complex but already well covered.
+code that is merely complex but already well covered. Anything scoring
+above 20 is flagged **CRAPPY** in both the stdout summary and the
+report's `Flag` column -- still informational, not a gate, but a clear
+line for "look at this one first."
 
 **Backend:**
 
