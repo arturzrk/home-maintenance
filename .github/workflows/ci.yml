@@ -280,3 +280,6 @@ jobs:
 
       - name: Dev script tests (dev-stop.sh)
         run: bash scripts/dev-stop.test.sh
+
+      - name: Dev script tests (crap-report.sh)
+        run: bash scripts/crap-report.test.sh
