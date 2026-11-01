@@ -1,11 +1,11 @@
+import { DUE_BUCKET_META } from "@/components/due-bucket-meta";
 import { DueJobSection } from "@/components/due-job-section";
 import type { DueJobBuckets } from "@/lib/due-jobs";
 
 export function DueJobsOverview({ buckets }: { buckets: DueJobBuckets }) {
-  const isAllCaughtUp =
-    buckets.overdue.length === 0 &&
-    buckets.dueThisWeek.length === 0 &&
-    buckets.comingUp.length === 0;
+  const isAllCaughtUp = DUE_BUCKET_META.every(
+    (b) => buckets[b.key].length === 0,
+  );
 
   if (isAllCaughtUp) {
     return (
@@ -18,9 +18,14 @@ export function DueJobsOverview({ buckets }: { buckets: DueJobBuckets }) {
 
   return (
     <div className="space-y-4">
-      <DueJobSection title="Overdue" items={buckets.overdue} />
-      <DueJobSection title="Due this week" items={buckets.dueThisWeek} />
-      <DueJobSection title="Coming up this month" items={buckets.comingUp} />
+      {DUE_BUCKET_META.map((b) => (
+        <DueJobSection
+          key={b.key}
+          id={b.key}
+          title={b.title}
+          items={buckets[b.key]}
+        />
+      ))}
     </div>
   );
 }
