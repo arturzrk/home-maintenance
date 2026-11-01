@@ -9,6 +9,18 @@ namespace HomeMaintenance.Application.JobDefinitions.Handlers;
 
 public sealed class UpdateJobDefinitionHandler
 {
+    private delegate Error? Step(UpdateJobDefinitionCommand cmd, JobDefinition definition, AuditQueue audits);
+
+    private static readonly Step[] Steps =
+    [
+        ApplyRename,
+        ApplySchedule,
+        ApplyStepTemplateRemovals,
+        ApplyStepTemplateReorder,
+        ApplyStepTemplateEdits,
+        ApplyStepTemplateAdditions,
+    ];
+
     private readonly IJobDefinitionRepository _definitions;
     private readonly IIdentityProvider _identity;
     private readonly IAuditLog _audit;
@@ -42,12 +54,7 @@ public sealed class UpdateJobDefinitionHandler
 
         var audits = new AuditQueue();
 
-        var error = ApplyRename(cmd, definition, audits)
-            ?? ApplySchedule(cmd, definition, audits)
-            ?? ApplyStepTemplateRemovals(cmd, definition, audits)
-            ?? ApplyStepTemplateReorder(cmd, definition, audits)
-            ?? ApplyStepTemplateEdits(cmd, definition, audits)
-            ?? ApplyStepTemplateAdditions(cmd, definition, audits);
+        var error = RunSteps(cmd, definition, audits);
         if (error is not null)
             return Result<JobDefinitionDto>.Failure(error);
 
@@ -57,6 +64,17 @@ public sealed class UpdateJobDefinitionHandler
             await EmitAudit(eventType, cmd.Id, owner, payload, ct);
 
         return Result<JobDefinitionDto>.Success(definition.ToDto());
+    }
+
+    private static Error? RunSteps(UpdateJobDefinitionCommand cmd, JobDefinition definition, AuditQueue audits)
+    {
+        foreach (var step in Steps)
+        {
+            var error = step(cmd, definition, audits);
+            if (error is not null)
+                return error;
+        }
+        return null;
     }
 
     private static Error? ApplyRename(UpdateJobDefinitionCommand cmd, JobDefinition definition, AuditQueue audits)
