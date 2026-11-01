@@ -41,4 +41,11 @@ describe("DueJobSection", () => {
     const { container } = render(<DueJobSection title="Due this week" items={[]} />);
     expect(container.firstChild).toBeNull();
   });
+
+  it("nonEmptyItems_SectionIsLabelledByItsHeading", () => {
+    render(<DueJobSection title="Due this week" items={[item("job-1", "Service boiler")]} />);
+    const heading = screen.getByRole("heading", { level: 2, name: "Due this week" });
+    const region = screen.getByRole("region", { name: "Due this week" });
+    expect(region).toContainElement(heading);
+  });
 });

@@ -23,6 +23,15 @@ export function parseIsoDateOnly(iso: string): number {
 /**
  * today's local wall-clock calendar date (ignoring time-of-day),
  * converted to the same epoch-day space as parseIsoDateOnly.
+ *
+ * Known limitation: `today` is constructed server-side (new Date() in
+ * a Server Component), so "local" here means the server process's
+ * timezone, not the viewing user's. A user far from the server's
+ * timezone can see a job's bucket flip a day earlier/later than their
+ * own calendar near midnight. Fixing this properly means threading the
+ * viewer's timezone from the client into the server render, which is
+ * out of scope for this pass - tracked as a known gap, not silently
+ * ignored.
  */
 export function todayEpochDay(today: Date): number {
   return Math.floor(
@@ -36,8 +45,12 @@ export function daysUntilDue(today: Date, dueDateIso: string): number {
   return parseIsoDateOnly(dueDateIso) - todayEpochDay(today);
 }
 
+function pluralDays(n: number): string {
+  return `${n} day${n === 1 ? "" : "s"}`;
+}
+
 export function formatDueLabel(days: number): string {
-  if (days < 0) return `Overdue by ${-days} day${-days === 1 ? "" : "s"}`;
+  if (days < 0) return `Overdue by ${pluralDays(-days)}`;
   if (days === 0) return "Due today";
-  return `Due in ${days} day${days === 1 ? "" : "s"}`;
+  return `Due in ${pluralDays(days)}`;
 }

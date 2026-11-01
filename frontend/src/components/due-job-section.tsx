@@ -10,9 +10,13 @@ export function DueJobSection({
 }) {
   if (items.length === 0) return null;
 
+  const headingId = `due-job-section-${title.toLowerCase().replace(/\s+/g, "-")}`;
+
   return (
-    <section className="space-y-2">
-      <h2 className="text-sm font-semibold text-gray-700">{title}</h2>
+    <section aria-labelledby={headingId} className="space-y-2">
+      <h2 id={headingId} className="text-sm font-semibold text-gray-700">
+        {title}
+      </h2>
       <ul className="space-y-2">
         {items.map((item) => (
           <li key={item.job.id}>

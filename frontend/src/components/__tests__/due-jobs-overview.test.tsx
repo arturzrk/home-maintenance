@@ -28,7 +28,7 @@ const empty: DueJobBuckets = { overdue: [], dueThisWeek: [], comingUp: [] };
 describe("DueJobsOverview", () => {
   it("allBucketsEmpty_RendersCaughtUpMessage_NoSectionTitles", () => {
     render(<DueJobsOverview buckets={empty} />);
-    expect(screen.getByText("You're all caught up!")).toBeInTheDocument();
+    expect(screen.getByText(/you're all caught up/i)).toBeInTheDocument();
     expect(screen.queryByText("Overdue")).not.toBeInTheDocument();
     expect(screen.queryByText("Due this week")).not.toBeInTheDocument();
     expect(screen.queryByText("Coming up this month")).not.toBeInTheDocument();
@@ -43,7 +43,7 @@ describe("DueJobsOverview", () => {
     expect(screen.getByText("Due this week")).toBeInTheDocument();
     expect(screen.queryByText("Overdue")).not.toBeInTheDocument();
     expect(screen.queryByText("Coming up this month")).not.toBeInTheDocument();
-    expect(screen.queryByText("You're all caught up!")).not.toBeInTheDocument();
+    expect(screen.queryByText(/you're all caught up/i)).not.toBeInTheDocument();
   });
 
   it("allBucketsPopulated_RendersAllThreeInFixedOrder", () => {

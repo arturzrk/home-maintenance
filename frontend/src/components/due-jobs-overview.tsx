@@ -9,14 +9,10 @@ export function DueJobsOverview({ buckets }: { buckets: DueJobBuckets }) {
 
   if (isAllCaughtUp) {
     return (
-      <div className="rounded-md border border-gray-200 bg-white px-4 py-6 text-center shadow-sm">
-        <p className="text-base font-medium text-gray-900">
-          You&apos;re all caught up!
-        </p>
-        <p className="mt-1 text-sm text-gray-500">
-          No jobs are overdue or due in the next 30 days.
-        </p>
-      </div>
+      <p className="text-sm text-gray-500">
+        You&apos;re all caught up! No jobs are overdue or due in the next 30
+        days.
+      </p>
     );
   }
 
