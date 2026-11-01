@@ -2,15 +2,17 @@ import { DueJobCard } from "@/components/due-job-card";
 import type { DueJobItem } from "@/lib/due-jobs";
 
 export function DueJobSection({
+  id,
   title,
   items,
 }: {
+  id: string;
   title: string;
   items: DueJobItem[];
 }) {
   if (items.length === 0) return null;
 
-  const headingId = `due-job-section-${title.toLowerCase().replace(/\s+/g, "-")}`;
+  const headingId = `due-job-section-${id}`;
 
   return (
     <section aria-labelledby={headingId} className="space-y-2">

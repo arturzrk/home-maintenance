@@ -27,6 +27,7 @@ describe("DueJobSection", () => {
   it("nonEmptyItems_RendersTitleAndOneRowPerItem", () => {
     render(
       <DueJobSection
+        id="dueThisWeek"
         title="Due this week"
         items={[item("job-1", "Service boiler"), item("job-2", "Clean gutters")]}
       />,
@@ -38,14 +39,34 @@ describe("DueJobSection", () => {
   });
 
   it("emptyItems_RendersNothing", () => {
-    const { container } = render(<DueJobSection title="Due this week" items={[]} />);
+    const { container } = render(
+      <DueJobSection id="dueThisWeek" title="Due this week" items={[]} />,
+    );
     expect(container.firstChild).toBeNull();
   });
 
   it("nonEmptyItems_SectionIsLabelledByItsHeading", () => {
-    render(<DueJobSection title="Due this week" items={[item("job-1", "Service boiler")]} />);
+    render(
+      <DueJobSection
+        id="dueThisWeek"
+        title="Due this week"
+        items={[item("job-1", "Service boiler")]}
+      />,
+    );
     const heading = screen.getByRole("heading", { level: 2, name: "Due this week" });
     const region = screen.getByRole("region", { name: "Due this week" });
     expect(region).toContainElement(heading);
+  });
+
+  it("differentIds_ProduceDifferentHeadingIds", () => {
+    const { rerender } = render(
+      <DueJobSection id="overdue" title="Overdue" items={[item("job-1", "A")]} />,
+    );
+    const firstId = screen.getByRole("heading", { level: 2 }).id;
+
+    rerender(<DueJobSection id="comingUp" title="Overdue" items={[item("job-1", "A")]} />);
+    const secondId = screen.getByRole("heading", { level: 2 }).id;
+
+    expect(firstId).not.toBe(secondId);
   });
 });

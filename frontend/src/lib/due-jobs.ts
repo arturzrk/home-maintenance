@@ -70,9 +70,7 @@ export function groupJobsByDueDate(
     .filter((item): item is DueJobItem => item !== null)
     .sort(compareDueJobItems);
 
-  return {
-    overdue: items.filter((i) => i.bucket === "overdue"),
-    dueThisWeek: items.filter((i) => i.bucket === "dueThisWeek"),
-    comingUp: items.filter((i) => i.bucket === "comingUp"),
-  };
+  const buckets: DueJobBuckets = { overdue: [], dueThisWeek: [], comingUp: [] };
+  for (const item of items) buckets[item.bucket].push(item);
+  return buckets;
 }

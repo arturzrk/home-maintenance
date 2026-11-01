@@ -1,11 +1,10 @@
 import Link from "next/link";
+import { DUE_BUCKET_META } from "@/components/due-bucket-meta";
 import type { DueBucket, DueJobItem } from "@/lib/due-jobs";
 
-const PILL_CLASSES: Record<DueBucket, string> = {
-  overdue: "bg-red-100 text-red-800",
-  dueThisWeek: "bg-yellow-100 text-yellow-800",
-  comingUp: "bg-gray-100 text-gray-800",
-};
+const PILL_CLASS_BY_BUCKET: Record<DueBucket, string> = Object.fromEntries(
+  DUE_BUCKET_META.map((b) => [b.key, b.pillClass]),
+) as Record<DueBucket, string>;
 
 export function DueJobCard({ item }: { item: DueJobItem }) {
   return (
@@ -18,7 +17,7 @@ export function DueJobCard({ item }: { item: DueJobItem }) {
           {item.job.name}
         </span>
         <span
-          className={`rounded-full px-2 py-0.5 text-xs font-medium ${PILL_CLASSES[item.bucket]}`}
+          className={`rounded-full px-2 py-0.5 text-xs font-medium ${PILL_CLASS_BY_BUCKET[item.bucket]}`}
         >
           {item.dueLabel}
         </span>
