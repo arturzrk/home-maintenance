@@ -6,8 +6,8 @@ using HomeMaintenance.Application.Common.Interfaces;
 using HomeMaintenance.Infrastructure;
 using HomeMaintenance.Infrastructure.Auth;
 using HomeMaintenance.Infrastructure.AuditLog;
+using HomeMaintenance.Infrastructure.Persistence;
 using System.Text.Json.Serialization;
-using MongoDB.Driver;
 using OpenTelemetry;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -33,10 +33,7 @@ if (!string.IsNullOrEmpty(builder.Configuration["APPLICATIONINSIGHTS_CONNECTION_
 // Health checks
 builder.Services
     .AddHealthChecks()
-    .AddMongoDb(
-        sp => sp.GetRequiredService<IMongoDatabase>(),
-        name: "mongodb",
-        tags: ["db", "ready"]);
+    .AddMongoHealthCheck();
 
 // ── CORS (allow Next.js dev server) ───────────────────────────────────────
 builder.Services.AddCors(options =>
