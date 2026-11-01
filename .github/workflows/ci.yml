@@ -142,7 +142,12 @@ jobs:
 
   e2e:
     name: e2e
-    runs-on: ubuntu-latest
+    # Pinned (not ubuntu-latest): GitHub's ubuntu-latest migrated to
+    # Ubuntu 26.04 ahead of Playwright shipping support for it, so
+    # "npx playwright install --with-deps chromium" fails outright
+    # ("Playwright does not support chromium on ubuntu26.04-x64").
+    # Revert to ubuntu-latest once @playwright/test supports it.
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     services:
       mongodb:
