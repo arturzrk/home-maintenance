@@ -140,4 +140,27 @@ public sealed class ScheduleDefinitionTests
         Should.Throw<ArgumentException>(() =>
             new ScheduleDefinition(CadenceUnit.Month, 1, start, start.AddDays(-1)));
     }
+
+    [Fact]
+    public void UnknownCadenceUnit_Throws()
+    {
+        var start = new DateOnly(2026, 1, 1);
+        var sched = new ScheduleDefinition((CadenceUnit)99, 1, start);
+
+        Should.Throw<InvalidOperationException>(() =>
+            sched.OccurrencesInRange(start, start.AddDays(1)).ToList());
+    }
+
+    [Fact]
+    public void OpenEndedRange_StopsAt10_000OccurrencesSafetyCap()
+    {
+        var start = new DateOnly(2026, 1, 1);
+        var sched = new ScheduleDefinition(CadenceUnit.Day, 1, start);
+
+        var result = sched.OccurrencesInRange(start, start.AddDays(50_000)).ToList();
+
+        result.Count.ShouldBe(10_001);
+        result[0].ShouldBe(start);
+        result[^1].ShouldBe(start.AddDays(10_000));
+    }
 }
