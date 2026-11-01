@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using HomeMaintenance.API.Middleware;
 using HomeMaintenance.Application.JobDefinitions.Commands;
 using HomeMaintenance.Application.JobDefinitions.Dto;
+using HomeMaintenance.Application.JobDefinitions.Handlers;
 using HomeMaintenance.Application.JobDefinitions.Queries;
 using MiniValidation;
 

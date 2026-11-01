@@ -1,3 +1,4 @@
+using HomeMaintenance.Application.Assets.Handlers;
 using HomeMaintenance.Application.Assets.Queries;
 using HomeMaintenance.Application.Common;
 using HomeMaintenance.Application.Common.Interfaces;

@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using HomeMaintenance.API.Middleware;
 using HomeMaintenance.Application.Account.Commands;
+using HomeMaintenance.Application.Account.Handlers;
 using HomeMaintenance.Application.Account.Queries;
 using MiniValidation;
 

@@ -1,6 +1,7 @@
 using HomeMaintenance.API.Middleware;
 using HomeMaintenance.Application.Properties.Commands;
 using HomeMaintenance.Application.Properties.Dto;
+using HomeMaintenance.Application.Properties.Handlers;
 using HomeMaintenance.Application.Properties.Queries;
 using MiniValidation;
 

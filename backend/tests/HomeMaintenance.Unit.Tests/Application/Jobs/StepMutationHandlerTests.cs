@@ -1,6 +1,7 @@
 using HomeMaintenance.Application.Common;
 using HomeMaintenance.Application.Common.Interfaces;
 using HomeMaintenance.Application.Jobs.Commands;
+using HomeMaintenance.Application.Jobs.Handlers;
 using HomeMaintenance.Application.Jobs.Queries;
 using HomeMaintenance.Domain.Identity;
 using HomeMaintenance.Domain.Jobs;

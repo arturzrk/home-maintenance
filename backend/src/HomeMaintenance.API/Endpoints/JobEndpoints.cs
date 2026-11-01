@@ -1,6 +1,7 @@
 using HomeMaintenance.API.Middleware;
 using HomeMaintenance.Application.Jobs.Commands;
 using HomeMaintenance.Application.Jobs.Dto;
+using HomeMaintenance.Application.Jobs.Handlers;
 using HomeMaintenance.Application.Jobs.Queries;
 using HomeMaintenance.Domain.Jobs;
 using MiniValidation;
