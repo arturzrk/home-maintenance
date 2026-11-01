@@ -1,6 +1,7 @@
 using HomeMaintenance.Application.Common;
 using HomeMaintenance.Application.Common.Interfaces;
 using HomeMaintenance.Application.Properties.Commands;
+using HomeMaintenance.Application.Properties.Handlers;
 using HomeMaintenance.Domain.Identity;
 using HomeMaintenance.Domain.Properties;
 using NSubstitute;

@@ -3,6 +3,7 @@ using HomeMaintenance.Application.Common.Interfaces;
 using HomeMaintenance.Application.JobDefinitions;
 using HomeMaintenance.Application.JobDefinitions.Commands;
 using HomeMaintenance.Application.JobDefinitions.Dto;
+using HomeMaintenance.Application.JobDefinitions.Handlers;
 using HomeMaintenance.Domain.Assets;
 using HomeMaintenance.Domain.Identity;
 using HomeMaintenance.Domain.JobDefinitions;

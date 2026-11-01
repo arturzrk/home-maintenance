@@ -1,13 +1,8 @@
-using HomeMaintenance.Application.Account.Commands;
-using HomeMaintenance.Application.Account.Queries;
-using HomeMaintenance.Application.Assets.Commands;
-using HomeMaintenance.Application.Assets.Queries;
-using HomeMaintenance.Application.JobDefinitions.Commands;
-using HomeMaintenance.Application.JobDefinitions.Queries;
-using HomeMaintenance.Application.Jobs.Commands;
-using HomeMaintenance.Application.Jobs.Queries;
-using HomeMaintenance.Application.Properties.Commands;
-using HomeMaintenance.Application.Properties.Queries;
+using HomeMaintenance.Application.Account.Handlers;
+using HomeMaintenance.Application.Assets.Handlers;
+using HomeMaintenance.Application.JobDefinitions.Handlers;
+using HomeMaintenance.Application.Jobs.Handlers;
+using HomeMaintenance.Application.Properties.Handlers;
 using Microsoft.Extensions.DependencyInjection;
 using System.Diagnostics.CodeAnalysis;
 
