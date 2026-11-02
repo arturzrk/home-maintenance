@@ -5,8 +5,6 @@ function renderMenu(overrides: Partial<Parameters<typeof SystemMenu>[0]> = {}) {
   const signOutAction = jest.fn().mockResolvedValue(undefined);
   const props = {
     identity: "alice@example.com",
-    version: "1.2.3",
-    healthy: true,
     signOutAction,
     ...overrides,
   };
@@ -53,7 +51,6 @@ describe("SystemMenu", () => {
     expect(guide).toHaveAttribute("target", "_blank");
     expect(guide).toHaveAttribute("rel", "noopener noreferrer");
 
-    expect(screen.getByText("Version 1.2.3")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Sign out" })).toBeInTheDocument();
   });
 
@@ -74,7 +71,7 @@ describe("SystemMenu", () => {
   it("stays open when clicking inside the panel", () => {
     renderMenu();
     openMenu();
-    fireEvent.mouseDown(screen.getByText("Version 1.2.3"));
+    fireEvent.mouseDown(panel()!);
     expect(panel()).not.toBeNull();
   });
 
@@ -83,19 +80,6 @@ describe("SystemMenu", () => {
     openMenu();
     fireEvent.click(screen.getByRole("link", { name: "My properties" }));
     expect(panel()).toBeNull();
-  });
-
-  it("shows Connected when healthy", () => {
-    renderMenu({ healthy: true });
-    openMenu();
-    expect(screen.getByText(/API: Connected/)).toBeInTheDocument();
-  });
-
-  it("shows Unreachable and unknown version on degraded backend", () => {
-    renderMenu({ healthy: false, version: null });
-    openMenu();
-    expect(screen.getByText(/API: Unreachable/)).toBeInTheDocument();
-    expect(screen.getByText("Version unknown")).toBeInTheDocument();
   });
 
   it("wires the sign-out form to the provided action", () => {

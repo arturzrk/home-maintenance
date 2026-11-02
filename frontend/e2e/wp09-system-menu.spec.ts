@@ -39,15 +39,16 @@ test.describe("WP09: System menu", () => {
     await expect(page.locator("#system-menu-panel")).toHaveCount(0);
   });
 
-  test("WP09-3: system info shows version and Connected", async ({ page }) => {
+  test("WP09-3: system health menu shows service info and Connected", async ({
+    page,
+  }) => {
     const { sub } = uniqueUser();
     await signInAs(page, sub);
 
-    await trigger(page).click();
-    const panel = page.locator("#system-menu-panel");
-    await expect(panel.getByText(/^Version .+/)).toBeVisible();
-    await expect(panel.getByText("Version unknown")).toHaveCount(0);
-    await expect(panel.getByText(/API: Connected/)).toBeVisible();
+    await page.locator("#system-health-menu-trigger").click();
+    const panel = page.locator("#system-health-menu-panel");
+    await expect(panel.getByText("Connected")).toBeVisible();
+    await expect(panel.getByText("HomeMaintenance API")).toBeVisible();
   });
 
   test("WP09-4: sign out returns to signin and locks the app", async ({

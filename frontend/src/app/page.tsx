@@ -1,17 +1,10 @@
 import Link from "next/link";
 import { unstable_rethrow } from "next/navigation";
-import {
-  checkHealth,
-  getApiInfo,
-  jobs as jobsApi,
-  properties as propertiesApi,
-} from "@/lib/api-client";
+import { jobs as jobsApi, properties as propertiesApi } from "@/lib/api-client";
 import { auth } from "@/lib/auth";
-import { ConnectionStatus } from "@/components/connection-status";
 import { DueJobsOverview } from "@/components/due-jobs-overview";
 import { LandingPage } from "@/components/landing-page";
 import { groupJobsByDueDate, type DueJobBuckets } from "@/lib/due-jobs";
-import type { ApiInfo } from "@/types/api";
 
 export const dynamic = "force-dynamic";
 
@@ -20,25 +13,6 @@ const EMPTY_BUCKETS: DueJobBuckets = {
   dueThisWeek: [],
   comingUp: [],
 };
-
-interface ConnectionState {
-  healthy: boolean;
-  apiInfo: ApiInfo | null;
-}
-
-/**
- * checkHealth/getApiInfo never take an idToken, so they can never
- * throw apiFetch's 401-redirect - a plain try/catch here (no
- * unstable_rethrow) is safe, unlike loadDueJobs below.
- */
-async function loadConnectionStatus(): Promise<ConnectionState> {
-  try {
-    const [healthy, apiInfo] = await Promise.all([checkHealth(), getApiInfo()]);
-    return { healthy, apiInfo };
-  } catch {
-    return { healthy: false, apiInfo: null };
-  }
-}
 
 interface DueJobsState {
   buckets: DueJobBuckets;
@@ -71,7 +45,8 @@ async function loadDueJobs(idToken: string): Promise<DueJobsState> {
 /**
  * "/" is public: anonymous visitors get the Maintained House landing
  * page, a usable session gets the dashboard with due/overdue jobs
- * across every property.
+ * across every property. Backend connectivity is shown in the shared
+ * header's System Health menu (layout.tsx), not on this page.
  */
 export default async function DashboardPage() {
   // Same bar as middleware/requireSession: a session without a usable
@@ -86,8 +61,7 @@ export default async function DashboardPage() {
   }
   const session = rawSession as typeof rawSession & { idToken: string };
 
-  const [{ healthy, apiInfo }, { buckets: dueJobBuckets, loadFailed }] =
-    await Promise.all([loadConnectionStatus(), loadDueJobs(session.idToken)]);
+  const { buckets: dueJobBuckets, loadFailed } = await loadDueJobs(session.idToken);
 
   return (
     <div className="space-y-6">
@@ -117,8 +91,6 @@ export default async function DashboardPage() {
           View your properties and manage their jobs, schedules, and assets.
         </p>
       </Link>
-
-      <ConnectionStatus healthy={healthy} apiInfo={apiInfo} />
     </div>
   );
 }
