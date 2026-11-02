@@ -2,29 +2,18 @@ using HomeMaintenance.Application.Common;
 using HomeMaintenance.Application.Common.Interfaces;
 using HomeMaintenance.Application.Jobs.Commands;
 using HomeMaintenance.Application.Jobs.Dto;
-using HomeMaintenance.Domain.Identity;
 using HomeMaintenance.Domain.Jobs;
 
 namespace HomeMaintenance.Application.Jobs.Handlers;
 
-public sealed class UpdateJobHandler
+public sealed class UpdateJobHandler : StepMutationHandlerBase
 {
-    private readonly IJobRepository _jobs;
-    private readonly IIdentityProvider _identity;
-    private readonly IAuditLog _audit;
-    private readonly ICorrelationContext _correlation;
-
     public UpdateJobHandler(
         IJobRepository jobs,
         IIdentityProvider identity,
         IAuditLog audit,
         ICorrelationContext correlation)
-    {
-        _jobs = jobs;
-        _identity = identity;
-        _audit = audit;
-        _correlation = correlation;
-    }
+        : base(jobs, identity, audit, correlation) { }
 
     public async Task<Result<JobDetailDto>> Handle(UpdateJobCommand cmd, CancellationToken ct = default)
     {
@@ -32,26 +21,20 @@ public sealed class UpdateJobHandler
             return Result<JobDetailDto>.Failure(
                 new ValidationError("request", "Provide at least one of name or dueDate."));
 
-        var owner = _identity.CurrentOwner;
-        var job = await _jobs.GetAsync(cmd.JobId, owner, ct);
-        if (job is null)
-            return Result<JobDetailDto>.Failure(new NotFoundError("Job", cmd.JobId));
-
-        if (job.Status != JobStatus.Active)
-            return Result<JobDetailDto>.Failure(
-                new BusinessRuleError("job_completed", "Job is completed; mutation not allowed."));
+        var (job, failure) = await LoadActive(cmd.JobId, ct);
+        if (failure is not null) return failure.Value;
 
         var audits = new AuditQueue();
-        var error = ApplyRename(cmd, job, audits) ?? ApplyDueDate(cmd, job, audits);
+        var error = ApplyRename(cmd, job!, audits) ?? ApplyDueDate(cmd, job!, audits);
         if (error is not null)
             return Result<JobDetailDto>.Failure(error);
 
-        await _jobs.UpdateAsync(job, ct);
+        await Jobs.UpdateAsync(job!, ct);
 
         foreach (var (eventType, payload) in audits)
-            await EmitAudit(eventType, job.Id, owner, payload, ct);
+            await RecordAudit(eventType, job!, payload: payload, ct: ct);
 
-        return Result<JobDetailDto>.Success(job.ToDetailDto());
+        return Result<JobDetailDto>.Success(job!.ToDetailDto());
     }
 
     private static Error? ApplyRename(UpdateJobCommand cmd, Job job, AuditQueue audits)
@@ -75,15 +58,6 @@ public sealed class UpdateJobHandler
         audits.Add(AuditEventTypes.JobDueDateChanged, new Dictionary<string, object?> { ["new_due_date"] = job.DueDate?.ToString("O") });
         return null;
     }
-
-    private Task EmitAudit(string eventType, string jobId, OwnerId owner, Dictionary<string, object?> payload, CancellationToken ct)
-        => _audit.RecordAsync(new AuditEvent(
-            eventType,
-            owner.Value,
-            $"job:{jobId}",
-            DateTime.UtcNow,
-            _correlation.CurrentId,
-            payload), ct);
 
     private static bool IsEmptyRequest(UpdateJobCommand cmd)
         => cmd.Name is null && !cmd.DueDateProvided;
