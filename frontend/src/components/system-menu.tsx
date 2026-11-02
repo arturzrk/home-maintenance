@@ -5,17 +5,16 @@ import Link from "next/link";
 
 interface Props {
   identity: string;
-  version: string | null;
-  healthy: boolean;
   signOutAction: () => Promise<void>;
 }
 
 /**
  * Header system menu: identity trigger opening a dropdown with
- * navigation, system info, and sign-out. Closes on outside click,
- * Escape, or choosing a navigation item.
+ * navigation and sign-out. Closes on outside click, Escape, or
+ * choosing a navigation item. API/system health lives in its own
+ * SystemHealthMenu, not here.
  */
-export function SystemMenu({ identity, version, healthy, signOutAction }: Props) {
+export function SystemMenu({ identity, signOutAction }: Props) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
 
@@ -83,22 +82,6 @@ export function SystemMenu({ identity, version, healthy, signOutAction }: Props)
           >
             User guide
           </a>
-
-          <div className="my-1 border-t border-gray-100" />
-
-          <div className="px-4 py-2 text-xs text-gray-500">
-            <p>Version {version ?? "unknown"}</p>
-            <p className="mt-0.5 flex items-center gap-1.5">
-              <span
-                aria-hidden="true"
-                className={
-                  "inline-block h-2 w-2 rounded-full " +
-                  (healthy ? "bg-green-500" : "bg-red-500")
-                }
-              />
-              API: {healthy ? "Connected" : "Unreachable"}
-            </p>
-          </div>
 
           <div className="my-1 border-t border-gray-100" />
 

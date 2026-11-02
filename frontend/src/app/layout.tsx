@@ -4,6 +4,7 @@ import "./globals.css";
 import { auth } from "@/lib/auth";
 import { checkHealth, getApiInfo } from "@/lib/api-client";
 import { signOutAction } from "@/app/actions";
+import { SystemHealthMenu } from "@/components/system-health-menu";
 import { SystemMenu } from "@/components/system-menu";
 
 export const metadata: Metadata = {
@@ -39,24 +40,22 @@ export default async function RootLayout({
               >
                 Maintained House
               </Link>
-              {session ? (
-                <SystemMenu
-                  identity={identity}
-                  version={apiInfo?.version ?? null}
-                  healthy={healthy}
-                  signOutAction={signOutAction}
-                />
-              ) : (
-                <a
-                  href="/user-manual/index.html"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="User guide (opens in a new tab)"
-                  className="text-sm text-gray-600 hover:text-gray-900 hover:underline"
-                >
-                  User guide
-                </a>
-              )}
+              <div className="flex items-center gap-4">
+                <SystemHealthMenu healthy={healthy} apiInfo={apiInfo} />
+                {session ? (
+                  <SystemMenu identity={identity} signOutAction={signOutAction} />
+                ) : (
+                  <a
+                    href="/user-manual/index.html"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="User guide (opens in a new tab)"
+                    className="text-sm text-gray-600 hover:text-gray-900 hover:underline"
+                  >
+                    User guide
+                  </a>
+                )}
+              </div>
             </div>
           </div>
         </header>
