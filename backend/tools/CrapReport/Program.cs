@@ -17,9 +17,8 @@
 // top N rows, sized for pasting into somewhere space-constrained (e.g. a
 // GitHub Actions job summary) without the full ~200-row table.
 
-using System.Globalization;
 using System.Text;
-using System.Text.RegularExpressions;
+using HomeMaintenance.Tools.Shared;
 
 if (args.Length < 2)
 {
@@ -56,37 +55,9 @@ Console.WriteLine($"Top {TopN} snippet: {topOutputPath}");
 return 0;
 
 static List<MethodRisk> CollectMethods(string reportDir)
-{
-    var rowPattern = new Regex(
-        """<tr><td title="[^"]*"><a href="#file\d+_line\d+" class="navigatetohash">(?<name>[^<]*)</a></td><td>(?<branch>[^<]*)</td><td>(?<complexity>\d+)</td><td>\d+</td><td>(?<seq>[^<]*)</td></tr>""",
-        RegexOptions.Compiled);
-
-    var results = new List<MethodRisk>();
-    foreach (var file in Directory.EnumerateFiles(reportDir, "*.html"))
-    {
-        var fileName = Path.GetFileNameWithoutExtension(file);
-        if (fileName is "index")
-            continue;
-
-        var html = File.ReadAllText(file);
-        foreach (Match m in rowPattern.Matches(html))
-        {
-            var complexity = int.Parse(m.Groups["complexity"].Value, CultureInfo.InvariantCulture);
-            var coverage = ParsePercent(m.Groups["seq"].Value);
-            results.Add(new MethodRisk(fileName, m.Groups["name"].Value, complexity, coverage, Crap(complexity, coverage)));
-        }
-    }
-    return results;
-}
-
-// Methods with no coverable lines (e.g. a trivial auto-property) render an
-// empty or non-numeric cell; treat those as fully covered rather than
-// flagging them as risky for a reason unrelated to testing.
-static double ParsePercent(string text)
-{
-    var trimmed = text.TrimEnd('%');
-    return double.TryParse(trimmed, CultureInfo.InvariantCulture, out var value) ? value : 100.0;
-}
+    => MethodMetricsScanner.Scan(reportDir)
+        .Select(m => new MethodRisk(m.ClassLabel, m.MethodName, m.Complexity, m.CoveragePercent, Crap(m.Complexity, m.CoveragePercent)))
+        .ToList();
 
 static double Crap(int complexity, double coveragePercent)
 {
