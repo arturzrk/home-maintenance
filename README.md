@@ -177,6 +177,35 @@ tab on GitHub (Actions -> the run -> Summary) -- no download needed.
 Neither runs on pull requests, and neither ever fails CI; both are
 informational only.
 
+### Cyclomatic complexity gate
+
+Unlike the CRAP reports above, this one **fails the build** on every
+push and pull request -- it's the actual enforcement behind this
+project's "keep cyclomatic complexity below 5" rule, which until now
+was a convention nobody was checking.
+
+The gate's threshold isn't 5, though. Several existing functions sit
+well above that (the top backend method is at 12; the top frontend
+function, NextAuth's `jwt` callback, is at 19) and refactoring all of
+them is a separate, larger undertaking from introducing the metric
+itself. The gate is set to 20 for both stacks -- a *ratchet*: it stops
+any new code from getting worse than today's worst case, while the
+existing CRAP-hotspot-driven refactor passes continue ratcheting the
+real ceiling down over time. 20 also matches the CRAP reports' own
+"CRAPPY" cutoff above, for one consistent number across the project
+rather than a second arbitrary threshold.
+
+**Backend:** `./scripts/complexity-gate.sh` -- same build+test+coverage
+pipeline as the CRAP report, but the final step is
+`backend/tools/ComplexityGate` instead of `CrapReport`: it fails (exit
+1) if any Domain/Application method exceeds the limit, rather than
+just ranking and reporting. Runs in CI as `complexity-gate-backend`,
+on every push and pull request.
+
+**Frontend:** enforced directly by ESLint's `complexity` rule in
+`frontend/eslint.config.mjs`, so it fails the existing `npm run lint`
+step (already a PR gate) -- no separate script or CI job needed.
+
 ## Setting up Google sign-in (staging / production)
 
 See [`docs/oidc-setup.md`](./docs/oidc-setup.md) for the full
