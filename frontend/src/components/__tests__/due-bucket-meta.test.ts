@@ -9,10 +9,12 @@ describe("DUE_BUCKET_META", () => {
     ]);
   });
 
-  it("everyEntry_HasATitleAndAPillClass", () => {
+  it("everyEntry_HasATitleAndColorClasses", () => {
     for (const entry of DUE_BUCKET_META) {
       expect(entry.title.length).toBeGreaterThan(0);
-      expect(entry.pillClass.length).toBeGreaterThan(0);
+      expect(entry.textClass.length).toBeGreaterThan(0);
+      expect(entry.iconBg.length).toBeGreaterThan(0);
+      expect(entry.iconColor.length).toBeGreaterThan(0);
     }
   });
 

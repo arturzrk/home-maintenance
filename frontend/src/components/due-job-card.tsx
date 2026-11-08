@@ -1,28 +1,25 @@
 import Link from "next/link";
-import { DUE_BUCKET_META } from "@/components/due-bucket-meta";
-import type { DueBucket, DueJobItem } from "@/lib/due-jobs";
+import type { DueJobItem } from "@/lib/due-jobs";
 
-const PILL_CLASS_BY_BUCKET: Record<DueBucket, string> = Object.fromEntries(
-  DUE_BUCKET_META.map((b) => [b.key, b.pillClass]),
-) as Record<DueBucket, string>;
-
-export function DueJobCard({ item }: { item: DueJobItem }) {
+export function DueJobCard({
+  item,
+  textClass,
+}: {
+  item: DueJobItem;
+  textClass: string;
+}) {
   return (
     <Link
       href={`/jobs/${item.job.id}`}
-      className="block rounded-md border border-gray-200 bg-white px-4 py-3 shadow-sm transition hover:border-gray-300 hover:bg-gray-50"
+      className="flex items-center justify-between gap-4 rounded-md px-1 py-1 transition hover:bg-gray-100/60"
     >
-      <div className="flex items-center justify-between gap-2">
-        <span className="text-base font-medium text-gray-900">
+      <span className="min-w-0">
+        <span className="block truncate text-sm font-medium text-gray-900">
           {item.job.name}
         </span>
-        <span
-          className={`rounded-full px-2 py-0.5 text-xs font-medium ${PILL_CLASS_BY_BUCKET[item.bucket]}`}
-        >
-          {item.dueLabel}
-        </span>
-      </div>
-      <p className="mt-1 text-xs text-gray-500">{item.propertyName}</p>
+        <span className="block truncate text-xs text-gray-500">{item.propertyName}</span>
+      </span>
+      <span className={`shrink-0 text-sm ${textClass}`}>{item.dueLabel}</span>
     </Link>
   );
 }
