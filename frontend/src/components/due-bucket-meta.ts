@@ -3,25 +3,40 @@ import type { DueBucket } from "@/lib/due-jobs";
 export interface DueBucketMeta {
   key: DueBucket;
   title: string;
-  pillClass: string;
+  /** Color for the job-count number and each card's due-label text. */
+  textClass: string;
+  /** Background for the icon badge next to the section title. */
+  iconBg: string;
+  /** Color for the icon itself. */
+  iconColor: string;
 }
 
 /**
  * Single source of truth for each due-job bucket's display order, title,
- * and pill color - lib/due-jobs.ts owns the bucketing logic (pure, no
- * UI), this owns how each bucket is presented. Adding/renaming a bucket
- * only means editing this one array.
+ * and color treatment - lib/due-jobs.ts owns the bucketing logic (pure,
+ * no UI), this owns how each bucket is presented. Adding/renaming a
+ * bucket only means editing this one array.
  */
 export const DUE_BUCKET_META: readonly DueBucketMeta[] = [
-  { key: "overdue", title: "Overdue", pillClass: "bg-red-100 text-red-800" },
+  {
+    key: "overdue",
+    title: "Overdue",
+    textClass: "text-rose-500",
+    iconBg: "bg-rose-50",
+    iconColor: "text-rose-500",
+  },
   {
     key: "dueThisWeek",
     title: "Due this week",
-    pillClass: "bg-yellow-100 text-yellow-800",
+    textClass: "text-amber-600",
+    iconBg: "bg-amber-50",
+    iconColor: "text-amber-500",
   },
   {
     key: "comingUp",
     title: "Coming up this month",
-    pillClass: "bg-gray-100 text-gray-800",
+    textClass: "text-gray-400",
+    iconBg: "bg-gray-100",
+    iconColor: "text-gray-400",
   },
 ];

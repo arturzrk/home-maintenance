@@ -1,4 +1,5 @@
 import { DUE_BUCKET_META } from "@/components/due-bucket-meta";
+import { DueBucketIcon } from "@/components/due-bucket-icon";
 import { DueJobSection } from "@/components/due-job-section";
 import type { DueJobBuckets } from "@/lib/due-jobs";
 
@@ -17,12 +18,15 @@ export function DueJobsOverview({ buckets }: { buckets: DueJobBuckets }) {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-10">
       {DUE_BUCKET_META.map((b) => (
         <DueJobSection
           key={b.key}
           id={b.key}
           title={b.title}
+          icon={<DueBucketIcon bucket={b.key} className={`h-3.5 w-3.5 ${b.iconColor}`} />}
+          iconBg={b.iconBg}
+          textClass={b.textClass}
           items={buckets[b.key]}
         />
       ))}

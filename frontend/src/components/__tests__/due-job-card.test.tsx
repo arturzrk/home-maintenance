@@ -26,29 +26,24 @@ function item(overrides: Partial<DueJobItem>): DueJobItem {
 
 describe("DueJobCard", () => {
   it("rendersJobNamePropertyNameAndDueLabel", () => {
-    render(<DueJobCard item={item({})} />);
+    render(<DueJobCard item={item({})} textClass="text-amber-600" />);
     expect(screen.getByText("Service boiler")).toBeInTheDocument();
     expect(screen.getByText("Lakeview Cottage")).toBeInTheDocument();
     expect(screen.getByText("Due today")).toBeInTheDocument();
   });
 
   it("linksToTheJobDetailPage", () => {
-    render(<DueJobCard item={item({ job: { ...item({}).job, id: "job-42" } })} />);
+    render(
+      <DueJobCard
+        item={item({ job: { ...item({}).job, id: "job-42" } })}
+        textClass="text-amber-600"
+      />,
+    );
     expect(screen.getByRole("link")).toHaveAttribute("href", "/jobs/job-42");
   });
 
-  it("overdueBucket_RendersRedPill", () => {
-    render(<DueJobCard item={item({ bucket: "overdue", dueLabel: "Overdue by 1 day" })} />);
-    expect(screen.getByText("Overdue by 1 day")).toHaveClass("bg-red-100");
-  });
-
-  it("dueThisWeekBucket_RendersYellowPill", () => {
-    render(<DueJobCard item={item({ bucket: "dueThisWeek", dueLabel: "Due in 3 days" })} />);
-    expect(screen.getByText("Due in 3 days")).toHaveClass("bg-yellow-100");
-  });
-
-  it("comingUpBucket_RendersGrayPill", () => {
-    render(<DueJobCard item={item({ bucket: "comingUp", dueLabel: "Due in 20 days" })} />);
-    expect(screen.getByText("Due in 20 days")).toHaveClass("bg-gray-100");
+  it("dueLabel_UsesTheGivenTextClass", () => {
+    render(<DueJobCard item={item({ dueLabel: "Overdue by 1 day" })} textClass="text-rose-500" />);
+    expect(screen.getByText("Overdue by 1 day")).toHaveClass("text-rose-500");
   });
 });
